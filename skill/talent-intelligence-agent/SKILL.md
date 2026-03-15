@@ -15,14 +15,26 @@ Run the bundled script:
 node <skill-dir>/scripts/talent-intelligence-cli.mjs \
   --projectName "<project>" \
   --roleTitle "<role>" \
+  --clientName "<client>" \
   --companyContext "<company context>" \
   --hiringBrief "<brief>" \
   --objective "<objective>" \
+  --reportingLine "<manager>" \
+  --level "<level>" \
   --targetIndustry "<industry>" \
   --targetCompanies "<companies>" \
+  --mustHaveSkills "<must haves>" \
   --location "<location>" \
   --salaryRange "<salary>" \
   --templateId "<template>" \
+  --out "state/<slug>.md"
+```
+
+For richer mandates, prefer:
+
+```bash
+node <skill-dir>/scripts/talent-intelligence-cli.mjs \
+  --intakeFile "<path-to-json-brief>" \
   --out "state/<slug>.md"
 ```
 
@@ -42,11 +54,14 @@ Resolve `<skill-dir>` to the actual installed skill directory.
 
 If the user leaves fields unspecified, infer sensible defaults:
 - `objective`: the practical hiring outcome the user needs
+- `clientName`: `Confidential Client` when obviously hidden or unnamed
 - `companyContext`: a short description of the employer or client situation
+- `searchType`: `executive_search` unless the request is clearly talent mapping or succession
 - `targetIndustry`: the most likely talent source industry mentioned, else `TBD`
-- `targetCompanies`: a short comma-separated list when obvious, else `TBD`
+- `targetCompanies`: a short comma-separated list when obvious, else empty list
 - `location`: the most likely hiring market mentioned, else `China`
 - `salaryRange`: `TBD` unless stated or strongly implied
+- `reportingLine`, `level`, `mustHaveSkills`, `dealBreakers`: infer if strongly implied, otherwise leave visible gaps
 - `templateId`: choose the nearest template instead of asking unless ambiguity matters
 
 ## Output discipline

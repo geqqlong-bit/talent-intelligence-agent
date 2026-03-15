@@ -1,4 +1,4 @@
-# 人才寻访策略报告｜AI 产品总监
+# 人才寻访策略报告｜VP Product
 
 ## 一页结论
 - **搜寻方向**：本岗位应以“企业软件 / AI SaaS 的产品业务负责人”作为主画像，而不是泛化到所有 AI 产品经理。
@@ -6,14 +6,14 @@
 - **执行原则**：前两周先做市场扫描与画像校准，拿到样本后再放大触达；先求准，再求量。
 
 ## 项目背景
-- **项目**：AI 产品总监寻访
-- **岗位**：AI 产品总监
-- **公司背景**：一家做企业级 AI 工具的 B 轮 SaaS 公司
-- **任务背景**：明确岗位画像并输出目标公司与寻访策略
-- **项目目标**：产出寻访策略和首轮 search plan
-- **目标行业**：企业软件, AI SaaS
-- **工作地点**：上海
-- **预算区间**：月薪 8-12 万
+- **项目**：Confidential Client - VP Product Search
+- **岗位**：VP Product
+- **公司背景**：Series C AI infrastructure company selling enterprise solutions in China and Southeast Asia
+- **任务背景**：Find a product leader who can unify platform roadmap, enterprise customer requirements, and cross-functional execution with sales and delivery.
+- **项目目标**：Produce a sourcing strategy, target-company map, and first-two-week search plan.
+- **目标行业**：Enterprise software, cloud, AI infrastructure
+- **工作地点**：Shanghai
+- **预算区间**：Base 150-220k RMB/month
 
 ## 目标人才画像
 ### 核心画像
@@ -32,10 +32,12 @@
 - 强技术但弱客户价值表达，转化为业务负责人难度偏高。
 
 ## 目标公司地图（第一版假设）
-- **梯队 1｜OpenAI**：优先关注承担过 AI 产品商业化、平台化或企业客户场景落地的人选。
-- **梯队 2｜ByteDance**：优先关注承担过 AI 产品商业化、平台化或企业客户场景落地的人选。
-- **梯队 3｜Baidu**：优先关注承担过 AI 产品商业化、平台化或企业客户场景落地的人选。
-- **梯队 4｜MiniMax**：优先关注承担过 AI 产品商业化、平台化或企业客户场景落地的人选。
+- **梯队 1｜Huawei Cloud**：优先关注承担过 AI 产品商业化、平台化或企业客户场景落地的人选。
+- **梯队 2｜Alibaba Cloud**：优先关注承担过 AI 产品商业化、平台化或企业客户场景落地的人选。
+- **梯队 3｜ByteDance Volcano Engine**：优先关注承担过 AI 产品商业化、平台化或企业客户场景落地的人选。
+- **梯队 4｜Tencent Cloud**：优先关注承担过 AI 产品商业化、平台化或企业客户场景落地的人选。
+- **梯队 5｜AWS China**：优先关注承担过 AI 产品商业化、平台化或企业客户场景落地的人选。
+- **梯队 6｜Snowflake**：优先关注承担过 AI 产品商业化、平台化或企业客户场景落地的人选。
 
 ## 搜寻渠道优先级
 1. 定向 Mapping：围绕目标公司与相邻团队做组织拆解，优先找一线在岗人。
@@ -44,14 +46,14 @@
 4. 内容反向定位：通过演讲、播客、公众号、产品发布会材料识别有观点的人。
 
 ## 搜索关键词建议
-- 中文关键词：AI 产品总监 / AI 产品负责人 / 企业产品负责人 / 商业化产品 / 平台产品 / 解决方案产品
+- 中文关键词：VP Product / AI 产品负责人 / 企业产品负责人 / 商业化产品 / 平台产品 / 解决方案产品
 - 英文关键词：AI Product Lead / Product Director / Head of Product / Commercialization / Enterprise AI / Platform Product
 - 组织线索词：企业服务 / SaaS / Copilot / Workflow / Knowledge / CRM / Data / Automation
 
 ## Boolean 搜索示例
 ### 版本 A：聚焦头衔
 ```text
-("AI 产品总监" OR "AI 产品负责人" OR "Product Director" OR "Head of Product")
+("VP Product" OR "AI 产品负责人" OR "Product Director" OR "Head of Product")
 AND ("企业软件" OR "SaaS" OR "Enterprise AI" OR "ToB")
 AND (上海 OR 北京 OR 深圳)
 ```

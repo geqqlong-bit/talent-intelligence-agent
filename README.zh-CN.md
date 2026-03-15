@@ -84,7 +84,7 @@ flowchart LR
 bash demo/run-demo.sh
 ```
 
-这会启动 mock backend，跑三组示例任务，并把 markdown 报告写入 `state/`。
+这会启动 mock backend，跑四组示例任务，并把 markdown 报告写入 `state/`。
 
 
 ### 1）配置运行时环境变量
@@ -136,18 +136,39 @@ bash install.sh ~/.openclaw/workspace
 
 ```bash
 node skill/talent-intelligence-agent/scripts/talent-intelligence-cli.mjs \
-  --projectName "AI 产品总监寻访" \
-  --roleTitle "AI 产品总监" \
-  --companyContext "一家做企业级 AI 工具的 B 轮 SaaS 公司" \
-  --hiringBrief "明确目标画像并输出寻访策略" \
-  --objective "产出搜寻策略与目标公司地图" \
-  --targetIndustry "企业软件, AI SaaS" \
-  --targetCompanies "OpenAI, ByteDance, Baidu, MiniMax" \
+  --projectName "Confidential Client - VP Product Search" \
+  --roleTitle "VP Product" \
+  --clientName "Confidential Client" \
+  --searchType executive_search \
+  --mandateType retained \
+  --companyContext "一家面向企业客户的 Series C AI infra 公司" \
+  --hiringBrief "寻找能统一平台路线图与大客户需求的产品负责人" \
+  --objective "产出寻访策略与目标公司地图" \
+  --reportingLine "CEO" \
+  --level VP \
+  --targetIndustry "企业软件, 云计算, AI infrastructure" \
+  --targetCompanies "Huawei Cloud, Alibaba Cloud, Volcano Engine, Tencent Cloud" \
+  --targetFunctions "企业产品, 平台产品, 解决方案产品" \
+  --targetBackgrounds "0-1 到 1-10, 带过 20+ PM 团队, 和销售深度协同" \
+  --mustHaveSkills "企业产品领导力, 大客户协同, 团队管理" \
+  --offLimits "现有投资组合公司 A, 董事会控制资产 B" \
   --location "上海" \
-  --salaryRange "月薪 8-12 万" \
+  --salaryRange "月 base 15-22 万" \
   --templateId sourcing_strategy_cn \
-  --out ../../state/ai-product-director-search.md
+  --out ../../state/vp-product-search.md
 ```
+
+## `--intakeFile` 示例
+
+如果不想手动传一长串参数，可以直接加载完整委托单 JSON：
+
+```bash
+node skill/talent-intelligence-agent/scripts/talent-intelligence-cli.mjs \
+  --intakeFile examples/executive-search-intake.json \
+  --out state/demo-executive-search.md
+```
+
+CLI 显式传入的参数会覆盖 `--intakeFile` 中的同名字段，所以很适合把 JSON 当基础 brief 复用。
 
 ## 模板说明
 
@@ -155,6 +176,18 @@ node skill/talent-intelligence-agent/scripts/talent-intelligence-cli.mjs \
 - `sourcing_strategy_cn`：目标公司地图、渠道策略、关键词与布尔搜索设计
 - `candidate_assessment_cn`：简历评估、匹配分析、风险提示、面试追问
 - `search_plan_cn`：更完整的招聘计划、周优先级、顾问式建议
+
+## Demo 产物文件
+
+运行 `bash demo/run-demo.sh` 后，应该看到：
+
+- `state/demo-sourcing-strategy.md`
+- `state/demo-jd-diagnosis.md`
+- `state/demo-candidate-assessment.md`
+- `state/demo-search-plan.md`
+- `state/demo-executive-search.md`
+
+最后两个文件分别验证更完整的 executive-search intake 流程，以及 `--intakeFile` 的本地可用性。
 
 ## 给后端实现者的建议
 

@@ -82,7 +82,7 @@ If you want to validate the end-to-end wiring before building a real backend:
 bash demo/run-demo.sh
 ```
 
-This starts the mock backend, runs three example workflows, and writes markdown reports into `state/`.
+This starts the mock backend, runs four example workflows, and writes markdown reports into `state/`.
 
 
 ### 1) Configure runtime endpoints
@@ -134,18 +134,39 @@ Expected behavior:
 
 ```bash
 node skill/talent-intelligence-agent/scripts/talent-intelligence-cli.mjs \
-  --projectName "AI Product Director Search" \
-  --roleTitle "AI Product Director" \
-  --companyContext "Series B SaaS company building enterprise AI tools" \
-  --hiringBrief "Clarify target profile and produce a sourcing strategy" \
+  --projectName "Confidential Client - VP Product Search" \
+  --roleTitle "VP Product" \
+  --clientName "Confidential Client" \
+  --searchType executive_search \
+  --mandateType retained \
+  --companyContext "Series C AI infra company selling to enterprise customers" \
+  --hiringBrief "Find a product leader who can unify platform roadmap and enterprise customer requirements" \
   --objective "Output search strategy and target-company map" \
-  --targetIndustry "Enterprise software, AI SaaS" \
-  --targetCompanies "OpenAI, ByteDance, Baidu, MiniMax" \
+  --reportingLine "CEO" \
+  --level VP \
+  --targetIndustry "Enterprise software, cloud, AI infrastructure" \
+  --targetCompanies "Huawei Cloud, Alibaba Cloud, Volcano Engine, Tencent Cloud" \
+  --targetFunctions "Enterprise product, Platform product, Solution product" \
+  --targetBackgrounds "0-1 to 1-10, 20+ PM org, enterprise sales collaboration" \
+  --mustHaveSkills "Enterprise product leadership, large-customer collaboration, people leadership" \
+  --offLimits "Portfolio company A, board-controlled asset B" \
   --location "Shanghai" \
-  --salaryRange "80-120K RMB/month" \
+  --salaryRange "Base 150-220k RMB/month" \
   --templateId sourcing_strategy_cn \
-  --out ../../state/ai-product-director-search.md
+  --out ../../state/vp-product-search.md
 ```
+
+## Intake-file example
+
+Instead of passing a long list of flags, you can load a full executive-search brief from JSON:
+
+```bash
+node skill/talent-intelligence-agent/scripts/talent-intelligence-cli.mjs \
+  --intakeFile examples/executive-search-intake.json \
+  --out state/demo-executive-search.md
+```
+
+CLI flags override values from `--intakeFile`, so the file works well as a reusable base brief.
 
 ## Template guide
 
@@ -153,6 +174,18 @@ node skill/talent-intelligence-agent/scripts/talent-intelligence-cli.mjs \
 - `sourcing_strategy_cn`: target company mapping, channel strategy, keyword and Boolean search design
 - `candidate_assessment_cn`: resume review, fit analysis, risk flags, interview follow-ups
 - `search_plan_cn`: broader recruiting plan, weekly priorities, advisory recommendations
+
+## Demo output files
+
+After `bash demo/run-demo.sh`, you should see:
+
+- `state/demo-sourcing-strategy.md`
+- `state/demo-jd-diagnosis.md`
+- `state/demo-candidate-assessment.md`
+- `state/demo-search-plan.md`
+- `state/demo-executive-search.md`
+
+The last two files validate the broader executive-search intake flow and `--intakeFile` support.
 
 ## Notes for backend implementers
 
