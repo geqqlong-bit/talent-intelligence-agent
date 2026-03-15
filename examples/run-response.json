@@ -8,51 +8,60 @@
     "status": "completed",
     "templateId": "sourcing_strategy_cn",
     "mode": "template-renderer",
-    "runnerId": "local-template"
+    "runnerId": "local-template",
+    "stageCount": 4,
+    "stepCount": 4,
+    "artifactCount": 4,
+    "finalArtifactId": "report-markdown"
   },
   "engine": {
     "kind": "local-template-engine",
-    "version": "v0.4",
+    "version": "v0.5",
     "provider": "local",
     "adapter": "template-renderer",
     "runnerId": "local-template",
     "executionMode": "local-template",
     "requestedMode": "openai",
-    "requestedRunner": "local-template",
+    "requestedRunner": "openai-chat",
     "requestedModel": "bailian/qwen3.5-plus",
     "resolvedMode": "template-renderer",
     "implementationStatus": "active",
     "resolutionSource": "runner",
-    "fallbackReason": "Local template runner is the executable backend bundled with this local-only service."
+    "fallbackReason": "Requested runner openai-chat is not executable in this local-only build; using local-template instead.",
+    "boundary": "local-only"
   },
   "summary": {
     "projectName": "Confidential Client - VP Product Search",
     "roleTitle": "VP Product",
     "templateId": "sourcing_strategy_cn"
   },
-  "reportMarkdown": "# 人才寻访策略报告｜VP Product\n\n## 一页结论\n- **搜寻方向**：本岗位应以“企业软件 / AI SaaS 的产品业务负责人”作为主画像，而不是泛化到所有 AI 产品经理。\n- **市场判断**：优质样本更可能分布在“平台型产品 + 商业化接口强 + 对 B 端复杂场景有判断”的团队中。\n- **执行原则**：前两周先做市场扫描与画像校准，拿到样本后再放大触达；先求准，再求量。\n",
+  "reportMarkdown": "# 人才寻访策略报告｜VP Product\n...",
   "metadata": {
     "requestId": "req_xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
     "runId": "run_xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
-    "apiVersion": "v0.4",
+    "apiVersion": "v0.5",
     "startedAt": "2026-03-15T00:00:00.000Z",
     "completedAt": "2026-03-15T00:00:00.000Z",
-    "durationMs": 1,
+    "durationMs": 3,
     "workflowId": "talent-intelligence.local-template-render",
-    "workflowVersion": "v0.4",
+    "workflowVersion": "v0.5",
     "runnerId": "local-template",
     "executionMode": "local-template",
     "executionStatus": "completed",
     "requestedMode": "openai",
-    "requestedRunner": "local-template",
-    "resolvedMode": "template-renderer"
+    "requestedRunner": "openai-chat",
+    "resolvedMode": "template-renderer",
+    "stageCount": 4,
+    "stepCount": 4,
+    "artifactCount": 4,
+    "finalArtifactId": "report-markdown"
   },
   "orchestration": {
     "requestId": "req_xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
     "runId": "run_xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
     "workflow": {
       "id": "talent-intelligence.local-template-render",
-      "version": "v0.4",
+      "version": "v0.5",
       "executionMode": "local-template",
       "runnerId": "local-template",
       "futureHook": "workflowRunner.execute"
@@ -61,34 +70,94 @@
       "status": "completed",
       "runnerId": "local-template",
       "boundary": "local-only",
-      "stepCount": 1,
+      "stageCount": 4,
+      "stepCount": 4,
+      "stages": [
+        {
+          "id": "ingest-request",
+          "label": "Ingest Request",
+          "order": 1,
+          "status": "completed",
+          "stepCount": 1,
+          "stepIds": [
+            "capture-request"
+          ],
+          "startedAt": "2026-03-15T00:00:00.000Z",
+          "completedAt": "2026-03-15T00:00:00.000Z",
+          "durationMs": 0,
+          "consumes": [],
+          "produces": [
+            "normalized-request"
+          ]
+        }
+      ],
       "steps": [
         {
           "id": "render-template",
+          "stageId": "render-report",
           "kind": "template-render",
           "runnerId": "local-template",
           "status": "completed",
           "startedAt": "2026-03-15T00:00:00.000Z",
           "completedAt": "2026-03-15T00:00:00.000Z",
           "durationMs": 1,
+          "consumes": [
+            "workflow-brief"
+          ],
+          "produces": [
+            "report-markdown"
+          ],
           "output": {
+            "artifactId": "report-markdown",
             "renderer": "renderTemplate",
-            "templateId": "sourcing_strategy_cn"
+            "templateId": "sourcing_strategy_cn",
+            "sourceArtifactId": "workflow-brief"
           }
         }
       ],
+      "artifacts": [
+        {
+          "id": "report-markdown",
+          "name": "Rendered Report",
+          "kind": "markdown",
+          "mimeType": "text/markdown",
+          "stageId": "render-report",
+          "producedBy": "render-template",
+          "boundary": "local-only",
+          "metadata": {
+            "templateId": "sourcing_strategy_cn",
+            "sourceArtifactId": "workflow-brief",
+            "lineCount": 92,
+            "preview": "# 人才寻访策略报告｜VP Product..."
+          }
+        }
+      ],
+      "finalArtifactId": "report-markdown",
       "result": {
         "renderer": "renderTemplate",
-        "templateId": "sourcing_strategy_cn"
+        "templateId": "sourcing_strategy_cn",
+        "artifactId": "report-markdown",
+        "finalizationArtifactId": "run-summary"
       }
     },
     "selection": {
       "requestedMode": "openai",
-      "requestedRunner": "local-template",
+      "requestedRunner": "openai-chat",
       "resolvedRunnerId": "local-template",
+      "resolvedMode": "template-renderer",
+      "resolutionSource": "runner",
       "strategy": "requested-runner",
-      "fallbackApplied": false,
-      "fallbackReason": "Local template runner is the executable backend bundled with this local-only service."
+      "fallbackApplied": true,
+      "fallbackReason": "Requested runner openai-chat is not executable in this local-only build; using local-template instead."
+    }
+  },
+  "artifacts": {
+    "rootDir": "/absolute/path/to/state/runs/YYYY/MM/DD/run_xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+    "files": {
+      "request": "/absolute/path/to/state/runs/YYYY/MM/DD/run_xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/request.json",
+      "response": "/absolute/path/to/state/runs/YYYY/MM/DD/run_xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/response.json",
+      "reportMarkdown": "/absolute/path/to/state/runs/YYYY/MM/DD/run_xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/report.md",
+      "events": "/absolute/path/to/state/runs/YYYY/MM/DD/run_xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/events.log"
     }
   }
 }

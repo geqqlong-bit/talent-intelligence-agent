@@ -47,7 +47,6 @@ Canonical request/response/error examples now live in the repo root `examples/` 
 - `examples/error-invalid-template.json`
 - `examples/error-missing-role-title.json`
 - `examples/error-invalid-json.json`
-- `examples/error-missing-role-title.json`
 
 These are referenced from `server/API.md` and are intended to stay aligned with the live code contract.
 
@@ -69,7 +68,7 @@ curl -X POST http://127.0.0.1:8788/api/talent-intelligence/run \
   --data @examples/run-request.json
 ```
 
-What to expect from the live v0.4 contract:
+What to expect from the live v0.5 contract:
 
 - every response includes a `requestId`
 - `/health` and `/schema` expose the local-only execution catalog and supported request modes

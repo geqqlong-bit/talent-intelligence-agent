@@ -1,6 +1,6 @@
 import crypto from 'crypto';
 
-export const API_VERSION = 'v0.4';
+export const API_VERSION = 'v0.5';
 
 export const TEMPLATE_IDS = [
   'jd_diagnosis_cn',
@@ -131,6 +131,12 @@ export function normalizeRequest(body = {}) {
       runnerId: runtime.runnerId ? String(runtime.runnerId) : runtime.runner ? String(runtime.runner) : undefined,
       baseUrl: runtime.baseUrl ? String(runtime.baseUrl) : undefined,
       apiKey: runtime.apiKey ? String(runtime.apiKey) : undefined,
+      path: runtime.path ? String(runtime.path) : undefined,
+      organization: runtime.organization ? String(runtime.organization) : undefined,
+      project: runtime.project ? String(runtime.project) : undefined,
+      allowRemote: runtime.allowRemote === true,
+      remoteEnabled: runtime.remoteEnabled === true,
+      remoteRequired: runtime.remoteRequired === true,
       model: String(runtime.model || process.env.TALENT_INTEL_DEFAULT_MODEL || 'bailian/qwen3.5-plus'),
       temperature: Number.isFinite(Number(runtime.temperature)) ? Number(runtime.temperature) : 0.4,
       maxTokens: Number.isFinite(Number(runtime.maxTokens)) ? Number(runtime.maxTokens) : 5000,

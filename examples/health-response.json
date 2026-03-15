@@ -1,11 +1,12 @@
 {
   "ok": true,
   "service": "talent-intelligence-service",
-  "version": "v0.4",
+  "version": "v0.5",
   "status": "healthy",
   "execution": {
     "mode": "local-template",
     "workflowId": "talent-intelligence.local-template-render",
+    "defaultRequestMode": "openai",
     "defaultRunnerId": "local-template",
     "supportedRequestModes": [
       "local",
@@ -28,7 +29,9 @@
         "publicMode": "template-renderer",
         "available": true,
         "capabilities": [
-          "template-render"
+          "template-render",
+          "workflow-stage-handoff",
+          "artifact-tracking"
         ],
         "workflowId": "talent-intelligence.local-template-render",
         "boundary": "local-only",
@@ -55,7 +58,7 @@
   "requestId": "req_xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
   "metadata": {
     "requestId": "req_xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
-    "apiVersion": "v0.4",
+    "apiVersion": "v0.5",
     "timestamp": "2026-03-15T00:00:00.000Z"
   }
 }

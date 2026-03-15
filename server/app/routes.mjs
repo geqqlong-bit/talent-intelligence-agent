@@ -39,8 +39,10 @@ function buildExecutionContract() {
   return {
     defaultRequestMode: 'openai',
     defaultRunnerId: DEFAULT_LOCAL_RUNNER_ID,
+    defaultPublicMode: catalog.defaultPublicMode,
     supportedRequestModes: catalog.supportedRequestModes,
     supportedRunnerIds: catalog.supportedRunnerIds,
+    plannedRunnerIds: catalog.plannedRunnerIds,
     runners: catalog.runners
   };
 }
@@ -48,6 +50,7 @@ function buildExecutionContract() {
 export async function routeRequest(req, res) {
   const requestId = getRequestId(req);
   const executionCatalog = buildExecutionContract();
+  const remoteFallback = resolveExecutionTarget({ mode: 'openai', runner: 'openai-chat' });
 
   if (req.method === 'GET' && req.url === '/health') {
     return json(res, 200, withRequestMeta({
@@ -100,11 +103,14 @@ export async function routeRequest(req, res) {
           executionMode: 'local-template',
           requestedMode: 'openai',
           requestedRunner: 'openai-chat',
-          resolvedMode: 'template-renderer',
+          preferredRunnerId: 'openai-chat',
           requestedModel: 'bailian/qwen3.5-plus',
+          resolvedMode: 'template-renderer',
           implementationStatus: 'active',
           resolutionSource: 'runner',
-          fallbackReason: resolveExecutionTarget({ mode: 'openai', runner: 'openai-chat' }).fallbackReason
+          fallbackApplied: true,
+          fallbackKind: 'runner-unavailable',
+          fallbackReason: remoteFallback.fallbackReason
         },
         summary: { projectName: 'string', roleTitle: 'string', templateId: 'string' },
         reportMarkdown: 'string',
@@ -131,7 +137,10 @@ export async function routeRequest(req, res) {
           executionStatus: 'completed',
           requestedMode: 'openai',
           requestedRunner: 'openai-chat',
+          preferredRunnerId: 'openai-chat',
           resolvedMode: 'template-renderer',
+          fallbackApplied: true,
+          fallbackKind: 'runner-unavailable',
           stageCount: 4,
           stepCount: 4,
           artifactCount: 4,
@@ -205,11 +214,14 @@ export async function routeRequest(req, res) {
           selection: {
             requestedMode: 'openai',
             requestedRunner: 'openai-chat',
+            preferredRunnerId: 'openai-chat',
             resolvedRunnerId: 'local-template',
             resolvedMode: 'template-renderer',
             resolutionSource: 'runner',
+            strategy: 'requested-runner',
             fallbackApplied: true,
-            fallbackReason: resolveExecutionTarget({ mode: 'openai', runner: 'openai-chat' }).fallbackReason
+            fallbackKind: 'runner-unavailable',
+            fallbackReason: remoteFallback.fallbackReason
           }
         }
       },

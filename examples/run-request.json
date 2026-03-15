@@ -13,9 +13,18 @@
     "hiringBrief": "Find a product leader who can unify platform roadmap and enterprise customer requirements",
     "objective": "Output search strategy and target-company map",
     "targetIndustry": "Enterprise software, cloud, AI infrastructure",
-    "targetCompanies": ["Huawei Cloud", "Alibaba Cloud", "Volcano Engine", "Tencent Cloud"],
+    "targetCompanies": [
+      "Huawei Cloud",
+      "Alibaba Cloud",
+      "Volcano Engine",
+      "Tencent Cloud"
+    ],
     "location": "Shanghai",
-    "targetGeographies": ["Shanghai", "Hangzhou", "Shenzhen"],
+    "targetGeographies": [
+      "Shanghai",
+      "Hangzhou",
+      "Shenzhen"
+    ],
     "salaryRange": "Base 150-220k RMB/month",
     "compensationMix": "Base + annual bonus + equity",
     "equity": "Meaningful late-stage option package",
@@ -28,25 +37,59 @@
     "successMetrics": "Ramp within 90 days, hire by Q2, improve roadmap quality with enterprise wins",
     "marketSignals": "Competitors are hiring senior product leaders from cloud businesses",
     "stakeholderBrief": "CEO wants a strategic builder; CRO wants strong customer-facing credibility",
-    "mustHaveSkills": ["Enterprise product leadership", "Large-customer collaboration", "People leadership"],
-    "niceToHaveSkills": ["AI infrastructure exposure", "Cloud platform monetization"],
-    "dealBreakers": ["Pure consumer background", "No team leadership experience"],
-    "targetFunctions": ["Enterprise product", "Platform product", "Solution product"],
-    "targetBackgrounds": ["0-1 to 1-10", "20+ PM org", "enterprise sales collaboration"],
-    "offLimits": ["Portfolio company A", "board-controlled asset B"],
-    "sourceChannels": ["Direct search", "Founder network", "Investor referrals"],
+    "mustHaveSkills": [
+      "Enterprise product leadership",
+      "Large-customer collaboration",
+      "People leadership"
+    ],
+    "niceToHaveSkills": [
+      "AI infrastructure exposure",
+      "Cloud platform monetization"
+    ],
+    "dealBreakers": [
+      "Pure consumer background",
+      "No team leadership experience"
+    ],
+    "targetFunctions": [
+      "Enterprise product",
+      "Platform product",
+      "Solution product"
+    ],
+    "targetBackgrounds": [
+      "0-1 to 1-10",
+      "20+ PM org",
+      "enterprise sales collaboration"
+    ],
+    "offLimits": [
+      "Portfolio company A",
+      "board-controlled asset B"
+    ],
+    "sourceChannels": [
+      "Direct search",
+      "Founder network",
+      "Investor referrals"
+    ],
     "interviewProcess": "CEO screen -> panel -> case -> board conversation",
-    "interviewPanel": ["CEO", "CRO", "CTO"],
+    "interviewPanel": [
+      "CEO",
+      "CRO",
+      "CTO"
+    ],
     "processConstraints": "Need shortlist in 3 weeks",
     "candidateName": "Example Candidate",
     "candidateSummary": "Optional field included here to show the full contract accepts candidate-assessment data too.",
-    "candidateHighlights": ["Scaled a B2B product line", "Managed senior PMs"],
-    "candidateConcerns": ["Limited China market depth"],
+    "candidateHighlights": [
+      "Scaled a B2B product line",
+      "Managed senior PMs"
+    ],
+    "candidateConcerns": [
+      "Limited China market depth"
+    ],
     "interviewerNotes": "Reserved for candidate-assessment workflows when relevant"
   },
   "runtime": {
     "mode": "openai",
-    "runner": "local-template",
+    "runner": "openai-chat",
     "baseUrl": "http://127.0.0.1:8999/v1",
     "apiKey": "test-key",
     "model": "bailian/qwen3.5-plus",

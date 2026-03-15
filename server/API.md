@@ -10,13 +10,12 @@ http://127.0.0.1:8788
 
 ## Version note
 
-This document describes the **workflow-runner-oriented backend contract for v0.4 planning**.
+The live server currently returns `apiVersion: "v0.5"`.
 
-In the current local service skeleton, live responses still expose `apiVersion: "v0.3"` because the runtime constant has not been bumped yet. The important behavior already matches the v0.4 docs shape:
-- requests resolve through a workflow runner boundary
-- success responses include `run`, `engine`, `metadata`, and `orchestration`
-- `reportMarkdown` is returned inline
-- persistence to `state/` is controlled by the caller/CLI, not automatically by the HTTP service
+What changed in this doc is the **execution-selection story**: the code now exposes a runner catalog that includes a planned remote adapter (`openai-chat`) plus explicit fallback semantics. In other words:
+- the public HTTP envelope is still v0.5
+- the runtime already models the future remote adapter contract
+- this build remains **local-only**, so non-executable remote requests resolve to `local-template`
 
 ## Endpoints
 
@@ -28,6 +27,7 @@ Canonical example: `examples/health-response.json`
 Key fields exposed under `execution`:
 - `mode`
 - `workflowId`
+- `defaultRequestMode`
 - `defaultRunnerId`
 - `supportedRequestModes`
 - `supportedRunnerIds`
@@ -41,13 +41,47 @@ Canonical example: `examples/schema-response.json`
 ### `POST /api/talent-intelligence/run`
 Runs one talent-intelligence workflow request.
 
+Canonical request/response examples:
+- `examples/run-request.json`
+- `examples/run-response.json`
+
+## Execution and fallback semantics
+
+The server publishes two runners today:
+
+- `local-template` — executable now
+- `openai-chat` — declared remote adapter, not executable in this build
+
+Resolution rules in `server/app/execution.mjs`:
+
+1. If `runtime.runner` or `runtime.runnerId` matches a known runner, that match wins.
+2. Otherwise the server tries to resolve by `runtime.executionMode` or `runtime.mode`.
+3. If the chosen runner is unavailable, the server falls back to `local-template`.
+4. The response records the outcome in both:
+   - `engine.*`
+   - `orchestration.selection.*`
+
+Typical fallback example:
+- request: `runtime.mode = "openai"`, `runtime.runner = "openai-chat"`
+- resolved runner: `local-template`
+- resolved public mode: `template-renderer`
+- `fallbackApplied = true`
+- `fallbackReason = "Requested runner openai-chat is not executable in this local-only build; using local-template instead."`
+
 ## Persistence behavior
 
-The backend returns the generated markdown in-band as `reportMarkdown`.
+There are **two separate persistence layers**:
 
-It does **not** automatically write a file into `state/`. In the packaged skill flow, the CLI persists the returned markdown only when `--out <path>` is supplied. That separation is intentional:
-- backend owns execution + response metadata
-- caller owns file persistence policy
+1. **HTTP server persistence** — automatic on every successful run
+   - writes `request.json`, `response.json`, `report.md`, and `events.log`
+   - location: `state/runs/YYYY/MM/DD/run_*`
+   - returned in the response as `artifacts.rootDir` and `artifacts.files.*`
+
+2. **CLI persistence** — optional extra write when `--out <path>` is supplied
+   - writes a caller-chosen markdown file
+   - independent from the server-managed `state/runs/...` artifacts
+
+So `reportMarkdown` is always returned inline, and successful HTTP runs also persist run artifacts server-side.
 
 ## Canonical example files
 
@@ -134,7 +168,7 @@ The current normalizer accepts these fields under `searchContext`:
 
 ### Runtime fields currently recognized
 
-- `mode` — defaults to `openai`; accepted request modes still resolve through the local workflow runner in this build
+- `mode` — defaults to `openai`
 - `executionMode`
 - `runner`
 - `runnerId`
@@ -144,6 +178,9 @@ The current normalizer accepts these fields under `searchContext`:
 - `temperature` — defaults to `0.4`
 - `maxTokens` — defaults to `5000`
 - `timeoutMs` — defaults to `120000`
+
+Important runtime note:
+- In this build, `baseUrl`, `apiKey`, and `model` are accepted and echoed into execution metadata, but no remote provider call is actually made unless a future runner becomes executable.
 
 ## Example request
 
@@ -172,7 +209,7 @@ From `examples/run-request.json`:
   },
   "runtime": {
     "mode": "openai",
-    "runner": "local-template",
+    "runner": "openai-chat",
     "baseUrl": "http://127.0.0.1:8999/v1",
     "apiKey": "test-key",
     "model": "bailian/qwen3.5-plus",
@@ -198,22 +235,27 @@ From `examples/run-response.json`:
     "status": "completed",
     "templateId": "sourcing_strategy_cn",
     "mode": "template-renderer",
-    "runnerId": "local-template"
+    "runnerId": "local-template",
+    "stageCount": 4,
+    "stepCount": 4,
+    "artifactCount": 4,
+    "finalArtifactId": "report-markdown"
   },
   "engine": {
     "kind": "local-template-engine",
-    "version": "v0.4",
+    "version": "v0.5",
     "provider": "local",
     "adapter": "template-renderer",
     "runnerId": "local-template",
     "executionMode": "local-template",
     "requestedMode": "openai",
-    "requestedRunner": "local-template",
+    "requestedRunner": "openai-chat",
     "requestedModel": "bailian/qwen3.5-plus",
     "resolvedMode": "template-renderer",
     "implementationStatus": "active",
     "resolutionSource": "runner",
-    "fallbackReason": "Local template runner is the executable backend bundled with this local-only service."
+    "fallbackReason": "Requested runner openai-chat is not executable in this local-only build; using local-template instead.",
+    "boundary": "local-only"
   },
   "summary": {
     "projectName": "Confidential Client - VP Product Search",
@@ -224,25 +266,29 @@ From `examples/run-response.json`:
   "metadata": {
     "requestId": "req_xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
     "runId": "run_xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
-    "apiVersion": "v0.4",
+    "apiVersion": "v0.5",
     "startedAt": "2026-03-15T00:00:00.000Z",
     "completedAt": "2026-03-15T00:00:00.000Z",
-    "durationMs": 1,
+    "durationMs": 3,
     "workflowId": "talent-intelligence.local-template-render",
-    "workflowVersion": "v0.4",
+    "workflowVersion": "v0.5",
     "runnerId": "local-template",
     "executionMode": "local-template",
     "executionStatus": "completed",
     "requestedMode": "openai",
-    "requestedRunner": "local-template",
-    "resolvedMode": "template-renderer"
+    "requestedRunner": "openai-chat",
+    "resolvedMode": "template-renderer",
+    "stageCount": 4,
+    "stepCount": 4,
+    "artifactCount": 4,
+    "finalArtifactId": "report-markdown"
   },
   "orchestration": {
     "requestId": "req_xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
     "runId": "run_xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
     "workflow": {
       "id": "talent-intelligence.local-template-render",
-      "version": "v0.4",
+      "version": "v0.5",
       "executionMode": "local-template",
       "runnerId": "local-template",
       "futureHook": "workflowRunner.execute"
@@ -251,34 +297,34 @@ From `examples/run-response.json`:
       "status": "completed",
       "runnerId": "local-template",
       "boundary": "local-only",
-      "stepCount": 1,
-      "steps": [
-        {
-          "id": "render-template",
-          "kind": "template-render",
-          "runnerId": "local-template",
-          "status": "completed",
-          "startedAt": "2026-03-15T00:00:00.000Z",
-          "completedAt": "2026-03-15T00:00:00.000Z",
-          "durationMs": 0,
-          "output": {
-            "renderer": "renderTemplate",
-            "templateId": "sourcing_strategy_cn"
-          }
-        }
-      ],
+      "stageCount": 4,
+      "stepCount": 4,
+      "finalArtifactId": "report-markdown",
       "result": {
         "renderer": "renderTemplate",
-        "templateId": "sourcing_strategy_cn"
+        "templateId": "sourcing_strategy_cn",
+        "artifactId": "report-markdown",
+        "finalizationArtifactId": "run-summary"
       }
     },
     "selection": {
       "requestedMode": "openai",
-      "requestedRunner": "local-template",
+      "requestedRunner": "openai-chat",
       "resolvedRunnerId": "local-template",
+      "resolvedMode": "template-renderer",
+      "resolutionSource": "runner",
       "strategy": "requested-runner",
-      "fallbackApplied": false,
-      "fallbackReason": "Local template runner is the executable backend bundled with this local-only service."
+      "fallbackApplied": true,
+      "fallbackReason": "Requested runner openai-chat is not executable in this local-only build; using local-template instead."
+    }
+  },
+  "artifacts": {
+    "rootDir": "/absolute/path/to/state/runs/YYYY/MM/DD/run_xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+    "files": {
+      "request": "/absolute/path/to/state/runs/YYYY/MM/DD/run_xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/request.json",
+      "response": "/absolute/path/to/state/runs/YYYY/MM/DD/run_xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/response.json",
+      "reportMarkdown": "/absolute/path/to/state/runs/YYYY/MM/DD/run_xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/report.md",
+      "events": "/absolute/path/to/state/runs/YYYY/MM/DD/run_xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/events.log"
     }
   }
 }
@@ -290,9 +336,9 @@ From `examples/run-response.json`:
 - `run.id` and `metadata.runId` refer to the same execution run.
 - `run.runnerId`, `engine.runnerId`, and `metadata.runnerId` identify the concrete backend runner that executed the request.
 - `reportMarkdown` contains the generated report body returned by the backend.
-- Persistence is external to the HTTP contract: the CLI may write `reportMarkdown` to `state/`, but the service does not promise a server-side file write.
+- `artifacts.*` points to the server-persisted run files.
 - `mode` is the public response mode; `engine.executionMode` and `orchestration.workflow.executionMode` show the internal execution path.
-- `orchestration.selection` records how request mode/runner selection resolved.
+- `orchestration.selection` records how request mode/runner selection resolved, including fallback.
 
 ## Error contract
 
@@ -318,7 +364,7 @@ From `examples/error-invalid-template.json`:
   },
   "metadata": {
     "requestId": "req_2fd1f9b2-3ad1-4d69-a6f2-50cbb2b6d709",
-    "apiVersion": "v0.4",
+    "apiVersion": "v0.5",
     "status": 400,
     "timestamp": "2026-03-15T00:00:00.000Z"
   }
@@ -342,7 +388,7 @@ From `examples/error-missing-role-title.json`:
   },
   "metadata": {
     "requestId": "req_0c9f7f72-e79b-41de-b0fd-f1cec4e0fe28",
-    "apiVersion": "v0.4",
+    "apiVersion": "v0.5",
     "status": 400,
     "timestamp": "2026-03-15T00:00:00.000Z"
   }
@@ -366,7 +412,7 @@ From `examples/error-invalid-json.json`:
   },
   "metadata": {
     "requestId": "req_f64c1f72-e79b-41de-b0fd-f1cec4e0fe28",
-    "apiVersion": "v0.4",
+    "apiVersion": "v0.5",
     "status": 400,
     "timestamp": "2026-03-15T00:00:00.000Z"
   }
@@ -377,6 +423,7 @@ From `examples/error-invalid-json.json`:
 
 - Error payloads use `metadata.status`, not a top-level `status` field.
 - Unknown routes return `NOT_FOUND` with HTTP 404 and the same error envelope pattern.
+- Failed runs are also persisted under `state/runs/...`, with `error.json` and `events.log`.
 - The HTTP status code and `metadata.status` should match.
 
 ## Curl examples
@@ -428,6 +475,6 @@ curl -X POST http://127.0.0.1:8788/api/talent-intelligence/run \
 
 ## Notes
 
-- Current engine is a **local workflow runner** with a template-render execution step.
-- The service returns reports inline and leaves persistence policy to the caller.
+- Current executable engine is the **local workflow runner** with a template-render execution path.
+- The published remote adapter is declarative for now; it exists in the runner catalog and resolution logic, but is not executable in this build.
 - Future backend implementations should preserve this request/response envelope unless there is an intentional version bump.
