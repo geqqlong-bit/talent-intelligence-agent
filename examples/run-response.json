@@ -12,35 +12,39 @@
   },
   "engine": {
     "kind": "local-template-engine",
-    "version": "v0.3",
+    "version": "v0.4",
     "provider": "local",
     "adapter": "template-renderer",
     "runnerId": "local-template",
     "executionMode": "local-template",
     "requestedMode": "openai",
+    "requestedRunner": "local-template",
     "requestedModel": "bailian/qwen3.5-plus",
     "resolvedMode": "template-renderer",
-    "boundary": "local-only"
+    "implementationStatus": "active",
+    "resolutionSource": "runner",
+    "fallbackReason": "Local template runner is the executable backend bundled with this local-only service."
   },
   "summary": {
     "projectName": "Confidential Client - VP Product Search",
     "roleTitle": "VP Product",
     "templateId": "sourcing_strategy_cn"
   },
-  "reportMarkdown": "# 人才寻访策略报告｜VP Product\n\n## 一页结论\n- **搜寻方向**：本岗位应以“企业软件 / AI SaaS 的产品业务负责人”作为主画像，而不是泛化到所有 AI 产品经理。\n- **市场判断**：优质样本更可能分布在“平台型产品 + 商业化接口强 + 对 B 端复杂场景有判断”的团队中。\n- **执行原则**：前两周先做市场扫描与画像校准，拿到样本后再放大触达；先求准，再求量。\n\n## 项目背景\n- **项目**：Confidential Client - VP Product Search\n- **岗位**：VP Product\n- **公司背景**：Series C AI infra company selling to enterprise customers\n- **任务背景**：Find a product leader who can unify platform roadmap and enterprise customer requirements\n- **项目目标**：Output search strategy and target-company map\n- **目标行业**：Enterprise software, cloud, AI infrastructure\n- **工作地点**：Shanghai\n- **预算区间**：Base 150-220k RMB/month\n\n## 目标人才画像\n### 核心画像\n- 做过企业级产品定义，并与销售、解决方案、交付团队有高频协作。\n- 能把抽象 AI 能力翻译成客户价值与产品路线，而不是停留在功能层面。\n- 具备跨团队 owner 气质，最好带过产品团队或承担过业务结果。\n\n### 可接受的相邻画像\n- 企业软件公司中的平台产品负责人、解决方案产品负责人、商业化产品负责人。\n- 大模型或 AI 基础设施公司里，长期面向企业客户场景的人选。\n- 非纯 AI 公司但在复杂 ToB 场景里做过产品升级或产品商业化的人选。\n\n### 不建议优先投入的画像\n- 纯消费互联网产品背景，缺少 B 端复杂交付或客户场景沉淀。\n- 只负责单点功能模块、缺少业务 owner 经验的人选。\n- 强技术但弱客户价值表达，转化为业务负责人难度偏高。\n\n## 目标公司地图（第一版假设）\n- **梯队 1｜Huawei Cloud**：优先关注承担过 AI 产品商业化、平台化或企业客户场景落地的人选。\n- **梯队 2｜Alibaba Cloud**：优先关注承担过 AI 产品商业化、平台化或企业客户场景落地的人选。\n- **梯队 3｜Volcano Engine**：优先关注承担过 AI 产品商业化、平台化或企业客户场景落地的人选。\n- **梯队 4｜Tencent Cloud**：优先关注承担过 AI 产品商业化、平台化或企业客户场景落地的人选。\n\n## 搜寻渠道优先级\n1. 定向 Mapping：围绕目标公司与相邻团队做组织拆解，优先找一线在岗人。\n2. 行业人脉 / 投资圈 / 创业者网络：用于获取“谁真正负责结果”的口碑信息。\n3. 公开平台搜索：作为补充验证，不应成为主渠道。\n4. 内容反向定位：通过演讲、播客、公众号、产品发布会材料识别有观点的人。\n\n## 搜索关键词建议\n- 中文关键词：VP Product / AI 产品负责人 / 企业产品负责人 / 商业化产品 / 平台产品 / 解决方案产品\n- 英文关键词：AI Product Lead / Product Director / Head of Product / Commercialization / Enterprise AI / Platform Product\n- 组织线索词：企业服务 / SaaS / Copilot / Workflow / Knowledge / CRM / Data / Automation\n\n## Boolean 搜索示例\n### 版本 A：聚焦头衔\n```text\n(\"VP Product\" OR \"AI 产品负责人\" OR \"Product Director\" OR \"Head of Product\")\nAND (\"企业软件\" OR \"SaaS\" OR \"Enterprise AI\" OR \"ToB\")\nAND (上海 OR 北京 OR 深圳)\n```\n\n### 版本 B：聚焦业务场景\n```text\n((商业化 OR 平台化 OR 解决方案 OR 企业客户) AND (AI OR 大模型 OR SaaS))\nAND (产品 OR product)\nAND (负责人 OR director OR lead)\n```\n\n## 首两周执行计划\n### Week 1：市场扫描\n- 产出首版目标公司池、关键词库、20-30 个样本名单。\n- 与业务方复盘：哪些样本“像”、哪些“看起来强但不对”。\n- 校正画像边界，避免后续大量无效触达。\n\n### Week 2：触达验证\n- 对高匹配样本做定向触达，验证 title、薪酬、组织阶段是否有吸引力。\n- 记录候选人拒绝原因：赛道、地点、薪酬、角色 scope、汇报线。\n- 决定是否需要拓展到相邻行业或降低某些门槛。\n\n## 过程指标建议\n- **样本命中率**：进入 shortlist 的比例，建议首周观察是否达到 20% 左右。\n- **触达回复率**：用于判断口径是否有吸引力。\n- **初访通过率**：用于验证画像是否精准。\n- **推进障碍 Top 3**：用于给业务方做市场教育，而不是只报进度。\n\n## 顾问建议的下一步\n1. 先补齐 20-30 家公司地图，并按“直接竞对 / 相邻赛道 / 上游能力方”分层。\n2. 先拿 10 位高匹配样本做试探触达，验证岗位故事是否成立。\n3. 若回复率持续偏低，优先检查岗位吸引力与 scope，而不是机械加渠道。\n\n## 综合判断\n- **人才池厚度**：中等偏窄\n- **信心等级**：中\n- **一句话建议**：这不是海投岗位，必须靠精准 mapping 和故事包装吃饭。\n",
+  "reportMarkdown": "# 人才寻访策略报告｜VP Product\n\n## 一页结论\n- **搜寻方向**：本岗位应以“企业软件 / AI SaaS 的产品业务负责人”作为主画像，而不是泛化到所有 AI 产品经理。\n- **市场判断**：优质样本更可能分布在“平台型产品 + 商业化接口强 + 对 B 端复杂场景有判断”的团队中。\n- **执行原则**：前两周先做市场扫描与画像校准，拿到样本后再放大触达；先求准，再求量。\n",
   "metadata": {
     "requestId": "req_xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
     "runId": "run_xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
-    "apiVersion": "v0.3",
+    "apiVersion": "v0.4",
     "startedAt": "2026-03-15T00:00:00.000Z",
     "completedAt": "2026-03-15T00:00:00.000Z",
     "durationMs": 1,
     "workflowId": "talent-intelligence.local-template-render",
-    "workflowVersion": "v0.3",
+    "workflowVersion": "v0.4",
     "runnerId": "local-template",
     "executionMode": "local-template",
     "executionStatus": "completed",
     "requestedMode": "openai",
+    "requestedRunner": "local-template",
     "resolvedMode": "template-renderer"
   },
   "orchestration": {
@@ -48,14 +52,10 @@
     "runId": "run_xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
     "workflow": {
       "id": "talent-intelligence.local-template-render",
-      "version": "v0.3",
+      "version": "v0.4",
       "executionMode": "local-template",
-      "boundary": "local-only",
-      "runner": {
-        "id": "local-template",
-        "kind": "workflow-runner",
-        "locality": "local-only"
-      }
+      "runnerId": "local-template",
+      "futureHook": "workflowRunner.execute"
     },
     "execution": {
       "status": "completed",
@@ -84,8 +84,9 @@
     },
     "selection": {
       "requestedMode": "openai",
+      "requestedRunner": "local-template",
       "resolvedRunnerId": "local-template",
-      "strategy": "requested-mode",
+      "strategy": "requested-runner",
       "fallbackApplied": false,
       "fallbackReason": "Local template runner is the executable backend bundled with this local-only service."
     }

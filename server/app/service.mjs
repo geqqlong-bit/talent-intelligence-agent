@@ -46,15 +46,109 @@ function buildExecutionPlan(requestContext) {
     requestContext.requestedModel
   );
 
+  const stages = [
+    {
+      id: 'ingest-request',
+      label: 'Ingest Request',
+      order: 1,
+      consumes: [],
+      produces: ['normalized-request']
+    },
+    {
+      id: 'prepare-brief',
+      label: 'Prepare Workflow Brief',
+      order: 2,
+      consumes: ['normalized-request'],
+      produces: ['workflow-brief']
+    },
+    {
+      id: 'render-report',
+      label: 'Render Report',
+      order: 3,
+      consumes: ['workflow-brief'],
+      produces: ['report-markdown']
+    },
+    {
+      id: 'finalize-run',
+      label: 'Finalize Run',
+      order: 4,
+      consumes: ['report-markdown'],
+      produces: ['run-summary']
+    }
+  ];
+
+  const artifacts = [
+    {
+      id: 'normalized-request',
+      name: 'Normalized Request Payload',
+      kind: 'json',
+      mimeType: 'application/json',
+      stageId: 'ingest-request'
+    },
+    {
+      id: 'workflow-brief',
+      name: 'Workflow Brief',
+      kind: 'json',
+      mimeType: 'application/json',
+      stageId: 'prepare-brief'
+    },
+    {
+      id: 'report-markdown',
+      name: 'Rendered Report',
+      kind: 'markdown',
+      mimeType: 'text/markdown',
+      stageId: 'render-report'
+    },
+    {
+      id: 'run-summary',
+      name: 'Run Summary',
+      kind: 'json',
+      mimeType: 'application/json',
+      stageId: 'finalize-run'
+    }
+  ];
+
   return {
     workflow,
     engine,
+    stages,
+    artifacts,
     steps: [
       {
+        id: 'capture-request',
+        stageId: 'ingest-request',
+        kind: 'capture-input',
+        runnerId: engine.runnerId,
+        status: 'pending',
+        consumes: [],
+        produces: ['normalized-request']
+      },
+      {
+        id: 'build-brief',
+        stageId: 'prepare-brief',
+        kind: 'brief-synthesis',
+        runnerId: engine.runnerId,
+        status: 'pending',
+        consumes: ['normalized-request'],
+        produces: ['workflow-brief']
+      },
+      {
         id: 'render-template',
+        stageId: 'render-report',
         kind: 'template-render',
         runnerId: engine.runnerId,
-        status: 'pending'
+        status: 'pending',
+        consumes: ['workflow-brief'],
+        produces: ['report-markdown']
+      },
+      {
+        id: 'finalize-response',
+        stageId: 'finalize-run',
+        kind: 'response-finalization',
+        runnerId: engine.runnerId,
+        status: 'pending',
+        consumes: ['report-markdown'],
+        produces: ['run-summary']
       }
     ]
   };
@@ -102,7 +196,11 @@ function buildMetadata(requestContext, executionPlan, executionResult) {
     executionStatus: executionResult.execution.status,
     requestedMode: requestContext.requestedMode,
     requestedRunner: requestContext.requestedRunner,
-    resolvedMode: requestContext.executionTarget.resolvedMode
+    resolvedMode: requestContext.executionTarget.resolvedMode,
+    stageCount: executionResult.execution.stageCount,
+    stepCount: executionResult.execution.stepCount,
+    artifactCount: executionResult.execution.artifacts?.length || 0,
+    finalArtifactId: executionResult.execution.finalArtifactId
   };
 }
 
@@ -122,7 +220,11 @@ export async function runTalentIntelligence(payload, context = {}) {
       status: executionResult.execution.status,
       templateId: payload.templateId,
       mode: requestContext.executionTarget.resolvedMode,
-      runnerId: executionPlan.engine.runnerId
+      runnerId: executionPlan.engine.runnerId,
+      stageCount: executionResult.execution.stageCount,
+      stepCount: executionResult.execution.stepCount,
+      artifactCount: executionResult.execution.artifacts?.length || 0,
+      finalArtifactId: executionResult.execution.finalArtifactId
     },
     engine: executionPlan.engine,
     summary: buildSummary(payload),
@@ -137,6 +239,8 @@ export async function runTalentIntelligence(payload, context = {}) {
         requestedMode: requestContext.requestedMode,
         requestedRunner: requestContext.requestedRunner,
         resolvedRunnerId: requestContext.executionTarget.resolvedRunnerId,
+        resolvedMode: requestContext.executionTarget.resolvedMode,
+        resolutionSource: requestContext.executionTarget.resolutionSource,
         strategy: requestContext.executionTarget.selectionStrategy,
         fallbackApplied: requestContext.executionTarget.fallbackApplied,
         fallbackReason: requestContext.executionTarget.fallbackReason

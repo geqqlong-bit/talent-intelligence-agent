@@ -1,5 +1,6 @@
 {
   "ok": false,
+  "requestId": "req_2fd1f9b2-3ad1-4d69-a6f2-50cbb2b6d709",
   "error": {
     "code": "INVALID_TEMPLATE",
     "message": "Unsupported templateId: bad_template",
@@ -12,10 +13,9 @@
       ]
     }
   },
-  "requestId": "req_xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
   "metadata": {
-    "requestId": "req_xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
-    "apiVersion": "v0.3",
+    "requestId": "req_2fd1f9b2-3ad1-4d69-a6f2-50cbb2b6d709",
+    "apiVersion": "v0.4",
     "status": 400,
     "timestamp": "2026-03-15T00:00:00.000Z"
   }

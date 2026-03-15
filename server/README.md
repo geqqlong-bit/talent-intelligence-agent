@@ -69,11 +69,14 @@ curl -X POST http://127.0.0.1:8788/api/talent-intelligence/run \
   --data @examples/run-request.json
 ```
 
-What to expect from the live v0.3 contract:
+What to expect from the live v0.4 contract:
 
 - every response includes a `requestId`
 - `/health` and `/schema` expose the local-only execution catalog and supported request modes
-- success responses include `run`, `engine`, `metadata`, and `orchestration`, with `runnerId` on run/engine/metadata
+- success responses include `run`, `engine`, `metadata`, `orchestration`, and `artifacts`, with `runnerId` on run/engine/metadata
+- each run is persisted locally under `state/runs/YYYY/MM/DD/<runId>/`
+- persisted success artifacts include `request.json`, `response.json`, `report.md`, and `events.log`
+- failed `/run` requests also write a local error record under the same dated tree
 - error responses place HTTP status info in `metadata.status`
 - whitespace-only `searchContext.roleTitle` requests return `MISSING_ROLE_TITLE`
 

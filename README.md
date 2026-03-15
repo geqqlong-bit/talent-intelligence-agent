@@ -9,9 +9,9 @@ A recruiting and headhunting agent for OpenClaw that turns plain-language hiring
 
 Most assistants can brainstorm hiring advice in chat. Very few can reliably convert a fuzzy recruiting request into a reusable workflow that:
 - routes to a dedicated talent-intelligence agent
-- runs through a backend workflow engine
-- saves long-form output to disk
-- returns a clean executive summary instead of flooding the conversation
+- runs through a backend workflow runner boundary
+- returns structured execution metadata alongside the report
+- lets the caller persist the long-form output to disk without flooding the conversation
 
 Talent Intelligence Agent is that layer.
 
@@ -19,8 +19,9 @@ Talent Intelligence Agent is that layer.
 
 - **Dedicated recruiting skill** for OpenClaw
 - **Portable CLI wrapper** around a local recruiting workflow backend
+- **Workflow-runner execution contract** with `run`, `engine`, `metadata`, and `orchestration` sections
 - **Environment-variable based config** instead of machine-specific paths
-- **Long report to `state/`** and short answer in chat
+- **Caller-controlled persistence**: CLI can write long reports to `state/`, while chat stays short
 - **Packaged `.skill` artifact** for easy sharing
 - **GitHub Actions packaging workflow** for distribution
 
@@ -67,8 +68,10 @@ flowchart LR
     O --> S[talent-intelligence-agent skill]
     S --> C[talent-intelligence-cli.mjs]
     C --> B[Recruiting workflow backend]
-    B --> L[LLM / model proxy]
-    B --> R[Markdown report in state/]
+    B --> W[Workflow runner selection + execution metadata]
+    B --> M[reportMarkdown response body]
+    C --> R[Persist markdown to state/ when --out is set]
+    M --> O
     R --> O
     O --> E[Executive summary in chat]
 ```
@@ -90,7 +93,7 @@ If you want to validate the end-to-end wiring before building a real backend:
 bash demo/run-demo.sh
 ```
 
-This starts the local backend service, runs five example workflows, and writes markdown reports into `state/`.
+This starts the local backend service, runs five example workflows through the local workflow runner, and writes markdown reports into `state/` via the CLI.
 
 
 ### 1) Configure runtime endpoints
@@ -134,9 +137,10 @@ Ask for things like:
 
 Expected behavior:
 1. The skill converts the request into a structured brief.
-2. The CLI calls the backend.
-3. A long markdown report is saved to `state/`.
-4. Chat returns an executive summary, key risks, and the file path.
+2. The CLI calls the backend run endpoint.
+3. The backend returns `reportMarkdown` plus workflow-runner metadata (`run`, `engine`, `metadata`, `orchestration`).
+4. If `--out` is set, the CLI persists the long markdown report to `state/`.
+5. Chat returns an executive summary, key risks, and the file path.
 
 ## CLI example
 
@@ -217,7 +221,7 @@ Canonical HTTP example payloads:
 - `examples/error-missing-role-title.json`
 - `examples/error-invalid-json.json`
 
-The current implementation keeps a stable HTTP contract while using a local template renderer under the hood. Later you can replace `server/app/service.mjs` with a real workflow engine without breaking the CLI contract.
+The current implementation keeps a stable HTTP contract while using a local workflow runner with a template-render step under the hood. Persistence is intentionally caller-controlled today: the HTTP service returns markdown in-band, and the CLI decides whether to write it to `state/`. Later you can replace `server/app/service.mjs` with a real workflow engine without breaking the CLI contract.
 
 ## Notes for backend implementers
 
@@ -227,8 +231,9 @@ Current contract highlights:
 - Schema endpoint: `GET /api/talent-intelligence/schema`
 - Run endpoint: `POST /api/talent-intelligence/run`
 - Supported templates: `jd_diagnosis_cn`, `sourcing_strategy_cn`, `candidate_assessment_cn`, `search_plan_cn`
-- Health and schema responses now expose the local-only execution catalog, including runner availability and supported request modes
-- Success responses include `run.runnerId`, `engine.runnerId`, `metadata.runnerId`, and orchestration selection details
+- Health and schema responses expose the execution catalog, including supported request modes, available runner ids, and declared future runners
+- Success responses include workflow-runner metadata in `run`, `engine`, `metadata`, and `orchestration`
+- `reportMarkdown` is returned inline; writing to `state/` is the caller's persistence decision, not an automatic server side effect
 - Error responses use `metadata.status` instead of a top-level `status` field
 - The server accepts either nested `searchContext` or a flat top-level brief, then normalizes to the same internal shape
 - `searchContext.roleTitle` is required after trimming; missing or whitespace-only values return `MISSING_ROLE_TITLE`

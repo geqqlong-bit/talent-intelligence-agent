@@ -1,5 +1,6 @@
 {
   "ok": false,
+  "requestId": "req_0c9f7f72-e79b-41de-b0fd-f1cec4e0fe28",
   "error": {
     "code": "MISSING_ROLE_TITLE",
     "message": "searchContext.roleTitle is required.",
@@ -7,10 +8,9 @@
       "field": "searchContext.roleTitle"
     }
   },
-  "requestId": "req_xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
   "metadata": {
-    "requestId": "req_xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
-    "apiVersion": "v0.3",
+    "requestId": "req_0c9f7f72-e79b-41de-b0fd-f1cec4e0fe28",
+    "apiVersion": "v0.4",
     "status": 400,
     "timestamp": "2026-03-15T00:00:00.000Z"
   }

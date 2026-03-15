@@ -9,6 +9,7 @@ import {
   withRequestMeta
 } from './schema.mjs';
 import { DEFAULT_LOCAL_RUNNER_ID, WORKFLOW_ID, getExecutionCatalog, resolveExecutionTarget } from './execution.mjs';
+import { persistRunArtifacts, persistRunFailure } from './persistence.mjs';
 import { runTalentIntelligence } from './service.mjs';
 
 function getRequestId(req) {
@@ -84,7 +85,11 @@ export async function routeRequest(req, res) {
           status: 'completed',
           templateId: 'sourcing_strategy_cn',
           mode: 'template-renderer',
-          runnerId: 'local-template'
+          runnerId: 'local-template',
+          stageCount: 4,
+          stepCount: 4,
+          artifactCount: 4,
+          finalArtifactId: 'report-markdown'
         },
         engine: {
           kind: 'local-template-engine',
@@ -103,6 +108,15 @@ export async function routeRequest(req, res) {
         },
         summary: { projectName: 'string', roleTitle: 'string', templateId: 'string' },
         reportMarkdown: 'string',
+        artifacts: {
+          rootDir: '/absolute/path/to/state/runs/YYYY/MM/DD/run_xxx',
+          files: {
+            request: '/absolute/path/to/request.json',
+            response: '/absolute/path/to/response.json',
+            reportMarkdown: '/absolute/path/to/report.md',
+            events: '/absolute/path/to/events.log'
+          }
+        },
         metadata: {
           requestId: 'req_xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx',
           runId: 'run_xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx',
@@ -117,7 +131,11 @@ export async function routeRequest(req, res) {
           executionStatus: 'completed',
           requestedMode: 'openai',
           requestedRunner: 'openai-chat',
-          resolvedMode: 'template-renderer'
+          resolvedMode: 'template-renderer',
+          stageCount: 4,
+          stepCount: 4,
+          artifactCount: 4,
+          finalArtifactId: 'report-markdown'
         },
         orchestration: {
           requestId: 'req_xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx',
@@ -131,9 +149,58 @@ export async function routeRequest(req, res) {
           },
           execution: {
             status: 'completed',
-            stepCount: 1,
             runnerId: 'local-template',
-            renderer: 'renderTemplate'
+            boundary: 'local-only',
+            stageCount: 4,
+            stepCount: 4,
+            finalArtifactId: 'report-markdown',
+            stages: [
+              {
+                id: 'ingest-request',
+                label: 'Ingest Request',
+                order: 1,
+                status: 'completed',
+                stepCount: 1,
+                stepIds: ['capture-request'],
+                consumes: [],
+                produces: ['normalized-request']
+              }
+            ],
+            steps: [
+              {
+                id: 'render-template',
+                stageId: 'render-report',
+                kind: 'template-render',
+                runnerId: 'local-template',
+                status: 'completed',
+                consumes: ['workflow-brief'],
+                produces: ['report-markdown'],
+                output: {
+                  artifactId: 'report-markdown',
+                  renderer: 'renderTemplate',
+                  templateId: 'sourcing_strategy_cn'
+                }
+              }
+            ],
+            artifacts: [
+              {
+                id: 'report-markdown',
+                name: 'Rendered Report',
+                kind: 'markdown',
+                mimeType: 'text/markdown',
+                stageId: 'render-report',
+                producedBy: 'render-template',
+                boundary: 'local-only',
+                metadata: {
+                  preview: '# 人才寻访策略报告｜VP Product...'
+                }
+              }
+            ],
+            result: {
+              renderer: 'renderTemplate',
+              templateId: 'sourcing_strategy_cn',
+              artifactId: 'report-markdown'
+            }
           },
           selection: {
             requestedMode: 'openai',
@@ -167,13 +234,22 @@ export async function routeRequest(req, res) {
   }
 
   if (req.method === 'POST' && req.url === '/api/talent-intelligence/run') {
+    let raw;
+
     try {
-      const raw = await readJsonBody(req);
+      raw = await readJsonBody(req);
       const payload = normalizeRequest(raw);
       const result = await runTalentIntelligence(payload, { requestId });
-      return json(res, 200, result, requestId);
+      const persisted = await persistRunArtifacts(result, payload);
+      return json(res, 200, persisted, requestId);
     } catch (error) {
       const normalized = normalizeError(error, requestId);
+      await persistRunFailure({
+        requestId,
+        requestPayload: raw,
+        error: normalized.error,
+        timestamp: normalized.metadata.timestamp
+      });
       return json(res, normalized.metadata.status || 500, normalized, requestId);
     }
   }

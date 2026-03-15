@@ -1,7 +1,7 @@
 {
   "ok": true,
   "service": "talent-intelligence-service",
-  "version": "v0.3",
+  "version": "v0.4",
   "status": "healthy",
   "execution": {
     "mode": "local-template",
@@ -13,6 +13,9 @@
       "openai",
       "llm",
       "remote"
+    ],
+    "supportedRunnerIds": [
+      "local-template"
     ],
     "runners": [
       {
@@ -52,7 +55,7 @@
   "requestId": "req_xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
   "metadata": {
     "requestId": "req_xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
-    "apiVersion": "v0.3",
+    "apiVersion": "v0.4",
     "timestamp": "2026-03-15T00:00:00.000Z"
   }
 }

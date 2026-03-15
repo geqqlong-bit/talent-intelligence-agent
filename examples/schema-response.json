@@ -1,7 +1,7 @@
 {
   "ok": true,
   "service": "talent-intelligence-service",
-  "version": "v0.3",
+  "version": "v0.4",
   "templates": [
     "jd_diagnosis_cn",
     "sourcing_strategy_cn",
@@ -22,6 +22,9 @@
       "openai",
       "llm",
       "remote"
+    ],
+    "supportedRunnerIds": [
+      "local-template"
     ],
     "runners": [
       {
@@ -72,18 +75,18 @@
     },
     "engine": {
       "kind": "local-template-engine",
-      "version": "v0.3",
+      "version": "v0.4",
       "provider": "local",
       "adapter": "template-renderer",
       "runnerId": "local-template",
       "executionMode": "local-template",
       "requestedMode": "openai",
-      "requestedRunner": "openai-chat",
-      "resolvedMode": "template-renderer",
+      "requestedRunner": "local-template",
       "requestedModel": "bailian/qwen3.5-plus",
+      "resolvedMode": "template-renderer",
       "implementationStatus": "active",
-      "resolutionSource": "requested-runner",
-      "fallbackReason": "Requested runner openai-chat is declared but not executable in this build; using local-template instead."
+      "resolutionSource": "runner",
+      "fallbackReason": "Local template runner is the executable backend bundled with this local-only service."
     },
     "summary": {
       "projectName": "string",
@@ -94,17 +97,17 @@
     "metadata": {
       "requestId": "req_xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
       "runId": "run_xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
-      "apiVersion": "v0.3",
-      "startedAt": "2026-03-15T00:00:00.000Z",
-      "completedAt": "2026-03-15T00:00:00.000Z",
-      "durationMs": 1,
+      "apiVersion": "v0.4",
+      "startedAt": "ISO date",
+      "completedAt": "ISO date",
+      "durationMs": 12,
       "workflowId": "talent-intelligence.local-template-render",
-      "workflowVersion": "v0.3",
+      "workflowVersion": "v0.4",
       "runnerId": "local-template",
       "executionMode": "local-template",
       "executionStatus": "completed",
       "requestedMode": "openai",
-      "requestedRunner": "openai-chat",
+      "requestedRunner": "local-template",
       "resolvedMode": "template-renderer"
     },
     "orchestration": {
@@ -112,15 +115,28 @@
       "runId": "run_xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
       "workflow": {
         "id": "talent-intelligence.local-template-render",
-        "version": "v0.3",
+        "version": "v0.4",
         "executionMode": "local-template",
+        "runnerId": "local-template",
         "futureHook": "workflowRunner.execute"
       },
       "execution": {
         "status": "completed",
         "stepCount": 1,
         "runnerId": "local-template",
-        "renderer": "renderTemplate"
+        "boundary": "local-only",
+        "result": {
+          "renderer": "renderTemplate",
+          "templateId": "sourcing_strategy_cn"
+        }
+      },
+      "selection": {
+        "requestedMode": "openai",
+        "requestedRunner": "local-template",
+        "resolvedRunnerId": "local-template",
+        "strategy": "requested-runner",
+        "fallbackApplied": false,
+        "fallbackReason": "Local template runner is the executable backend bundled with this local-only service."
       }
     }
   },
@@ -141,15 +157,15 @@
     },
     "metadata": {
       "requestId": "req_xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
-      "apiVersion": "v0.3",
+      "apiVersion": "v0.4",
       "status": 400,
-      "timestamp": "2026-03-15T00:00:00.000Z"
+      "timestamp": "ISO date"
     }
   },
   "requestId": "req_xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
   "metadata": {
     "requestId": "req_xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
-    "apiVersion": "v0.3",
+    "apiVersion": "v0.4",
     "timestamp": "2026-03-15T00:00:00.000Z"
   }
 }

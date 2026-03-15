@@ -1,6 +1,6 @@
 import crypto from 'crypto';
 
-export const API_VERSION = 'v0.3';
+export const API_VERSION = 'v0.4';
 
 export const TEMPLATE_IDS = [
   'jd_diagnosis_cn',
