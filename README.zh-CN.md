@@ -174,6 +174,7 @@ node skill/talent-intelligence-agent/scripts/talent-intelligence-cli.mjs \
 ```
 
 CLI 显式传入的参数会覆盖 `--intakeFile` 中的同名字段，所以很适合把 JSON 当基础 brief 复用。
+无论哪种方式，`roleTitle` 都必须提供非空值。
 
 ## 模板说明
 

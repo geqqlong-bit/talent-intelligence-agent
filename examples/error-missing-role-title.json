@@ -1,10 +1,10 @@
 {
   "ok": false,
   "error": {
-    "code": "INVALID_JSON",
-    "message": "Request body must be valid JSON.",
+    "code": "MISSING_ROLE_TITLE",
+    "message": "searchContext.roleTitle is required.",
     "details": {
-      "raw": "{\"templateId\": }"
+      "field": "searchContext.roleTitle"
     }
   },
   "requestId": "req_xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
@@ -12,6 +12,6 @@
     "requestId": "req_xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
     "apiVersion": "v0.3",
     "status": 400,
-    "timestamp": "2026-03-15T11:07:47.572Z"
+    "timestamp": "2026-03-15T00:00:00.000Z"
   }
 }

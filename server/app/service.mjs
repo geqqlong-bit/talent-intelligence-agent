@@ -1,9 +1,11 @@
 import crypto from 'crypto';
-import { API_VERSION } from './schema.mjs';
 import { renderTemplate } from './templates.mjs';
-
-const WORKFLOW_ID = 'talent-intelligence.local-template-render';
-const WORKFLOW_HOOK = 'workflowRunner.execute';
+import {
+  createEngineDescriptor,
+  createWorkflowDescriptor,
+  executionRunners,
+  resolveExecutionTarget
+} from './execution.mjs';
 
 function nowMs() {
   return Date.now();
@@ -18,24 +20,10 @@ function createRunId(seed = undefined) {
   return raw || `run_${crypto.randomUUID()}`;
 }
 
-function resolveExecutionMode(runtime = {}) {
-  const requestedMode = String(runtime.mode || 'openai').trim().toLowerCase();
-
-  if (requestedMode === 'local' || requestedMode === 'template-renderer') {
-    return 'local-template';
-  }
-
-  if (requestedMode === 'openai' || requestedMode === 'llm' || requestedMode === 'remote') {
-    return 'local-template';
-  }
-
-  return 'local-template';
-}
-
 function buildRequestContext(payload, context = {}) {
   const startedAtMs = nowMs();
   const runtime = payload.runtime || {};
-  const executionMode = resolveExecutionMode(runtime);
+  const executionTarget = resolveExecutionTarget(runtime);
 
   return {
     requestId: context.requestId,
@@ -43,33 +31,29 @@ function buildRequestContext(payload, context = {}) {
     startedAtMs,
     runtime,
     payload,
-    executionMode,
-    requestedMode: String(runtime.mode || 'openai'),
+    executionTarget,
+    requestedMode: executionTarget.requestedMode,
+    requestedRunner: executionTarget.requestedRunner,
     requestedModel: String(runtime.model || 'template-only')
   };
 }
 
 function buildExecutionPlan(requestContext) {
+  const workflow = createWorkflowDescriptor(requestContext.executionTarget);
+  const engine = createEngineDescriptor(
+    requestContext.executionTarget,
+    workflow.version,
+    requestContext.requestedModel
+  );
+
   return {
-    workflow: {
-      id: WORKFLOW_ID,
-      version: API_VERSION,
-      executionMode: requestContext.executionMode,
-      futureHook: WORKFLOW_HOOK
-    },
-    engine: {
-      kind: 'local-template-engine',
-      version: API_VERSION,
-      provider: 'local',
-      adapter: 'template-renderer',
-      executionMode: requestContext.executionMode,
-      requestedMode: requestContext.requestedMode,
-      requestedModel: requestContext.requestedModel
-    },
+    workflow,
+    engine,
     steps: [
       {
         id: 'render-template',
         kind: 'template-render',
+        runnerId: engine.runnerId,
         status: 'pending'
       }
     ]
@@ -77,20 +61,20 @@ function buildExecutionPlan(requestContext) {
 }
 
 async function executeWorkflow(requestContext, executionPlan) {
-  if (executionPlan.workflow.executionMode !== 'local-template') {
-    throw new Error(`Unsupported execution mode: ${executionPlan.workflow.executionMode}`);
+  const runnerId = executionPlan.engine.runnerId;
+  const executeRunner = executionRunners[runnerId];
+
+  if (!executeRunner) {
+    throw new Error(`Unsupported execution runner: ${runnerId}`);
   }
 
-  const reportMarkdown = renderTemplate(requestContext.payload);
-
-  return {
-    reportMarkdown,
-    execution: {
-      status: 'completed',
-      stepCount: executionPlan.steps.length,
-      renderer: 'renderTemplate'
-    }
-  };
+  return executeRunner({
+    payload: requestContext.payload,
+    runtime: requestContext.runtime,
+    requestContext,
+    executionPlan,
+    renderTemplate
+  });
 }
 
 function buildSummary(payload) {
@@ -107,14 +91,18 @@ function buildMetadata(requestContext, executionPlan, executionResult) {
   return {
     requestId: requestContext.requestId,
     runId: requestContext.runId,
-    apiVersion: API_VERSION,
+    apiVersion: executionPlan.workflow.version,
     startedAt: toIso(requestContext.startedAtMs),
     completedAt: toIso(completedAtMs),
     durationMs: completedAtMs - requestContext.startedAtMs,
     workflowId: executionPlan.workflow.id,
     workflowVersion: executionPlan.workflow.version,
+    runnerId: executionPlan.engine.runnerId,
     executionMode: executionPlan.workflow.executionMode,
-    executionStatus: executionResult.execution.status
+    executionStatus: executionResult.execution.status,
+    requestedMode: requestContext.requestedMode,
+    requestedRunner: requestContext.requestedRunner,
+    resolvedMode: requestContext.executionTarget.resolvedMode
   };
 }
 
@@ -127,13 +115,14 @@ export async function runTalentIntelligence(payload, context = {}) {
   return {
     ok: true,
     requestId: requestContext.requestId,
-    mode: 'template-renderer',
+    mode: requestContext.executionTarget.resolvedMode,
     templateId: payload.templateId,
     run: {
       id: requestContext.runId,
       status: executionResult.execution.status,
       templateId: payload.templateId,
-      mode: 'template-renderer'
+      mode: requestContext.executionTarget.resolvedMode,
+      runnerId: executionPlan.engine.runnerId
     },
     engine: executionPlan.engine,
     summary: buildSummary(payload),
@@ -143,7 +132,15 @@ export async function runTalentIntelligence(payload, context = {}) {
       requestId: requestContext.requestId,
       runId: requestContext.runId,
       workflow: executionPlan.workflow,
-      execution: executionResult.execution
+      execution: executionResult.execution,
+      selection: {
+        requestedMode: requestContext.requestedMode,
+        requestedRunner: requestContext.requestedRunner,
+        resolvedRunnerId: requestContext.executionTarget.resolvedRunnerId,
+        strategy: requestContext.executionTarget.selectionStrategy,
+        fallbackApplied: requestContext.executionTarget.fallbackApplied,
+        fallbackReason: requestContext.executionTarget.fallbackReason
+      }
     }
   };
 }

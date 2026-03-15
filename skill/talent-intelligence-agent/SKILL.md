@@ -53,6 +53,7 @@ Resolve `<skill-dir>` to the actual installed skill directory.
 ## Brief completion rules
 
 If the user leaves fields unspecified, infer sensible defaults:
+- `roleTitle`: required; do not invent or silently replace it with a placeholder
 - `objective`: the practical hiring outcome the user needs
 - `clientName`: `Confidential Client` when obviously hidden or unnamed
 - `companyContext`: a short description of the employer or client situation

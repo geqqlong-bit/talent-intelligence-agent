@@ -61,6 +61,20 @@ function cleanObject(obj) {
   );
 }
 
+function normalizeString(value) {
+  if (value === undefined || value === null) return undefined;
+  const normalized = String(value).trim();
+  return normalized || undefined;
+}
+
+function requireRoleTitle(args) {
+  const roleTitle = normalizeString(args.roleTitle);
+  if (!roleTitle) {
+    throw new Error('roleTitle is required. Supply --roleTitle <text> or include a non-empty roleTitle in --intakeFile.');
+  }
+  return roleTitle;
+}
+
 function readIntakeFile(filePath) {
   const absolutePath = path.resolve(process.cwd(), filePath);
   const raw = fs.readFileSync(absolutePath, 'utf8');
@@ -82,9 +96,10 @@ function normalizeMergedArgs(args) {
 }
 
 function buildPayload(args, runtime) {
+  const normalizedRoleTitle = requireRoleTitle(args);
+
   const {
     projectName = 'Talent Intelligence Task',
-    roleTitle = 'Unknown Role',
     companyContext = 'Employer context not specified',
     hiringBrief = 'Provide recruiting analysis and recommendations.',
     objective = 'Produce a structured talent intelligence deliverable.',
@@ -137,7 +152,7 @@ function buildPayload(args, runtime) {
     payload: {
       searchContext: cleanObject({
         projectName,
-        roleTitle,
+        roleTitle: normalizedRoleTitle,
         clientName,
         searchType,
         mandateType,
@@ -231,7 +246,7 @@ async function main() {
   const rawArgs = parseArgs(process.argv.slice(2));
 
   if (rawArgs.help) {
-    console.log(`Usage: node talent-intelligence-cli.mjs [options]\n\nCore options:\n  --projectName <text>\n  --roleTitle <text>\n  --companyContext <text>\n  --hiringBrief <text>\n  --objective <text>\n  --targetIndustry <text>\n  --targetCompanies <csv>\n  --location <text>\n  --salaryRange <text>\n  --templateId <jd_diagnosis_cn|sourcing_strategy_cn|candidate_assessment_cn|search_plan_cn>\n  --model <model>\n  --out <file>\n\nExecutive-search intake options:\n  --intakeFile <json>\n  --clientName <text>\n  --searchType <executive_search|talent_map|replacement|succession>\n  --mandateType <retained|contingent|in_house>\n  --companyStage <text>\n  --businessModel <text>\n  --teamStage <text>\n  --reportingLine <text>\n  --level <text>\n  --headcount <number>\n  --urgency <text>\n  --searchReason <text>\n  --successProfile <text>\n  --successMetrics <text>\n  --marketSignals <text>\n  --stakeholderBrief <text>\n  --mustHaveSkills <csv>\n  --niceToHaveSkills <csv>\n  --dealBreakers <csv>\n  --targetFunctions <csv>\n  --targetBackgrounds <csv>\n  --offLimits <csv>\n  --targetGeographies <csv>\n  --compensationMix <text>\n  --equity <text>\n  --interviewProcess <text>\n  --interviewPanel <csv>\n  --processConstraints <text>\n  --sourceChannels <csv>\n\nCandidate-assessment options:\n  --candidateName <text>\n  --candidateSummary <text>\n  --candidateHighlights <csv>\n  --candidateConcerns <csv>\n  --interviewerNotes <text>\n`);
+    console.log(`Usage: node talent-intelligence-cli.mjs [options]\n\nCore options:\n  --projectName <text>\n  --roleTitle <text>  (required; may also come from --intakeFile)\n  --companyContext <text>\n  --hiringBrief <text>\n  --objective <text>\n  --targetIndustry <text>\n  --targetCompanies <csv>\n  --location <text>\n  --salaryRange <text>\n  --templateId <jd_diagnosis_cn|sourcing_strategy_cn|candidate_assessment_cn|search_plan_cn>\n  --model <model>\n  --out <file>\n\nExecutive-search intake options:\n  --intakeFile <json>\n  --clientName <text>\n  --searchType <executive_search|talent_map|replacement|succession>\n  --mandateType <retained|contingent|in_house>\n  --companyStage <text>\n  --businessModel <text>\n  --teamStage <text>\n  --reportingLine <text>\n  --level <text>\n  --headcount <number>\n  --urgency <text>\n  --searchReason <text>\n  --successProfile <text>\n  --successMetrics <text>\n  --marketSignals <text>\n  --stakeholderBrief <text>\n  --mustHaveSkills <csv>\n  --niceToHaveSkills <csv>\n  --dealBreakers <csv>\n  --targetFunctions <csv>\n  --targetBackgrounds <csv>\n  --offLimits <csv>\n  --targetGeographies <csv>\n  --compensationMix <text>\n  --equity <text>\n  --interviewProcess <text>\n  --interviewPanel <csv>\n  --processConstraints <text>\n  --sourceChannels <csv>\n\nCandidate-assessment options:\n  --candidateName <text>\n  --candidateSummary <text>\n  --candidateHighlights <csv>\n  --candidateConcerns <csv>\n  --interviewerNotes <text>\n`);
     process.exit(0);
   }
 

@@ -46,6 +46,7 @@
   },
   "runtime": {
     "mode": "openai",
+    "runner": "local-template",
     "baseUrl": "http://127.0.0.1:8999/v1",
     "apiKey": "test-key",
     "model": "bailian/qwen3.5-plus",

@@ -1,6 +1,6 @@
 import crypto from 'crypto';
 
-export const API_VERSION = 'v0.2';
+export const API_VERSION = 'v0.3';
 
 export const TEMPLATE_IDS = [
   'jd_diagnosis_cn',
@@ -53,6 +53,17 @@ function toStringArray(value) {
   return [String(value).trim()].filter(Boolean);
 }
 
+function toOptionalString(value, fallback = undefined) {
+  if (value === undefined || value === null) return fallback;
+  const normalized = String(value).trim();
+  return normalized || fallback;
+}
+
+function toRequiredString(value) {
+  if (value === undefined || value === null) return '';
+  return String(value).trim();
+}
+
 export function normalizeRequest(body = {}) {
   if (!isPlainObject(body)) {
     throw createError('INVALID_REQUEST', 'Request body must be a JSON object.');
@@ -70,33 +81,33 @@ export function normalizeRequest(body = {}) {
   const normalized = {
     templateId,
     searchContext: {
-      projectName: String(searchContext.projectName || 'Talent Intelligence Task'),
-      roleTitle: String(searchContext.roleTitle || 'Unknown Role'),
-      clientName: searchContext.clientName ? String(searchContext.clientName) : undefined,
-      searchType: String(searchContext.searchType || 'executive_search'),
-      mandateType: searchContext.mandateType ? String(searchContext.mandateType) : undefined,
-      companyContext: String(searchContext.companyContext || 'Employer context not specified'),
-      companyStage: searchContext.companyStage ? String(searchContext.companyStage) : undefined,
-      businessModel: searchContext.businessModel ? String(searchContext.businessModel) : undefined,
-      teamStage: searchContext.teamStage ? String(searchContext.teamStage) : undefined,
-      hiringBrief: String(searchContext.hiringBrief || 'Provide recruiting analysis and recommendations.'),
-      objective: String(searchContext.objective || 'Produce a structured talent intelligence deliverable.'),
-      targetIndustry: String(searchContext.targetIndustry || 'TBD'),
+      projectName: toOptionalString(searchContext.projectName, 'Talent Intelligence Task'),
+      roleTitle: toRequiredString(searchContext.roleTitle),
+      clientName: toOptionalString(searchContext.clientName),
+      searchType: toOptionalString(searchContext.searchType, 'executive_search'),
+      mandateType: toOptionalString(searchContext.mandateType),
+      companyContext: toOptionalString(searchContext.companyContext, 'Employer context not specified'),
+      companyStage: toOptionalString(searchContext.companyStage),
+      businessModel: toOptionalString(searchContext.businessModel),
+      teamStage: toOptionalString(searchContext.teamStage),
+      hiringBrief: toOptionalString(searchContext.hiringBrief, 'Provide recruiting analysis and recommendations.'),
+      objective: toOptionalString(searchContext.objective, 'Produce a structured talent intelligence deliverable.'),
+      targetIndustry: toOptionalString(searchContext.targetIndustry, 'TBD'),
       targetCompanies: toStringArray(searchContext.targetCompanies),
-      location: String(searchContext.location || 'China'),
+      location: toOptionalString(searchContext.location, 'China'),
       targetGeographies: toStringArray(searchContext.targetGeographies),
-      salaryRange: String(searchContext.salaryRange || 'TBD'),
-      compensationMix: searchContext.compensationMix ? String(searchContext.compensationMix) : undefined,
-      equity: searchContext.equity ? String(searchContext.equity) : undefined,
-      reportingLine: searchContext.reportingLine ? String(searchContext.reportingLine) : undefined,
-      level: searchContext.level ? String(searchContext.level) : undefined,
-      headcount: searchContext.headcount ? String(searchContext.headcount) : undefined,
-      urgency: searchContext.urgency ? String(searchContext.urgency) : undefined,
-      searchReason: searchContext.searchReason ? String(searchContext.searchReason) : undefined,
-      successProfile: searchContext.successProfile ? String(searchContext.successProfile) : undefined,
-      successMetrics: searchContext.successMetrics ? String(searchContext.successMetrics) : undefined,
-      marketSignals: searchContext.marketSignals ? String(searchContext.marketSignals) : undefined,
-      stakeholderBrief: searchContext.stakeholderBrief ? String(searchContext.stakeholderBrief) : undefined,
+      salaryRange: toOptionalString(searchContext.salaryRange, 'TBD'),
+      compensationMix: toOptionalString(searchContext.compensationMix),
+      equity: toOptionalString(searchContext.equity),
+      reportingLine: toOptionalString(searchContext.reportingLine),
+      level: toOptionalString(searchContext.level),
+      headcount: toOptionalString(searchContext.headcount),
+      urgency: toOptionalString(searchContext.urgency),
+      searchReason: toOptionalString(searchContext.searchReason),
+      successProfile: toOptionalString(searchContext.successProfile),
+      successMetrics: toOptionalString(searchContext.successMetrics),
+      marketSignals: toOptionalString(searchContext.marketSignals),
+      stakeholderBrief: toOptionalString(searchContext.stakeholderBrief),
       mustHaveSkills: toStringArray(searchContext.mustHaveSkills),
       niceToHaveSkills: toStringArray(searchContext.niceToHaveSkills),
       dealBreakers: toStringArray(searchContext.dealBreakers),
@@ -104,17 +115,20 @@ export function normalizeRequest(body = {}) {
       targetBackgrounds: toStringArray(searchContext.targetBackgrounds),
       offLimits: toStringArray(searchContext.offLimits),
       sourceChannels: toStringArray(searchContext.sourceChannels),
-      interviewProcess: searchContext.interviewProcess ? String(searchContext.interviewProcess) : undefined,
+      interviewProcess: toOptionalString(searchContext.interviewProcess),
       interviewPanel: toStringArray(searchContext.interviewPanel),
-      processConstraints: searchContext.processConstraints ? String(searchContext.processConstraints) : undefined,
-      candidateName: searchContext.candidateName ? String(searchContext.candidateName) : undefined,
-      candidateSummary: searchContext.candidateSummary ? String(searchContext.candidateSummary) : undefined,
+      processConstraints: toOptionalString(searchContext.processConstraints),
+      candidateName: toOptionalString(searchContext.candidateName),
+      candidateSummary: toOptionalString(searchContext.candidateSummary),
       candidateHighlights: toStringArray(searchContext.candidateHighlights),
       candidateConcerns: toStringArray(searchContext.candidateConcerns),
-      interviewerNotes: searchContext.interviewerNotes ? String(searchContext.interviewerNotes) : undefined
+      interviewerNotes: toOptionalString(searchContext.interviewerNotes)
     },
     runtime: {
-      mode: String(runtime.mode || 'openai'),
+      mode: String(runtime.mode || runtime.executionMode || 'openai'),
+      executionMode: runtime.executionMode ? String(runtime.executionMode) : undefined,
+      runner: runtime.runner ? String(runtime.runner) : runtime.runnerId ? String(runtime.runnerId) : undefined,
+      runnerId: runtime.runnerId ? String(runtime.runnerId) : runtime.runner ? String(runtime.runner) : undefined,
       baseUrl: runtime.baseUrl ? String(runtime.baseUrl) : undefined,
       apiKey: runtime.apiKey ? String(runtime.apiKey) : undefined,
       model: String(runtime.model || process.env.TALENT_INTEL_DEFAULT_MODEL || 'bailian/qwen3.5-plus'),
@@ -124,8 +138,8 @@ export function normalizeRequest(body = {}) {
     }
   };
 
-  if (!normalized.searchContext.roleTitle.trim()) {
-    throw createError('MISSING_ROLE_TITLE', 'searchContext.roleTitle is required.');
+  if (!normalized.searchContext.roleTitle) {
+    throw createError('MISSING_ROLE_TITLE', 'searchContext.roleTitle is required.', { field: 'searchContext.roleTitle' });
   }
 
   return normalized;

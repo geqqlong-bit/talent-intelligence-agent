@@ -36,9 +36,12 @@ projects/talent-intelligence-agent/
 ├── examples/
 │   ├── example.env
 │   ├── executive-search-intake.json
+│   ├── health-response.json
+│   ├── schema-response.json
 │   ├── run-request.json
 │   ├── run-response.json
 │   ├── error-invalid-template.json
+│   ├── error-missing-role-title.json
 │   └── error-invalid-json.json
 ├── .github/
 │   └── workflows/
@@ -172,6 +175,7 @@ node skill/talent-intelligence-agent/scripts/talent-intelligence-cli.mjs \
 ```
 
 CLI flags override values from `--intakeFile`, so the file works well as a reusable base brief.
+A non-empty `roleTitle` is required either from CLI flags or from the intake JSON.
 
 ## Template guide
 
@@ -205,9 +209,12 @@ Service docs:
 - `server/API.md`
 
 Canonical HTTP example payloads:
+- `examples/health-response.json`
+- `examples/schema-response.json`
 - `examples/run-request.json`
 - `examples/run-response.json`
 - `examples/error-invalid-template.json`
+- `examples/error-missing-role-title.json`
 - `examples/error-invalid-json.json`
 
 The current implementation keeps a stable HTTP contract while using a local template renderer under the hood. Later you can replace `server/app/service.mjs` with a real workflow engine without breaking the CLI contract.
@@ -220,15 +227,21 @@ Current contract highlights:
 - Schema endpoint: `GET /api/talent-intelligence/schema`
 - Run endpoint: `POST /api/talent-intelligence/run`
 - Supported templates: `jd_diagnosis_cn`, `sourcing_strategy_cn`, `candidate_assessment_cn`, `search_plan_cn`
-- Error responses currently include a top-level `status` field in the JSON body
+- Health and schema responses now expose the local-only execution catalog, including runner availability and supported request modes
+- Success responses include `run.runnerId`, `engine.runnerId`, `metadata.runnerId`, and orchestration selection details
+- Error responses use `metadata.status` instead of a top-level `status` field
 - The server accepts either nested `searchContext` or a flat top-level brief, then normalizes to the same internal shape
+- `searchContext.roleTitle` is required after trimming; missing or whitespace-only values return `MISSING_ROLE_TITLE`
 
 Reference docs and canonical examples:
 
 - `server/API.md`
+- `examples/health-response.json`
+- `examples/schema-response.json`
 - `examples/run-request.json`
 - `examples/run-response.json`
 - `examples/error-invalid-template.json`
+- `examples/error-missing-role-title.json`
 - `examples/error-invalid-json.json`
 
 The bundled CLI currently includes a fallback markdown generator so the wiring can be tested before the real backend is ready.

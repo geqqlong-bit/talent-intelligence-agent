@@ -1,0 +1,155 @@
+{
+  "ok": true,
+  "service": "talent-intelligence-service",
+  "version": "v0.3",
+  "templates": [
+    "jd_diagnosis_cn",
+    "sourcing_strategy_cn",
+    "candidate_assessment_cn",
+    "search_plan_cn"
+  ],
+  "endpoints": {
+    "run": "POST /api/talent-intelligence/run",
+    "health": "GET /health",
+    "schema": "GET /api/talent-intelligence/schema"
+  },
+  "execution": {
+    "defaultRequestMode": "openai",
+    "defaultRunnerId": "local-template",
+    "supportedRequestModes": [
+      "local",
+      "template-renderer",
+      "openai",
+      "llm",
+      "remote"
+    ],
+    "runners": [
+      {
+        "id": "local-template",
+        "label": "Local Template Runner",
+        "kind": "local-template-engine",
+        "provider": "local",
+        "adapter": "template-renderer",
+        "executionMode": "local-template",
+        "publicMode": "template-renderer",
+        "available": true,
+        "capabilities": [
+          "template-render"
+        ],
+        "workflowId": "talent-intelligence.local-template-render",
+        "boundary": "local-only",
+        "selectionReason": "Local template runner is the executable backend bundled with this local-only service."
+      },
+      {
+        "id": "openai-chat",
+        "label": "OpenAI-Compatible Remote Runner",
+        "kind": "remote-llm-runner",
+        "provider": "openai-compatible",
+        "adapter": "chat-completions",
+        "executionMode": "remote-llm",
+        "publicMode": "llm",
+        "available": false,
+        "capabilities": [
+          "llm-generate"
+        ],
+        "workflowId": "talent-intelligence.remote-llm-run",
+        "boundary": "local-only",
+        "selectionReason": "Declared as a future backend only; this build stays local-only and will not call remote providers."
+      }
+    ]
+  },
+  "responseShape": {
+    "ok": true,
+    "requestId": "req_xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+    "mode": "template-renderer",
+    "templateId": "sourcing_strategy_cn",
+    "run": {
+      "id": "run_xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+      "status": "completed",
+      "templateId": "sourcing_strategy_cn",
+      "mode": "template-renderer",
+      "runnerId": "local-template"
+    },
+    "engine": {
+      "kind": "local-template-engine",
+      "version": "v0.3",
+      "provider": "local",
+      "adapter": "template-renderer",
+      "runnerId": "local-template",
+      "executionMode": "local-template",
+      "requestedMode": "openai",
+      "requestedRunner": "openai-chat",
+      "resolvedMode": "template-renderer",
+      "requestedModel": "bailian/qwen3.5-plus",
+      "implementationStatus": "active",
+      "resolutionSource": "requested-runner",
+      "fallbackReason": "Requested runner openai-chat is declared but not executable in this build; using local-template instead."
+    },
+    "summary": {
+      "projectName": "string",
+      "roleTitle": "string",
+      "templateId": "string"
+    },
+    "reportMarkdown": "string",
+    "metadata": {
+      "requestId": "req_xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+      "runId": "run_xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+      "apiVersion": "v0.3",
+      "startedAt": "2026-03-15T00:00:00.000Z",
+      "completedAt": "2026-03-15T00:00:00.000Z",
+      "durationMs": 1,
+      "workflowId": "talent-intelligence.local-template-render",
+      "workflowVersion": "v0.3",
+      "runnerId": "local-template",
+      "executionMode": "local-template",
+      "executionStatus": "completed",
+      "requestedMode": "openai",
+      "requestedRunner": "openai-chat",
+      "resolvedMode": "template-renderer"
+    },
+    "orchestration": {
+      "requestId": "req_xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+      "runId": "run_xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+      "workflow": {
+        "id": "talent-intelligence.local-template-render",
+        "version": "v0.3",
+        "executionMode": "local-template",
+        "futureHook": "workflowRunner.execute"
+      },
+      "execution": {
+        "status": "completed",
+        "stepCount": 1,
+        "runnerId": "local-template",
+        "renderer": "renderTemplate"
+      }
+    }
+  },
+  "errorShape": {
+    "ok": false,
+    "requestId": "req_xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+    "error": {
+      "code": "INVALID_TEMPLATE",
+      "message": "Unsupported templateId: bad_template",
+      "details": {
+        "allowed": [
+          "jd_diagnosis_cn",
+          "sourcing_strategy_cn",
+          "candidate_assessment_cn",
+          "search_plan_cn"
+        ]
+      }
+    },
+    "metadata": {
+      "requestId": "req_xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+      "apiVersion": "v0.3",
+      "status": 400,
+      "timestamp": "2026-03-15T00:00:00.000Z"
+    }
+  },
+  "requestId": "req_xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+  "metadata": {
+    "requestId": "req_xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+    "apiVersion": "v0.3",
+    "timestamp": "2026-03-15T00:00:00.000Z"
+  }
+}

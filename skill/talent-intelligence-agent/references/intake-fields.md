@@ -4,7 +4,7 @@ Use this reference when converting a fuzzy request into a structured brief.
 
 ## 1) Core search fields
 - `projectName`: short task name, usually client + role + goal
-- `roleTitle`: target role title
+- `roleTitle`: target role title, required and must be non-empty after trimming
 - `clientName`: hiring company or external client name
 - `searchType`: `executive_search`, `talent_map`, `replacement`, `succession`, or similar
 - `mandateType`: `retained`, `contingent`, or `in_house`

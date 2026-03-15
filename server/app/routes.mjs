@@ -8,6 +8,7 @@ import {
   TEMPLATE_IDS,
   withRequestMeta
 } from './schema.mjs';
+import { DEFAULT_LOCAL_RUNNER_ID, WORKFLOW_ID, getExecutionCatalog, resolveExecutionTarget } from './execution.mjs';
 import { runTalentIntelligence } from './service.mjs';
 
 function getRequestId(req) {
@@ -32,8 +33,20 @@ function normalizeError(error, requestId) {
   );
 }
 
+function buildExecutionContract() {
+  const catalog = getExecutionCatalog();
+  return {
+    defaultRequestMode: 'openai',
+    defaultRunnerId: DEFAULT_LOCAL_RUNNER_ID,
+    supportedRequestModes: catalog.supportedRequestModes,
+    supportedRunnerIds: catalog.supportedRunnerIds,
+    runners: catalog.runners
+  };
+}
+
 export async function routeRequest(req, res) {
   const requestId = getRequestId(req);
+  const executionCatalog = buildExecutionContract();
 
   if (req.method === 'GET' && req.url === '/health') {
     return json(res, 200, withRequestMeta({
@@ -42,8 +55,9 @@ export async function routeRequest(req, res) {
       version: API_VERSION,
       status: 'healthy',
       execution: {
-        mode: 'local-template',
-        workflowId: 'talent-intelligence.local-template-render'
+        mode: DEFAULT_LOCAL_RUNNER_ID,
+        workflowId: WORKFLOW_ID,
+        ...executionCatalog
       }
     }, requestId, { timestamp: new Date().toISOString() }), requestId);
   }
@@ -59,6 +73,7 @@ export async function routeRequest(req, res) {
         health: 'GET /health',
         schema: 'GET /api/talent-intelligence/schema'
       },
+      execution: executionCatalog,
       responseShape: {
         ok: true,
         requestId: 'req_xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx',
@@ -68,16 +83,23 @@ export async function routeRequest(req, res) {
           id: 'run_xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx',
           status: 'completed',
           templateId: 'sourcing_strategy_cn',
-          mode: 'template-renderer'
+          mode: 'template-renderer',
+          runnerId: 'local-template'
         },
         engine: {
           kind: 'local-template-engine',
           version: API_VERSION,
           provider: 'local',
           adapter: 'template-renderer',
+          runnerId: 'local-template',
           executionMode: 'local-template',
           requestedMode: 'openai',
-          requestedModel: 'bailian/qwen3.5-plus'
+          requestedRunner: 'openai-chat',
+          resolvedMode: 'template-renderer',
+          requestedModel: 'bailian/qwen3.5-plus',
+          implementationStatus: 'active',
+          resolutionSource: 'runner',
+          fallbackReason: resolveExecutionTarget({ mode: 'openai', runner: 'openai-chat' }).fallbackReason
         },
         summary: { projectName: 'string', roleTitle: 'string', templateId: 'string' },
         reportMarkdown: 'string',
@@ -88,24 +110,39 @@ export async function routeRequest(req, res) {
           startedAt: 'ISO date',
           completedAt: 'ISO date',
           durationMs: 12,
-          workflowId: 'talent-intelligence.local-template-render',
+          workflowId: WORKFLOW_ID,
           workflowVersion: API_VERSION,
+          runnerId: 'local-template',
           executionMode: 'local-template',
-          executionStatus: 'completed'
+          executionStatus: 'completed',
+          requestedMode: 'openai',
+          requestedRunner: 'openai-chat',
+          resolvedMode: 'template-renderer'
         },
         orchestration: {
           requestId: 'req_xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx',
           runId: 'run_xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx',
           workflow: {
-            id: 'talent-intelligence.local-template-render',
+            id: WORKFLOW_ID,
             version: API_VERSION,
             executionMode: 'local-template',
+            runnerId: 'local-template',
             futureHook: 'workflowRunner.execute'
           },
           execution: {
             status: 'completed',
             stepCount: 1,
+            runnerId: 'local-template',
             renderer: 'renderTemplate'
+          },
+          selection: {
+            requestedMode: 'openai',
+            requestedRunner: 'openai-chat',
+            resolvedRunnerId: 'local-template',
+            resolvedMode: 'template-renderer',
+            resolutionSource: 'runner',
+            fallbackApplied: true,
+            fallbackReason: resolveExecutionTarget({ mode: 'openai', runner: 'openai-chat' }).fallbackReason
           }
         }
       },
