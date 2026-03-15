@@ -76,6 +76,17 @@ flowchart LR
 
 ## 快速开始
 
+### 0）先跑本地 demo
+
+如果你想先验证整条链路，而不是马上接真实后端：
+
+```bash
+bash demo/run-demo.sh
+```
+
+这会启动 mock backend，跑三组示例任务，并把 markdown 报告写入 `state/`。
+
+
 ### 1）配置运行时环境变量
 
 ```bash

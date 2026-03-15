@@ -74,6 +74,17 @@ flowchart LR
 
 ## Quick start
 
+### 0) Run the local demo
+
+If you want to validate the end-to-end wiring before building a real backend:
+
+```bash
+bash demo/run-demo.sh
+```
+
+This starts the mock backend, runs three example workflows, and writes markdown reports into `state/`.
+
+
 ### 1) Configure runtime endpoints
 
 ```bash
