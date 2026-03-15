@@ -187,6 +187,20 @@ After `bash demo/run-demo.sh`, you should see:
 
 The last two files validate the broader executive-search intake flow and `--intakeFile` support.
 
+## Local backend service
+
+Start the local service skeleton:
+
+```bash
+node server/index.mjs
+```
+
+Service docs:
+- `server/README.md`
+- `server/API.md`
+
+The current implementation keeps a stable HTTP contract while using a local template renderer under the hood. Later you can replace `server/app/service.mjs` with a real workflow engine without breaking the CLI contract.
+
 ## Notes for backend implementers
 
 Recommended API shape:

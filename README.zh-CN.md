@@ -189,6 +189,20 @@ CLI 显式传入的参数会覆盖 `--intakeFile` 中的同名字段，所以很
 
 最后两个文件分别验证更完整的 executive-search intake 流程，以及 `--intakeFile` 的本地可用性。
 
+## 本地 backend service
+
+启动本地服务骨架：
+
+```bash
+node server/index.mjs
+```
+
+服务文档：
+- `server/README.md`
+- `server/API.md`
+
+当前实现已经把 HTTP 接口层、schema 层、service 层、template 层拆开了。后面你可以直接替换 `server/app/service.mjs` 为真实 workflow engine，而不用推翻 CLI 契约。
+
 ## 给后端实现者的建议
 
 推荐接口形态：

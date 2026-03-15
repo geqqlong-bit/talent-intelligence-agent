@@ -6,7 +6,7 @@ cd "$ROOT_DIR"
 
 export TALENT_INTEL_BACKEND_URL="${TALENT_INTEL_BACKEND_URL:-http://127.0.0.1:8788}"
 
-node server/mock-backend.mjs > /tmp/talent-intelligence-mock.log 2>&1 &
+node server/index.mjs > /tmp/talent-intelligence-mock.log 2>&1 &
 SERVER_PID=$!
 trap 'kill $SERVER_PID 2>/dev/null || true' EXIT
 
