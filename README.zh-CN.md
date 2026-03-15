@@ -36,7 +36,12 @@ projects/talent-intelligence-agent/
 ├── .gitignore
 ├── install.sh
 ├── examples/
-│   └── example.env
+│   ├── example.env
+│   ├── executive-search-intake.json
+│   ├── run-request.json
+│   ├── run-response.json
+│   ├── error-invalid-template.json
+│   └── error-invalid-json.json
 ├── .github/
 │   └── workflows/
 │       └── package-skill.yml
@@ -84,7 +89,7 @@ flowchart LR
 bash demo/run-demo.sh
 ```
 
-这会启动 mock backend，跑四组示例任务，并把 markdown 报告写入 `state/`。
+这会启动本地 backend service，跑五组示例任务，并把 markdown 报告写入 `state/`。
 
 
 ### 1）配置运行时环境变量
@@ -201,35 +206,32 @@ node server/index.mjs
 - `server/README.md`
 - `server/API.md`
 
+标准 HTTP 示例文件：
+- `examples/run-request.json`
+- `examples/run-response.json`
+- `examples/error-invalid-template.json`
+- `examples/error-invalid-json.json`
+
 当前实现已经把 HTTP 接口层、schema 层、service 层、template 层拆开了。后面你可以直接替换 `server/app/service.mjs` 为真实 workflow engine，而不用推翻 CLI 契约。
 
-## 给后端实现者的建议
+## 给后端实现者的说明
 
-推荐接口形态：
+当前接口契约重点：
 
-```json
-POST /api/talent-intelligence/run
-{
-  "searchContext": {
-    "projectName": "AI 产品总监寻访",
-    "roleTitle": "AI 产品总监",
-    "companyContext": "一家 B 轮 AI SaaS 公司",
-    "hiringBrief": "明确目标画像并输出寻访策略",
-    "objective": "产出搜寻策略与目标公司地图",
-    "targetIndustry": "企业软件, AI SaaS",
-    "targetCompanies": ["OpenAI", "ByteDance"],
-    "location": "上海",
-    "salaryRange": "月薪 8-12 万"
-  },
-  "templateId": "sourcing_strategy_cn",
-  "runtime": {
-    "mode": "openai",
-    "baseUrl": "http://127.0.0.1:8999/v1",
-    "apiKey": "test-key",
-    "model": "bailian/qwen3.5-plus"
-  }
-}
-```
+- 健康检查：`GET /health`
+- schema：`GET /api/talent-intelligence/schema`
+- 执行入口：`POST /api/talent-intelligence/run`
+- 支持模板：`jd_diagnosis_cn`、`sourcing_strategy_cn`、`candidate_assessment_cn`、`search_plan_cn`
+- 错误响应目前会在 JSON 顶层附带 `status` 字段
+- 服务端既接受嵌套的 `searchContext`，也接受平铺 top-level brief，随后统一归一化
+
+参考文档和标准示例：
+
+- `server/API.md`
+- `examples/run-request.json`
+- `examples/run-response.json`
+- `examples/error-invalid-template.json`
+- `examples/error-invalid-json.json`
 
 当前自带的 CLI 已经内置 fallback markdown 生成逻辑，所以即使真实后端还没接好，也可以先验证链路。
 

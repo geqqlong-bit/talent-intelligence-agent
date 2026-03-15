@@ -1,14 +1,24 @@
 import http from 'http';
+import { createError, createRequestId, json, withRequestMeta } from './app/schema.mjs';
 import { routeRequest } from './app/routes.mjs';
 
 const port = Number(process.env.PORT || process.env.TALENT_INTEL_PORT || 8788);
 
 const server = http.createServer(async (req, res) => {
+  const requestId = createRequestId(req?.headers?.['x-request-id']);
+
   try {
     await routeRequest(req, res);
   } catch (error) {
-    res.writeHead(500, { 'Content-Type': 'application/json; charset=utf-8' });
-    res.end(JSON.stringify({ ok: false, error: { code: 'UNHANDLED_SERVER_ERROR', message: error.message } }, null, 2));
+    const payload = withRequestMeta(
+      createError('UNHANDLED_SERVER_ERROR', error?.message || 'Unknown error', undefined, 500),
+      requestId,
+      {
+        status: 500,
+        timestamp: new Date().toISOString()
+      }
+    );
+    json(res, 500, payload, requestId);
   }
 });
 

@@ -1,3 +1,7 @@
+import crypto from 'crypto';
+
+export const API_VERSION = 'v0.2';
+
 export const TEMPLATE_IDS = [
   'jd_diagnosis_cn',
   'sourcing_strategy_cn',
@@ -5,13 +9,38 @@ export const TEMPLATE_IDS = [
   'search_plan_cn'
 ];
 
-export function json(res, status, payload) {
-  res.writeHead(status, { 'Content-Type': 'application/json; charset=utf-8' });
+export function createRequestId(seed = undefined) {
+  const raw = seed ? String(seed).trim() : '';
+  return raw || `req_${crypto.randomUUID()}`;
+}
+
+export function json(res, status, payload, requestId = undefined) {
+  const headers = { 'Content-Type': 'application/json; charset=utf-8' };
+  if (requestId) headers['X-Request-Id'] = requestId;
+  res.writeHead(status, headers);
   res.end(JSON.stringify(payload, null, 2));
 }
 
-export function createError(code, message, details = undefined, status = 400) {
-  return { ok: false, error: { code, message, details }, status };
+export function createError(code, message, details = undefined, status = 400, extras = {}) {
+  return {
+    ok: false,
+    error: { code, message, details },
+    status,
+    ...extras
+  };
+}
+
+export function withRequestMeta(payload, requestId, extras = {}) {
+  return {
+    ...payload,
+    requestId,
+    metadata: {
+      requestId,
+      apiVersion: API_VERSION,
+      ...payload.metadata,
+      ...extras
+    }
+  };
 }
 
 function isPlainObject(value) {

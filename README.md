@@ -34,7 +34,12 @@ projects/talent-intelligence-agent/
 ├── .gitignore
 ├── install.sh
 ├── examples/
-│   └── example.env
+│   ├── example.env
+│   ├── executive-search-intake.json
+│   ├── run-request.json
+│   ├── run-response.json
+│   ├── error-invalid-template.json
+│   └── error-invalid-json.json
 ├── .github/
 │   └── workflows/
 │       └── package-skill.yml
@@ -82,7 +87,7 @@ If you want to validate the end-to-end wiring before building a real backend:
 bash demo/run-demo.sh
 ```
 
-This starts the mock backend, runs four example workflows, and writes markdown reports into `state/`.
+This starts the local backend service, runs five example workflows, and writes markdown reports into `state/`.
 
 
 ### 1) Configure runtime endpoints
@@ -199,35 +204,32 @@ Service docs:
 - `server/README.md`
 - `server/API.md`
 
+Canonical HTTP example payloads:
+- `examples/run-request.json`
+- `examples/run-response.json`
+- `examples/error-invalid-template.json`
+- `examples/error-invalid-json.json`
+
 The current implementation keeps a stable HTTP contract while using a local template renderer under the hood. Later you can replace `server/app/service.mjs` with a real workflow engine without breaking the CLI contract.
 
 ## Notes for backend implementers
 
-Recommended API shape:
+Current contract highlights:
 
-```json
-POST /api/talent-intelligence/run
-{
-  "searchContext": {
-    "projectName": "AI Product Director Search",
-    "roleTitle": "AI Product Director",
-    "companyContext": "Series B AI SaaS company",
-    "hiringBrief": "Clarify target profile and produce a sourcing strategy",
-    "objective": "Output search strategy and target-company map",
-    "targetIndustry": "Enterprise software, AI SaaS",
-    "targetCompanies": ["OpenAI", "ByteDance"],
-    "location": "Shanghai",
-    "salaryRange": "80-120K RMB/month"
-  },
-  "templateId": "sourcing_strategy_cn",
-  "runtime": {
-    "mode": "openai",
-    "baseUrl": "http://127.0.0.1:8999/v1",
-    "apiKey": "test-key",
-    "model": "bailian/qwen3.5-plus"
-  }
-}
-```
+- Health endpoint: `GET /health`
+- Schema endpoint: `GET /api/talent-intelligence/schema`
+- Run endpoint: `POST /api/talent-intelligence/run`
+- Supported templates: `jd_diagnosis_cn`, `sourcing_strategy_cn`, `candidate_assessment_cn`, `search_plan_cn`
+- Error responses currently include a top-level `status` field in the JSON body
+- The server accepts either nested `searchContext` or a flat top-level brief, then normalizes to the same internal shape
+
+Reference docs and canonical examples:
+
+- `server/API.md`
+- `examples/run-request.json`
+- `examples/run-response.json`
+- `examples/error-invalid-template.json`
+- `examples/error-invalid-json.json`
 
 The bundled CLI currently includes a fallback markdown generator so the wiring can be tested before the real backend is ready.
 

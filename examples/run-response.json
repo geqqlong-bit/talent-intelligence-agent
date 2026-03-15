@@ -1,0 +1,54 @@
+{
+  "ok": true,
+  "requestId": "req_xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+  "mode": "template-renderer",
+  "templateId": "sourcing_strategy_cn",
+  "run": {
+    "id": "run_xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+    "status": "completed",
+    "templateId": "sourcing_strategy_cn",
+    "mode": "template-renderer"
+  },
+  "engine": {
+    "kind": "local-template-engine",
+    "version": "v0.2",
+    "provider": "local",
+    "adapter": "template-renderer",
+    "executionMode": "local-template",
+    "requestedMode": "openai",
+    "requestedModel": "bailian/qwen3.5-plus"
+  },
+  "summary": {
+    "projectName": "Confidential Client - VP Product Search",
+    "roleTitle": "VP Product",
+    "templateId": "sourcing_strategy_cn"
+  },
+  "reportMarkdown": "# 人才寻访策略报告｜VP Product\n\n## 一页结论\n- ...",
+  "metadata": {
+    "requestId": "req_xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+    "runId": "run_xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+    "apiVersion": "v0.2",
+    "startedAt": "2026-03-15T11:07:47.612Z",
+    "completedAt": "2026-03-15T11:07:47.613Z",
+    "durationMs": 1,
+    "workflowId": "talent-intelligence.local-template-render",
+    "workflowVersion": "v0.2",
+    "executionMode": "local-template",
+    "executionStatus": "completed"
+  },
+  "orchestration": {
+    "requestId": "req_xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+    "runId": "run_xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+    "workflow": {
+      "id": "talent-intelligence.local-template-render",
+      "version": "v0.2",
+      "executionMode": "local-template",
+      "futureHook": "workflowRunner.execute"
+    },
+    "execution": {
+      "status": "completed",
+      "stepCount": 1,
+      "renderer": "renderTemplate"
+    }
+  }
+}

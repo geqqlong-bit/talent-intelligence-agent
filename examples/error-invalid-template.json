@@ -1,0 +1,22 @@
+{
+  "ok": false,
+  "error": {
+    "code": "INVALID_TEMPLATE",
+    "message": "Unsupported templateId: bad_template",
+    "details": {
+      "allowed": [
+        "jd_diagnosis_cn",
+        "sourcing_strategy_cn",
+        "candidate_assessment_cn",
+        "search_plan_cn"
+      ]
+    }
+  },
+  "requestId": "req_xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+  "metadata": {
+    "requestId": "req_xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+    "apiVersion": "v0.2",
+    "status": 400,
+    "timestamp": "2026-03-15T11:07:47.572Z"
+  }
+}
