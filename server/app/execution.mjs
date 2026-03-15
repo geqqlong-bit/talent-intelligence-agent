@@ -142,6 +142,22 @@ function buildInvalidModeError(requestedMode) {
   );
 }
 
+function selectionFallbackKindFor(remote) {
+  if (!remote) return 'runner-unavailable';
+  if (remote.readiness === 'misconfigured') return 'remote-invalid-config';
+  if (remote.readiness === 'disabled' || remote.readiness === 'configured-but-disabled') return 'remote-disabled';
+  if (remote.readiness === 'standby') return 'remote-not-selected';
+  return 'runner-unavailable';
+}
+
+function remoteSelectionErrorCode(remote) {
+  if (!remote?.required) return 'REMOTE_RUNNER_REQUIRED_BUT_UNAVAILABLE';
+  if (remote.readiness === 'misconfigured') return 'REMOTE_RUNNER_REQUIRED_BUT_INVALID_CONFIG';
+  if (remote.readiness === 'disabled' || remote.readiness === 'configured-but-disabled') return 'REMOTE_RUNNER_REQUIRED_BUT_DISABLED';
+  if (remote.readiness === 'standby') return 'REMOTE_RUNNER_REQUIRED_BUT_NOT_SELECTED';
+  return 'REMOTE_RUNNER_REQUIRED_BUT_UNAVAILABLE';
+}
+
 export function resolveExecutionTarget(runtime = {}) {
   const requestedMode = normalizeText(runtime.executionMode || runtime.mode || 'openai', 'openai');
   const requestedRunner = normalizeText(runtime.runner || runtime.runnerId);
@@ -162,7 +178,7 @@ export function resolveExecutionTarget(runtime = {}) {
 
   if (!preferredAvailability.available && preferredAvailability.remote?.required) {
     throw createError(
-      'REMOTE_RUNNER_REQUIRED_BUT_UNAVAILABLE',
+      remoteSelectionErrorCode(preferredAvailability.remote),
       preferredAvailability.selectionReason,
       {
         requestedMode,
@@ -178,7 +194,7 @@ export function resolveExecutionTarget(runtime = {}) {
   const fallbackApplied = preferred.id !== executable.id;
   const resolutionSource = runnerMatch ? 'runner' : modeMatch ? 'mode' : 'default';
   const strategy = runnerMatch ? 'requested-runner' : modeMatch ? 'requested-mode' : 'default-runner';
-  const fallbackKind = fallbackApplied ? 'runner-unavailable' : 'none';
+  const fallbackKind = fallbackApplied ? selectionFallbackKindFor(preferredAvailability.remote) : 'none';
 
   return {
     requestedMode,

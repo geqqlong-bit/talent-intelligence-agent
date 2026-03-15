@@ -32,6 +32,79 @@ function resolveHeaderValue(runtimeValue, envValue) {
   return envText || undefined;
 }
 
+function createRemoteConfigError({ code, message, remote, status = 503, details = undefined }) {
+  const error = new Error(message);
+  error.code = code;
+  error.status = status;
+  error.details = details;
+  error.remote = remote;
+  return error;
+}
+
+function remoteConfigErrorFor(remote) {
+  if (remote.required && !remote.explicitRemoteRequest) {
+    return createRemoteConfigError({
+      code: 'REMOTE_RUNNER_REQUIRED_BUT_NOT_SELECTED',
+      message: 'Remote execution is required, but this request did not select a remote runner.',
+      remote,
+      status: 400,
+      details: {
+        readiness: remote.readiness
+      }
+    });
+  }
+
+  if (remote.readiness === 'misconfigured') {
+    return createRemoteConfigError({
+      code: remote.required ? 'REMOTE_RUNNER_REQUIRED_BUT_INVALID_CONFIG' : 'REMOTE_RUNNER_INVALID_CONFIG',
+      message: remote.reason,
+      remote,
+      status: remote.required ? 503 : 400,
+      details: {
+        readiness: remote.readiness,
+        missing: {
+          baseUrl: !remote.request.baseUrl,
+          model: !remote.request.model
+        }
+      }
+    });
+  }
+
+  if (remote.readiness === 'disabled' || remote.readiness === 'configured-but-disabled') {
+    return createRemoteConfigError({
+      code: remote.required ? 'REMOTE_RUNNER_REQUIRED_BUT_DISABLED' : 'REMOTE_RUNNER_DISABLED',
+      message: remote.reason,
+      remote,
+      status: remote.required ? 503 : 400,
+      details: {
+        readiness: remote.readiness
+      }
+    });
+  }
+
+  if (remote.readiness === 'standby') {
+    return createRemoteConfigError({
+      code: remote.required ? 'REMOTE_RUNNER_REQUIRED_BUT_NOT_SELECTED' : 'REMOTE_RUNNER_NOT_SELECTED',
+      message: remote.reason,
+      remote,
+      status: remote.required ? 503 : 400,
+      details: {
+        readiness: remote.readiness
+      }
+    });
+  }
+
+  return createRemoteConfigError({
+    code: remote.required ? 'REMOTE_RUNNER_REQUIRED_BUT_UNAVAILABLE' : 'REMOTE_RUNNER_NOT_CALLABLE',
+    message: remote.reason,
+    remote,
+    status: remote.required ? 503 : 400,
+    details: {
+      readiness: remote.readiness
+    }
+  });
+}
+
 function buildMessages(payload) {
   const ctx = payload.searchContext || {};
   const system = [
@@ -126,10 +199,7 @@ export async function callRemoteOpenAICompatible({ payload, runtime = {}, reques
   const remote = resolveRemoteOpenAIConfig(runtime);
 
   if (!remote.callable) {
-    const error = new Error(remote.reason);
-    error.code = remote.required ? 'REMOTE_RUNNER_REQUIRED_BUT_UNAVAILABLE' : 'REMOTE_RUNNER_NOT_CALLABLE';
-    error.remote = remote;
-    throw error;
+    throw remoteConfigErrorFor(remote);
   }
 
   const baseUrl = remote.request.baseUrl.replace(/\/+$/, '');
@@ -183,6 +253,7 @@ export async function callRemoteOpenAICompatible({ payload, runtime = {}, reques
     if (!normalizeText(content)) {
       const error = new Error('Remote OpenAI-compatible response did not include choices[0].message.content');
       error.code = 'REMOTE_RUNNER_BAD_RESPONSE';
+      error.status = 502;
       error.responseBody = summarize(parsed || rawText);
       error.remote = remote;
       throw error;
@@ -209,9 +280,17 @@ export async function callRemoteOpenAICompatible({ payload, runtime = {}, reques
     if (error?.name === 'AbortError') {
       const timeoutError = new Error(`Remote OpenAI-compatible request timed out after ${remote.request.timeoutMs}ms`);
       timeoutError.code = 'REMOTE_RUNNER_TIMEOUT';
+      timeoutError.status = 504;
       timeoutError.remote = remote;
       throw timeoutError;
     }
+
+    if (!error?.code && error instanceof Error) {
+      error.code = 'REMOTE_RUNNER_UNREACHABLE';
+      error.status = 503;
+      error.remote = remote;
+    }
+
     throw error;
   } finally {
     clearTimeout(timer);

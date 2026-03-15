@@ -8,6 +8,7 @@ This folder contains the local HTTP service skeleton that the CLI can call today
 server/
 ├── index.mjs              # HTTP server entry
 ├── mock-backend.mjs       # compatibility entry for existing demo scripts
+├── mock-openai-provider.mjs # local OpenAI-compatible mock for offline remote-runner tests
 ├── API.md                 # request / response contract
 └── app/
     ├── routes.mjs         # routing layer
@@ -68,10 +69,10 @@ curl -X POST http://127.0.0.1:8788/api/talent-intelligence/run \
   --data @examples/run-request.json
 ```
 
-What to expect from the live v0.5 contract:
+What to expect from the live v0.6 contract:
 
 - every response includes a `requestId`
-- `/health` and `/schema` expose the local-only execution catalog and supported request modes
+- `/health` and `/schema` expose the execution catalog and supported request modes
 - success responses include `run`, `engine`, `metadata`, `orchestration`, and `artifacts`, with `runnerId` on run/engine/metadata
 - each run is persisted locally under `state/runs/YYYY/MM/DD/<runId>/`
 - persisted success artifacts include `request.json`, `response.json`, `report.md`, and `events.log`
@@ -88,3 +89,18 @@ What to expect from the live v0.5 contract:
 - `templates.mjs` provides the current local rendering implementation
 
 The point of this split is simple: keep the HTTP contract stable while making the execution boundary real and swappable later.
+
+## Offline remote-runner harness
+
+To integration-test the `openai-chat` adapter without external internet:
+
+```bash
+bash demo/test-remote-harness.sh
+```
+
+That smoke test starts:
+- `server/mock-openai-provider.mjs`
+- `server/index.mjs` with `TALENT_INTEL_ENABLE_REMOTE_RUNNER=1`
+- a POST run using `examples/run-request-remote-mock.json`
+
+It then asserts that the backend stayed on runner `openai-chat`, remote execution succeeded, and no fallback to `local-template` occurred.

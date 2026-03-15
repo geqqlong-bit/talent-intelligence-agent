@@ -20,7 +20,8 @@ Talent Intelligence Agent is that layer.
 - **Dedicated recruiting skill** for OpenClaw
 - **Portable CLI wrapper** around a local recruiting workflow backend
 - **Workflow-runner execution contract** with `run`, `engine`, `metadata`, `orchestration`, and persisted `artifacts` sections
-- **Remote-adapter aware execution catalog**: callers may request `openai`, `llm`, or `remote`, and this local-only build transparently falls back to `local-template` when the requested runner is not executable
+- **Remote-integration aware execution catalog**: the backend publishes both `local-template` and `openai-chat`, and it can call the remote runner only when outbound calls are explicitly enabled and configured
+- **Tightened runtime/error contract**: invalid runner ids, invalid runtime modes, missing required role titles, invalid JSON, and remote-required-but-unavailable requests now resolve through explicit error codes
 - **Environment-variable based config** instead of machine-specific paths
 - **Two-layer persistence model**: every HTTP run writes `request.json`, `response.json`, `report.md`, and `events.log` under `state/runs/YYYY/MM/DD/run_*`, while the CLI may additionally write a caller-selected markdown copy with `--out`
 - **Packaged `.skill` artifact** for easy sharing
@@ -82,7 +83,8 @@ flowchart LR
 - OpenClaw
 - Node.js 18+
 - **Recruiting workflow backend** — running and reachable
-- Optional env vars for future remote adapters (`TALENT_INTEL_LLM_*`), even though the bundled backend stays local-only in this build
+- Optional backend remote-runner env vars (`TALENT_INTEL_REMOTE_*`, `TALENT_INTEL_ENABLE_REMOTE_RUNNER`) if you want the server to actually call an OpenAI-compatible endpoint
+- Optional CLI convenience env vars (`TALENT_INTEL_LLM_*`) for the bundled wrapper, which are forwarded into request runtime fields
 
 ## Quick start
 
@@ -101,9 +103,20 @@ This starts the local backend service, runs five example workflows through the l
 
 ```bash
 export TALENT_INTEL_BACKEND_URL="http://<your-host>:<your-port>"
+
+# CLI-side convenience vars used by talent-intelligence-cli.mjs
 export TALENT_INTEL_LLM_BASE_URL="http://<your-llm-proxy>:<port>/v1"
 export TALENT_INTEL_LLM_API_KEY="<your-api-key>"
 export TALENT_INTEL_DEFAULT_MODEL="bailian/qwen3.5-plus"
+
+# Server-side remote runner vars used by server/app/remote-openai.mjs
+export TALENT_INTEL_ENABLE_REMOTE_RUNNER="1"
+export TALENT_INTEL_REMOTE_BASE_URL="http://<your-llm-proxy>:<port>/v1"
+export TALENT_INTEL_REMOTE_API_KEY="<your-api-key>"
+# optional
+export TALENT_INTEL_REMOTE_PATH="/chat/completions"
+export TALENT_INTEL_REMOTE_ORG="<your-org>"
+export TALENT_INTEL_REMOTE_PROJECT="<your-project>"
 ```
 
 Optional tuning:
@@ -139,7 +152,7 @@ Ask for things like:
 Expected behavior:
 1. The skill converts the request into a structured brief.
 2. The CLI calls the backend run endpoint.
-3. The backend resolves the requested mode/runner through the execution catalog; non-executable remote runners currently fall back to `local-template`.
+3. The backend resolves the requested mode/runner through the execution catalog; if `openai-chat` is requested but outbound remote calls are not both enabled and configured, the request falls back to `local-template`.
 4. The backend returns `reportMarkdown`, workflow-runner metadata (`run`, `engine`, `metadata`, `orchestration`), and persisted run-artifact paths in `artifacts`.
 5. If `--out` is set, the CLI also writes a caller-chosen markdown file to `state/`.
 6. Chat returns an executive summary, key risks, and the file path.
@@ -223,7 +236,7 @@ Canonical HTTP example payloads:
 - `examples/error-missing-role-title.json`
 - `examples/error-invalid-json.json`
 
-The current implementation keeps a stable HTTP contract while using a local workflow runner with a template-render step under the hood. The HTTP service persists per-run artifacts under `state/runs/...` automatically, while the CLI can additionally write a caller-selected markdown file with `--out`. Later you can replace `server/app/service.mjs` with a real workflow engine without breaking the outer response envelope.
+The current implementation keeps a stable HTTP contract while using a local workflow runner with a template-render step under the hood. It also includes a real remote-runner harness for OpenAI-compatible chat completions in `server/app/remote-openai.mjs`, but outbound calls only happen when the remote runner is explicitly enabled and configured; otherwise requests that target `openai-chat` fall back to `local-template`. The HTTP service persists per-run artifacts under `state/runs/...` automatically, while the CLI can additionally write a caller-selected markdown file with `--out`.
 
 ## Notes for backend implementers
 
@@ -233,12 +246,14 @@ Current contract highlights:
 - Schema endpoint: `GET /api/talent-intelligence/schema`
 - Run endpoint: `POST /api/talent-intelligence/run`
 - Supported templates: `jd_diagnosis_cn`, `sourcing_strategy_cn`, `candidate_assessment_cn`, `search_plan_cn`
-- Health and schema responses expose the execution catalog, including default request mode, available runner ids, and declared future runners
+- Health and schema responses expose the execution catalog, including `defaultPublicMode`, executable runner ids, and planned runner ids
 - Success responses include workflow-runner metadata in `run`, `engine`, `metadata`, and `orchestration`, plus persisted file locations in `artifacts`
 - `reportMarkdown` is returned inline; the server also persists run artifacts automatically under `state/runs/...`, while CLI `--out` remains a separate caller-controlled write
 - Error responses use `metadata.status` instead of a top-level `status` field
 - The server accepts either nested `searchContext` or a flat top-level brief, then normalizes to the same internal shape
 - `searchContext.roleTitle` is required after trimming; missing or whitespace-only values return `MISSING_ROLE_TITLE`
+- Invalid runner aliases return `INVALID_RUNNER`; unsupported runtime modes return `INVALID_RUNTIME_MODE`
+- If `runtime.remoteRequired=true` and the remote runner is not callable, the server returns `REMOTE_RUNNER_REQUIRED_BUT_UNAVAILABLE` instead of silently falling back
 
 Reference docs and canonical examples:
 
@@ -251,7 +266,15 @@ Reference docs and canonical examples:
 - `examples/error-missing-role-title.json`
 - `examples/error-invalid-json.json`
 
-The bundled CLI currently includes a fallback markdown generator so the wiring can be tested before the real backend is ready, but the bundled HTTP backend itself does not call remote providers yet: requests for `openai`, `llm`, or `remote` resolve through fallback to `local-template` unless/until a remote runner becomes available.
+The bundled CLI still includes a fallback markdown generator for backend failures. The bundled HTTP backend can now exercise the remote adapter against a local mock OpenAI-compatible provider, so you can integration-test the remote path without external internet.
+
+Offline remote-harness smoke test:
+
+```bash
+bash demo/test-remote-harness.sh
+```
+
+That script starts `server/mock-openai-provider.mjs` on a local port, starts the backend with `TALENT_INTEL_ENABLE_REMOTE_RUNNER=1`, submits `examples/run-request-remote-mock.json`, and asserts that the response stayed on runner `openai-chat` without fallback.
 
 ## License
 

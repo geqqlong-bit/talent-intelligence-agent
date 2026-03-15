@@ -1,7 +1,7 @@
 {
   "ok": true,
   "service": "talent-intelligence-service",
-  "version": "v0.5",
+  "version": "v0.6",
   "templates": [
     "jd_diagnosis_cn",
     "sourcing_strategy_cn",
@@ -16,15 +16,19 @@
   "execution": {
     "defaultRequestMode": "openai",
     "defaultRunnerId": "local-template",
+    "defaultPublicMode": "template-renderer",
     "supportedRequestModes": [
-      "local",
-      "template-renderer",
-      "openai",
       "llm",
-      "remote"
+      "local",
+      "openai",
+      "remote",
+      "template-renderer"
     ],
     "supportedRunnerIds": [
       "local-template"
+    ],
+    "plannedRunnerIds": [
+      "openai-chat"
     ],
     "runners": [
       {
@@ -36,6 +40,7 @@
         "executionMode": "local-template",
         "publicMode": "template-renderer",
         "available": true,
+        "executable": true,
         "capabilities": [
           "template-render",
           "workflow-stage-handoff",
@@ -43,7 +48,8 @@
         ],
         "workflowId": "talent-intelligence.local-template-render",
         "boundary": "local-only",
-        "selectionReason": "Local template runner is the executable backend bundled with this local-only service."
+        "implementationStatus": "active",
+        "selectionReason": "Local template runner is the executable backend bundled with this service."
       },
       {
         "id": "openai-chat",
@@ -54,12 +60,22 @@
         "executionMode": "remote-llm",
         "publicMode": "llm",
         "available": false,
+        "executable": false,
         "capabilities": [
-          "llm-generate"
+          "llm-generate",
+          "optional-remote-fallback"
         ],
         "workflowId": "talent-intelligence.remote-llm-run",
         "boundary": "local-only",
-        "selectionReason": "Declared as a future backend only; this build stays local-only and will not call remote providers."
+        "implementationStatus": "standby",
+        "selectionReason": "Remote runner is disabled by default; set runtime.allowRemote=true or TALENT_INTEL_ENABLE_REMOTE_RUNNER=1 to allow outbound calls.",
+        "remote": {
+          "readiness": "disabled",
+          "enabled": false,
+          "configured": false,
+          "explicitRemoteRequest": false,
+          "required": false
+        }
       }
     ]
   },
@@ -81,18 +97,21 @@
     },
     "engine": {
       "kind": "local-template-engine",
-      "version": "v0.5",
+      "version": "v0.6",
       "provider": "local",
       "adapter": "template-renderer",
       "runnerId": "local-template",
       "executionMode": "local-template",
       "requestedMode": "openai",
       "requestedRunner": "openai-chat",
+      "preferredRunnerId": "openai-chat",
       "requestedModel": "bailian/qwen3.5-plus",
       "resolvedMode": "template-renderer",
       "implementationStatus": "active",
       "resolutionSource": "runner",
-      "fallbackReason": "Requested runner openai-chat is not executable in this local-only build; using local-template instead.",
+      "fallbackApplied": true,
+      "fallbackKind": "runner-unavailable",
+      "fallbackReason": "Requested runner openai-chat is not callable for this request; using local-template instead. Remote runner is disabled by default; set runtime.allowRemote=true or TALENT_INTEL_ENABLE_REMOTE_RUNNER=1 to allow outbound calls.",
       "boundary": "local-only"
     },
     "summary": {
@@ -102,29 +121,33 @@
     },
     "reportMarkdown": "string",
     "artifacts": {
-      "rootDir": "/absolute/path/to/state/runs/YYYY/MM/DD/run_xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+      "rootDir": "/absolute/path/to/state/runs/YYYY/MM/DD/run_xxx",
       "files": {
-        "request": "/absolute/path/to/state/runs/YYYY/MM/DD/run_xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/request.json",
-        "response": "/absolute/path/to/state/runs/YYYY/MM/DD/run_xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/response.json",
-        "reportMarkdown": "/absolute/path/to/state/runs/YYYY/MM/DD/run_xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/report.md",
-        "events": "/absolute/path/to/state/runs/YYYY/MM/DD/run_xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/events.log"
+        "request": "/absolute/path/to/request.json",
+        "response": "/absolute/path/to/response.json",
+        "reportMarkdown": "/absolute/path/to/report.md",
+        "events": "/absolute/path/to/events.log"
       }
     },
     "metadata": {
       "requestId": "req_xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
       "runId": "run_xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
-      "apiVersion": "v0.5",
+      "apiVersion": "v0.6",
       "startedAt": "ISO date",
       "completedAt": "ISO date",
       "durationMs": 12,
       "workflowId": "talent-intelligence.local-template-render",
-      "workflowVersion": "v0.5",
+      "workflowVersion": "v0.6",
       "runnerId": "local-template",
       "executionMode": "local-template",
       "executionStatus": "completed",
       "requestedMode": "openai",
       "requestedRunner": "openai-chat",
+      "preferredRunnerId": "openai-chat",
       "resolvedMode": "template-renderer",
+      "fallbackApplied": true,
+      "fallbackKind": "runner-unavailable",
+      "fallbackReason": "Requested runner openai-chat is not callable for this request; using local-template instead. Remote runner is disabled by default; set runtime.allowRemote=true or TALENT_INTEL_ENABLE_REMOTE_RUNNER=1 to allow outbound calls.",
       "stageCount": 4,
       "stepCount": 4,
       "artifactCount": 4,
@@ -135,7 +158,7 @@
       "runId": "run_xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
       "workflow": {
         "id": "talent-intelligence.local-template-render",
-        "version": "v0.5",
+        "version": "v0.6",
         "executionMode": "local-template",
         "runnerId": "local-template",
         "futureHook": "workflowRunner.execute"
@@ -179,8 +202,7 @@
             "output": {
               "artifactId": "report-markdown",
               "renderer": "renderTemplate",
-              "templateId": "sourcing_strategy_cn",
-              "sourceArtifactId": "workflow-brief"
+              "templateId": "sourcing_strategy_cn"
             }
           }
         ],
@@ -201,19 +223,20 @@
         "result": {
           "renderer": "renderTemplate",
           "templateId": "sourcing_strategy_cn",
-          "artifactId": "report-markdown",
-          "finalizationArtifactId": "run-summary"
+          "artifactId": "report-markdown"
         }
       },
       "selection": {
         "requestedMode": "openai",
         "requestedRunner": "openai-chat",
+        "preferredRunnerId": "openai-chat",
         "resolvedRunnerId": "local-template",
         "resolvedMode": "template-renderer",
         "resolutionSource": "runner",
         "strategy": "requested-runner",
         "fallbackApplied": true,
-        "fallbackReason": "Requested runner openai-chat is not executable in this local-only build; using local-template instead."
+        "fallbackKind": "runner-unavailable",
+        "fallbackReason": "Requested runner openai-chat is not callable for this request; using local-template instead. Remote runner is disabled by default; set runtime.allowRemote=true or TALENT_INTEL_ENABLE_REMOTE_RUNNER=1 to allow outbound calls."
       }
     }
   },
@@ -234,7 +257,7 @@
     },
     "metadata": {
       "requestId": "req_xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
-      "apiVersion": "v0.5",
+      "apiVersion": "v0.6",
       "status": 400,
       "timestamp": "ISO date"
     }
@@ -242,7 +265,7 @@
   "requestId": "req_xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
   "metadata": {
     "requestId": "req_xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
-    "apiVersion": "v0.5",
+    "apiVersion": "v0.6",
     "timestamp": "2026-03-15T00:00:00.000Z"
   }
 }

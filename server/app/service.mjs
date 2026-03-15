@@ -158,8 +158,12 @@ function buildExecutionPlan(requestContext) {
 function normalizeExecutionFailure(error, requestContext, executionPlan) {
   if (error?.ok === false) return error;
 
+  const remoteErrorCode = typeof error?.code === 'string' && error.code.startsWith('REMOTE_')
+    ? error.code
+    : undefined;
+
   return createError(
-    'RUNNER_EXECUTION_FAILED',
+    remoteErrorCode || 'RUNNER_EXECUTION_FAILED',
     error?.message || 'Execution runner failed.',
     {
       runnerId: executionPlan.engine.runnerId,
@@ -171,10 +175,24 @@ function normalizeExecutionFailure(error, requestContext, executionPlan) {
       cause: error?.cause?.message || undefined,
       code: error?.code,
       status: error?.status,
-      responseBody: error?.responseBody
+      responseBody: error?.responseBody,
+      remote: error?.remote,
+      details: error?.details
     },
-    500
+    error?.status || (remoteErrorCode ? 503 : 500)
   );
+}
+
+function remoteRuntimeFallbackKind(error) {
+  if (error?.code === 'REMOTE_RUNNER_INVALID_CONFIG') return 'remote-invalid-config';
+  if (error?.code === 'REMOTE_RUNNER_REQUIRED_BUT_INVALID_CONFIG') return 'remote-invalid-config';
+  if (error?.code === 'REMOTE_RUNNER_DISABLED') return 'remote-disabled';
+  if (error?.code === 'REMOTE_RUNNER_REQUIRED_BUT_DISABLED') return 'remote-disabled';
+  if (error?.code === 'REMOTE_RUNNER_UNREACHABLE') return 'remote-unreachable';
+  if (error?.code === 'REMOTE_RUNNER_TIMEOUT') return 'remote-timeout';
+  if (error?.code === 'REMOTE_RUNNER_HTTP_ERROR') return 'remote-http-error';
+  if (error?.code === 'REMOTE_RUNNER_BAD_RESPONSE') return 'remote-bad-response';
+  return 'runtime-execution-fallback';
 }
 
 function buildLocalFallbackPlanFromRemote(executionPlan, error) {
@@ -195,6 +213,8 @@ function buildLocalFallbackPlanFromRemote(executionPlan, error) {
       executionMode: 'local-template',
       resolvedMode: 'template-renderer',
       implementationStatus: 'active',
+      fallbackApplied: true,
+      fallbackKind: remoteRuntimeFallbackKind(error),
       fallbackReason: `Remote runner failed and local fallback was used: ${error.message}`
     },
     steps: executionPlan.steps.map((step) => ({
@@ -251,11 +271,13 @@ async function executeWorkflow(requestContext, executionPlan) {
             attempted: true,
             succeeded: false,
             fallbackApplied: true,
+            fallbackKind: remoteRuntimeFallbackKind(error),
             error: {
               code: error.code || 'REMOTE_RUNNER_FAILED',
               message: error.message,
               status: error.status,
-              responseBody: error.responseBody
+              responseBody: error.responseBody,
+              details: error.details
             }
           },
           result: {
@@ -280,6 +302,13 @@ function buildSummary(payload) {
 
 function buildMetadata(requestContext, effectiveExecutionPlan, executionResult) {
   const completedAtMs = nowMs();
+  const fallbackApplied = requestContext.executionTarget.fallbackApplied || Boolean(executionResult.execution?.remote?.fallbackApplied);
+  const fallbackKind = executionResult.execution?.remote?.fallbackKind
+    || effectiveExecutionPlan.engine?.fallbackKind
+    || requestContext.executionTarget.fallbackKind;
+  const fallbackReason = executionResult.execution?.remote?.error?.message
+    || effectiveExecutionPlan.engine?.fallbackReason
+    || requestContext.executionTarget.fallbackReason;
 
   return {
     requestId: requestContext.requestId,
@@ -297,9 +326,9 @@ function buildMetadata(requestContext, effectiveExecutionPlan, executionResult) 
     requestedRunner: requestContext.requestedRunner,
     preferredRunnerId: requestContext.executionTarget.preferredRunnerId,
     resolvedMode: effectiveExecutionPlan.engine.resolvedMode,
-    fallbackApplied: requestContext.executionTarget.fallbackApplied || Boolean(executionResult.execution?.remote?.fallbackApplied),
-    fallbackKind: executionResult.execution?.remote?.fallbackApplied ? 'runtime-execution-fallback' : requestContext.executionTarget.fallbackKind,
-    fallbackReason: executionResult.execution?.remote?.error?.message || requestContext.executionTarget.fallbackReason,
+    fallbackApplied,
+    fallbackKind,
+    fallbackReason,
     stageCount: executionResult.execution.stageCount,
     stepCount: executionResult.execution.stepCount,
     artifactCount: executionResult.execution.artifacts?.length || 0,
@@ -313,6 +342,14 @@ export async function runTalentIntelligence(payload, context = {}) {
   const executionResult = await executeWorkflow(requestContext, executionPlan);
   const effectiveExecutionPlan = executionResult.executionPlan || executionPlan;
   const metadata = buildMetadata(requestContext, effectiveExecutionPlan, executionResult);
+
+  const fallbackApplied = requestContext.executionTarget.fallbackApplied || Boolean(executionResult.execution?.remote?.fallbackApplied);
+  const fallbackKind = executionResult.execution?.remote?.fallbackKind
+    || effectiveExecutionPlan.engine?.fallbackKind
+    || requestContext.executionTarget.fallbackKind;
+  const fallbackReason = executionResult.execution?.remote?.error?.message
+    || effectiveExecutionPlan.engine?.fallbackReason
+    || requestContext.executionTarget.fallbackReason;
 
   return {
     ok: true,
@@ -347,9 +384,9 @@ export async function runTalentIntelligence(payload, context = {}) {
         resolvedMode: effectiveExecutionPlan.engine.resolvedMode,
         resolutionSource: requestContext.executionTarget.resolutionSource,
         strategy: requestContext.executionTarget.selectionStrategy,
-        fallbackApplied: requestContext.executionTarget.fallbackApplied || Boolean(executionResult.execution?.remote?.fallbackApplied),
-        fallbackKind: executionResult.execution?.remote?.fallbackApplied ? 'runtime-execution-fallback' : requestContext.executionTarget.fallbackKind,
-        fallbackReason: executionResult.execution?.remote?.error?.message || requestContext.executionTarget.fallbackReason
+        fallbackApplied,
+        fallbackKind,
+        fallbackReason
       }
     }
   };

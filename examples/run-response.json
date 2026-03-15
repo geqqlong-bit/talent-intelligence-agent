@@ -16,19 +16,33 @@
   },
   "engine": {
     "kind": "local-template-engine",
-    "version": "v0.5",
+    "version": "v0.6",
     "provider": "local",
     "adapter": "template-renderer",
     "runnerId": "local-template",
     "executionMode": "local-template",
     "requestedMode": "openai",
     "requestedRunner": "openai-chat",
+    "preferredRunnerId": "openai-chat",
     "requestedModel": "bailian/qwen3.5-plus",
     "resolvedMode": "template-renderer",
-    "implementationStatus": "active",
+    "implementationStatus": "standby",
     "resolutionSource": "runner",
-    "fallbackReason": "Requested runner openai-chat is not executable in this local-only build; using local-template instead.",
-    "boundary": "local-only"
+    "fallbackApplied": true,
+    "fallbackKind": "runner-unavailable",
+    "fallbackReason": "Requested runner openai-chat is not callable for this request; using local-template instead. Remote runner configuration exists, but outbound calls remain disabled until explicitly enabled.",
+    "boundary": "local-only",
+    "remote": {
+      "readiness": "configured-but-disabled",
+      "enabled": false,
+      "configured": true,
+      "callable": false,
+      "required": false,
+      "explicitRemoteRequest": true,
+      "baseUrl": "http://127.0.0.1:8999/v1",
+      "path": "/chat/completions",
+      "model": "bailian/qwen3.5-plus"
+    }
   },
   "summary": {
     "projectName": "Confidential Client - VP Product Search",
@@ -39,18 +53,22 @@
   "metadata": {
     "requestId": "req_xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
     "runId": "run_xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
-    "apiVersion": "v0.5",
+    "apiVersion": "v0.6",
     "startedAt": "2026-03-15T00:00:00.000Z",
     "completedAt": "2026-03-15T00:00:00.000Z",
-    "durationMs": 3,
+    "durationMs": 11,
     "workflowId": "talent-intelligence.local-template-render",
-    "workflowVersion": "v0.5",
+    "workflowVersion": "v0.6",
     "runnerId": "local-template",
     "executionMode": "local-template",
     "executionStatus": "completed",
     "requestedMode": "openai",
     "requestedRunner": "openai-chat",
+    "preferredRunnerId": "openai-chat",
     "resolvedMode": "template-renderer",
+    "fallbackApplied": true,
+    "fallbackKind": "runner-unavailable",
+    "fallbackReason": "Requested runner openai-chat is not callable for this request; using local-template instead. Remote runner configuration exists, but outbound calls remain disabled until explicitly enabled.",
     "stageCount": 4,
     "stepCount": 4,
     "artifactCount": 4,
@@ -61,7 +79,7 @@
     "runId": "run_xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
     "workflow": {
       "id": "talent-intelligence.local-template-render",
-      "version": "v0.5",
+      "version": "v0.6",
       "executionMode": "local-template",
       "runnerId": "local-template",
       "futureHook": "workflowRunner.execute"
@@ -84,7 +102,7 @@
           ],
           "startedAt": "2026-03-15T00:00:00.000Z",
           "completedAt": "2026-03-15T00:00:00.000Z",
-          "durationMs": 0,
+          "durationMs": 1,
           "consumes": [],
           "produces": [
             "normalized-request"
@@ -100,7 +118,7 @@
           "status": "completed",
           "startedAt": "2026-03-15T00:00:00.000Z",
           "completedAt": "2026-03-15T00:00:00.000Z",
-          "durationMs": 1,
+          "durationMs": 3,
           "consumes": [
             "workflow-brief"
           ],
@@ -128,6 +146,7 @@
             "templateId": "sourcing_strategy_cn",
             "sourceArtifactId": "workflow-brief",
             "lineCount": 92,
+            "renderer": "renderTemplate",
             "preview": "# 人才寻访策略报告｜VP Product..."
           }
         }
@@ -137,18 +156,21 @@
         "renderer": "renderTemplate",
         "templateId": "sourcing_strategy_cn",
         "artifactId": "report-markdown",
+        "finalArtifactId": "report-markdown",
         "finalizationArtifactId": "run-summary"
       }
     },
     "selection": {
       "requestedMode": "openai",
       "requestedRunner": "openai-chat",
+      "preferredRunnerId": "openai-chat",
       "resolvedRunnerId": "local-template",
       "resolvedMode": "template-renderer",
       "resolutionSource": "runner",
       "strategy": "requested-runner",
       "fallbackApplied": true,
-      "fallbackReason": "Requested runner openai-chat is not executable in this local-only build; using local-template instead."
+      "fallbackKind": "runner-unavailable",
+      "fallbackReason": "Requested runner openai-chat is not callable for this request; using local-template instead. Remote runner configuration exists, but outbound calls remain disabled until explicitly enabled."
     }
   },
   "artifacts": {

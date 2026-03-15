@@ -1,0 +1,37 @@
+{
+  "templateId": "sourcing_strategy_cn",
+  "searchContext": {
+    "projectName": "Confidential Client - VP Product Search",
+    "roleTitle": "VP Product",
+    "clientName": "Confidential Client",
+    "searchType": "executive_search",
+    "mandateType": "retained",
+    "companyContext": "Series C AI infra company selling to enterprise customers",
+    "objective": "Output search strategy and target-company map",
+    "targetIndustry": "Enterprise software, cloud, AI infrastructure",
+    "targetCompanies": [
+      "Huawei Cloud",
+      "Alibaba Cloud",
+      "Volcano Engine",
+      "Tencent Cloud"
+    ],
+    "location": "Shanghai",
+    "salaryRange": "Base 150-220k RMB/month",
+    "mustHaveSkills": [
+      "Enterprise product leadership",
+      "Large-customer collaboration",
+      "People leadership"
+    ]
+  },
+  "runtime": {
+    "mode": "openai",
+    "runner": "openai-chat",
+    "allowRemote": true,
+    "baseUrl": "http://127.0.0.1:8999/v1",
+    "apiKey": "test-key",
+    "model": "mock-qwen",
+    "temperature": 0.2,
+    "maxTokens": 1200,
+    "timeoutMs": 15000
+  }
+}

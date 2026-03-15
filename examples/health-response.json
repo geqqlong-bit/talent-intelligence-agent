@@ -1,22 +1,26 @@
 {
   "ok": true,
   "service": "talent-intelligence-service",
-  "version": "v0.5",
+  "version": "v0.6",
   "status": "healthy",
   "execution": {
     "mode": "local-template",
     "workflowId": "talent-intelligence.local-template-render",
     "defaultRequestMode": "openai",
     "defaultRunnerId": "local-template",
+    "defaultPublicMode": "template-renderer",
     "supportedRequestModes": [
-      "local",
-      "template-renderer",
-      "openai",
       "llm",
-      "remote"
+      "local",
+      "openai",
+      "remote",
+      "template-renderer"
     ],
     "supportedRunnerIds": [
       "local-template"
+    ],
+    "plannedRunnerIds": [
+      "openai-chat"
     ],
     "runners": [
       {
@@ -28,6 +32,7 @@
         "executionMode": "local-template",
         "publicMode": "template-renderer",
         "available": true,
+        "executable": true,
         "capabilities": [
           "template-render",
           "workflow-stage-handoff",
@@ -35,7 +40,8 @@
         ],
         "workflowId": "talent-intelligence.local-template-render",
         "boundary": "local-only",
-        "selectionReason": "Local template runner is the executable backend bundled with this local-only service."
+        "implementationStatus": "active",
+        "selectionReason": "Local template runner is the executable backend bundled with this service."
       },
       {
         "id": "openai-chat",
@@ -46,19 +52,29 @@
         "executionMode": "remote-llm",
         "publicMode": "llm",
         "available": false,
+        "executable": false,
         "capabilities": [
-          "llm-generate"
+          "llm-generate",
+          "optional-remote-fallback"
         ],
         "workflowId": "talent-intelligence.remote-llm-run",
         "boundary": "local-only",
-        "selectionReason": "Declared as a future backend only; this build stays local-only and will not call remote providers."
+        "implementationStatus": "standby",
+        "selectionReason": "Remote runner is disabled by default; set runtime.allowRemote=true or TALENT_INTEL_ENABLE_REMOTE_RUNNER=1 to allow outbound calls.",
+        "remote": {
+          "readiness": "disabled",
+          "enabled": false,
+          "configured": false,
+          "explicitRemoteRequest": false,
+          "required": false
+        }
       }
     ]
   },
   "requestId": "req_xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
   "metadata": {
     "requestId": "req_xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
-    "apiVersion": "v0.5",
+    "apiVersion": "v0.6",
     "timestamp": "2026-03-15T00:00:00.000Z"
   }
 }
