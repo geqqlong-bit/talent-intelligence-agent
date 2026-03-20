@@ -1,6 +1,6 @@
 import crypto from 'crypto';
 
-export const API_VERSION = 'v0.5';
+export const API_VERSION = 'v0.11';
 
 export const TEMPLATE_IDS = [
   'jd_diagnosis_cn',
@@ -15,7 +15,12 @@ export function createRequestId(seed = undefined) {
 }
 
 export function json(res, status, payload, requestId = undefined) {
-  const headers = { 'Content-Type': 'application/json; charset=utf-8' };
+  const headers = { 
+    'Content-Type': 'application/json; charset=utf-8',
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type, X-Request-Id'
+  };
   if (requestId) headers['X-Request-Id'] = requestId;
   res.writeHead(status, headers);
   res.end(JSON.stringify(payload, null, 2));
@@ -62,6 +67,118 @@ function toOptionalString(value, fallback = undefined) {
 function toRequiredString(value) {
   if (value === undefined || value === null) return '';
   return String(value).trim();
+}
+
+function normalizeRubricId(value, fallbackIndex) {
+  const raw = toOptionalString(value);
+  if (raw) return raw;
+  return `dimension_${fallbackIndex + 1}`;
+}
+
+function normalizeRubricLabel(value, fallbackIndex) {
+  return toOptionalString(value, `Dimension ${fallbackIndex + 1}`);
+}
+
+function normalizeRubrics(input) {
+  if (input === undefined || input === null || input === '') return [];
+
+  const list = Array.isArray(input) ? input : [input];
+  const normalized = list
+    .map((item, index) => {
+      if (typeof item === 'string') {
+        const label = item.trim();
+        if (!label) return null;
+        return {
+          id: normalizeRubricId(undefined, index),
+          label,
+          weight: 1,
+          description: undefined
+        };
+      }
+
+      if (!isPlainObject(item)) return null;
+
+      const label = normalizeRubricLabel(item.label || item.name || item.dimension, index);
+      const numericWeight = Number(item.weight);
+
+      return {
+        id: normalizeRubricId(item.id || item.key, index),
+        label,
+        weight: Number.isFinite(numericWeight) && numericWeight > 0 ? numericWeight : 1,
+        description: toOptionalString(item.description || item.desc || item.definition)
+      };
+    })
+    .filter(Boolean);
+
+  if (!normalized.length) return [];
+
+  const totalWeight = normalized.reduce((sum, item) => sum + item.weight, 0) || normalized.length;
+
+  return normalized.map((item) => ({
+    ...item,
+    normalizedWeight: Number((item.weight / totalWeight).toFixed(6))
+  }));
+}
+
+// Function to normalize candidates - handles both single candidate (backward compatibility) and multiple candidates
+function normalizeCandidates(candidateInput) {
+  if (candidateInput === undefined || candidateInput === null) {
+    return [];
+  }
+  
+  // If it's already an array, return it as is
+  if (Array.isArray(candidateInput)) {
+    return candidateInput.map(normalizeSingleCandidate);
+  }
+  
+  // If it's a single object, treat it as a single candidate for backward compatibility
+  if (typeof candidateInput === 'object') {
+    return [normalizeSingleCandidate(candidateInput)];
+  }
+  
+  // If it's a string, treat it as a single candidate name
+  if (typeof candidateInput === 'string') {
+    return [{ name: candidateInput.trim(), summary: '', highlights: [], concerns: [] }];
+  }
+  
+  return [];
+}
+
+// Helper function to normalize a single candidate object
+function normalizeSingleCandidate(candidate) {
+  if (typeof candidate === 'string') {
+    return {
+      name: candidate.trim(),
+      summary: '',
+      highlights: [],
+      concerns: [],
+      details: {}
+    };
+  }
+  
+  if (typeof candidate === 'object' && candidate !== null) {
+    return {
+      name: toRequiredString(candidate.name || candidate.candidateName),
+      summary: toOptionalString(candidate.summary || candidate.candidateSummary, ''),
+      highlights: toStringArray(candidate.highlights || candidate.candidateHighlights || []),
+      concerns: toStringArray(candidate.concerns || candidate.candidateConcerns || []),
+      details: candidate.details || {},
+      // Include any additional candidate fields that might be present
+      ...Object.fromEntries(
+        Object.entries(candidate).filter(([key]) => 
+          !['name', 'summary', 'highlights', 'concerns', 'details', 'candidateName', 'candidateSummary', 'candidateHighlights', 'candidateConcerns'].includes(key)
+        )
+      )
+    };
+  }
+  
+  return {
+    name: '',
+    summary: '',
+    highlights: [],
+    concerns: [],
+    details: {}
+  };
 }
 
 export function normalizeRequest(body = {}) {
@@ -118,10 +235,25 @@ export function normalizeRequest(body = {}) {
       interviewProcess: toOptionalString(searchContext.interviewProcess),
       interviewPanel: toStringArray(searchContext.interviewPanel),
       processConstraints: toOptionalString(searchContext.processConstraints),
+      // Handle both legacy single candidate fields and new multiple candidates
       candidateName: toOptionalString(searchContext.candidateName),
       candidateSummary: toOptionalString(searchContext.candidateSummary),
       candidateHighlights: toStringArray(searchContext.candidateHighlights),
       candidateConcerns: toStringArray(searchContext.candidateConcerns),
+      candidates: normalizeCandidates(
+        searchContext.candidates || 
+        (searchContext.candidateName ? {
+          name: searchContext.candidateName,
+          summary: searchContext.candidateSummary,
+          highlights: searchContext.candidateHighlights,
+          concerns: searchContext.candidateConcerns
+        } : undefined)
+      ),
+      rubrics: normalizeRubrics(
+        searchContext.rubrics
+        || searchContext.rubric
+        || searchContext.assessmentRubrics
+      ),
       interviewerNotes: toOptionalString(searchContext.interviewerNotes)
     },
     runtime: {
@@ -140,7 +272,8 @@ export function normalizeRequest(body = {}) {
       model: String(runtime.model || process.env.TALENT_INTEL_DEFAULT_MODEL || 'bailian/qwen3.5-plus'),
       temperature: Number.isFinite(Number(runtime.temperature)) ? Number(runtime.temperature) : 0.4,
       maxTokens: Number.isFinite(Number(runtime.maxTokens)) ? Number(runtime.maxTokens) : 5000,
-      timeoutMs: Number.isFinite(Number(runtime.timeoutMs)) ? Number(runtime.timeoutMs) : 120000
+      timeoutMs: Number.isFinite(Number(runtime.timeoutMs)) ? Number(runtime.timeoutMs) : 120000,
+      maxConcurrency: Number.isFinite(Number(runtime.maxConcurrency)) ? Number(runtime.maxConcurrency) : 5
     }
   };
 

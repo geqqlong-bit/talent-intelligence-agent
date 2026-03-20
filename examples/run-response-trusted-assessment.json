@@ -1,0 +1,1326 @@
+{
+  "ok": true,
+  "requestId": "req_e3e45115-3e95-4652-87bd-87b39da24cb3",
+  "mode": "llm",
+  "templateId": "candidate_assessment_cn",
+  "run": {
+    "id": "run_cabad437-cd1c-4e4e-b515-7c242507d425",
+    "status": "completed",
+    "templateId": "candidate_assessment_cn",
+    "mode": "llm",
+    "runnerId": "openai-chat",
+    "stageCount": 8,
+    "stepCount": 8,
+    "artifactCount": 9,
+    "finalArtifactId": "report-markdown"
+  },
+  "engine": {
+    "kind": "remote-llm-runner",
+    "version": "v0.11",
+    "provider": "openai-compatible",
+    "adapter": "chat-completions",
+    "runnerId": "openai-chat",
+    "executionMode": "remote-llm",
+    "requestedMode": "openai",
+    "requestedRunner": "openai-chat",
+    "preferredRunnerId": "openai-chat",
+    "requestedModel": "mock-qwen",
+    "resolvedMode": "llm",
+    "implementationStatus": "active",
+    "resolutionSource": "runner",
+    "fallbackApplied": false,
+    "fallbackKind": "none",
+    "fallbackReason": "Remote runner is explicitly enabled and configured for OpenAI-compatible chat completions.",
+    "boundary": "local-only",
+    "remote": {
+      "readiness": "callable",
+      "enabled": true,
+      "configured": true,
+      "callable": true,
+      "required": false,
+      "explicitRemoteRequest": true,
+      "baseUrl": "http://127.0.0.1:29099/v1",
+      "path": "/chat/completions",
+      "model": "mock-qwen"
+    }
+  },
+  "summary": {
+    "projectName": "Confidential Client - Trusted Assessment Demo",
+    "roleTitle": "Senior Engineering Manager",
+    "templateId": "candidate_assessment_cn"
+  },
+  "reportMarkdown": "# Senior Engineering Manager\n\n## Job Description Diagnosis\n\n# 模拟远程人才情报报告｜Senior Engineering Manager\n\n## 结论\n\n- 该报告由本地 mock OpenAI-compatible provider 生成，用于离线集成测试。\n- Template: candidate_assessment_cn\n- Project: Confidential Client - Trusted Assessment Demo\n- Objective: Produce a trusted candidate assessment with rubric, evidence, and confidence\n\n## 角色摘要\n\n- Role Title: Senior Engineering Manager\n- Location: Shanghai\n- Salary Range: Base 80-110k RMB/month\n\n## Target Companies\n\n- TBD\n\n## Must-Have Skills\n\n- Engineering leadership\n- Cross-functional execution\n- B2B product delivery\n\n## Mock Provider Notes\n\n- No external network was used.\n- This response is deterministic enough for local harness validation.\n\n## Search Plan\n\n# 模拟远程人才情报报告｜Senior Engineering Manager\n\n## 结论\n\n- 该报告由本地 mock OpenAI-compatible provider 生成，用于离线集成测试。\n- Template: candidate_assessment_cn\n- Project: Confidential Client - Trusted Assessment Demo\n- Objective: Produce a trusted candidate assessment with rubric, evidence, and confidence\n\n## 角色摘要\n\n- Role Title: Senior Engineering Manager\n- Location: Shanghai\n- Salary Range: Base 80-110k RMB/month\n\n## Target Companies\n\n- TBD\n\n## Must-Have Skills\n\n- Engineering leadership\n- Cross-functional execution\n- B2B product delivery\n\n## Mock Provider Notes\n\n- No external network was used.\n- This response is deterministic enough for local harness validation.\n\n## Sourcing Strategy\n\n# 模拟远程人才情报报告｜Senior Engineering Manager\n\n## 结论\n\n- 该报告由本地 mock OpenAI-compatible provider 生成，用于离线集成测试。\n- Template: candidate_assessment_cn\n- Project: Confidential Client - Trusted Assessment Demo\n- Objective: Produce a trusted candidate assessment with rubric, evidence, and confidence\n\n## 角色摘要\n\n- Role Title: Senior Engineering Manager\n- Location: Shanghai\n- Salary Range: Base 80-110k RMB/month\n\n## Target Companies\n\n- TBD\n\n## Must-Have Skills\n\n- Engineering leadership\n- Cross-functional execution\n- B2B product delivery\n\n## Mock Provider Notes\n\n- No external network was used.\n- This response is deterministic enough for local harness validation.\n\n## Individual Candidate Assessments (1 total)\n\n### 候选人评估｜Alex Chen\n- 推荐结论：建议推进\n- 摘要：Engineering leader with platform and enterprise delivery background.\n\n#### 评估维度\n#### Rubric｜相关经历匹配\n- 判断：Alex Chen 具备与目标岗位相邻的经历，可继续核实深度与迁移性。\n- 置信度：中\n- 证据状态：证据有限\n- 简历证据：\n  - \"Engineering leader with platform and enterprise delivery background.\"\n- 缺失信息：\n  - 缺少每段经历的职责边界与起止时间\n\n#### Rubric｜业绩与 owner 程度\n- 判断：简历里出现了可验证结果线索，但仍需核实是否为本人主导。\n- 置信度：中\n- 证据状态：证据充分\n- 简历证据：\n  - \"Led a 20-engineer team through platform modernization\"\n  - \"Worked closely with product and sales on enterprise customer launches\"\n- 缺失信息：\n  - 需要补充目标、动作、结果、本人角色\n\n#### Rubric｜领域与能力对口度\n- 判断：信息不足：缺少足够简历证据支持判断。\n- 置信度：低\n- 证据状态：信息不足\n- 简历证据：\n  - \"信息不足\"\n- 缺失信息：\n  - 需要补充核心技能使用场景与熟练度\n\n#### Rubric｜主要风险信号\n- 判断：简历/备注中已有风险信号，建议在初访里先核实。\n- 置信度：中\n- 证据状态：证据充分\n- 简历证据：\n  - \"Ownership scope may be overstated\"\n  - \"Has mostly operated in relatively mature organizations\"\n- 缺失信息：\n  - 需要补充离职动机、薪酬预期、管理跨度或城市意愿\n\n#### 综合风险\n- Evidence｜证据密度不足：虽然有结果线索，但仍缺少完整业务背景与本人贡献拆解。（置信度：中；证据状态：证据有限）\n\n#### 下一轮追问\n- 请拆一个你亲自主导的项目：目标、资源、动作、结果分别是什么？\n- 你在上一段经历里真正拍板或 owner 的部分是什么？\n- 如果加入当前岗位，前 90 天你会先解决哪三件事？\n\n",
+  "candidateAssessment": {
+    "mode": "batch",
+    "totalCandidates": 1,
+    "successfulAssessments": 1,
+    "failedAssessments": 0,
+    "rubrics": [],
+    "assessments": [
+      {
+        "assessmentType": "trusted_assessment",
+        "candidateName": "Alex Chen",
+        "recommendation": "建议推进",
+        "summary": "Engineering leader with platform and enterprise delivery background.",
+        "confidence": {
+          "score": 0.78,
+          "label": "medium-high",
+          "rationale": "Trusted assessment 依赖简历证据密度；当前结论适合继续验证，不适合直接终判。"
+        },
+        "dimensions": [
+          {
+            "key": "relevant_experience",
+            "label": "Rubric｜相关经历匹配",
+            "judgement": "Alex Chen 具备与目标岗位相邻的经历，可继续核实深度与迁移性。",
+            "confidence": "中",
+            "evidenceQuotes": [
+              "Engineering leader with platform and enterprise delivery background."
+            ],
+            "evidenceStatus": "证据有限",
+            "missingInformation": [
+              "缺少每段经历的职责边界与起止时间"
+            ],
+            "id": "relevant_experience"
+          },
+          {
+            "key": "achievement_ownership",
+            "label": "Rubric｜业绩与 owner 程度",
+            "judgement": "简历里出现了可验证结果线索，但仍需核实是否为本人主导。",
+            "confidence": "中",
+            "evidenceQuotes": [
+              "Led a 20-engineer team through platform modernization",
+              "Worked closely with product and sales on enterprise customer launches"
+            ],
+            "evidenceStatus": "证据充分",
+            "missingInformation": [
+              "需要补充目标、动作、结果、本人角色"
+            ],
+            "id": "achievement_ownership"
+          },
+          {
+            "key": "domain_alignment",
+            "label": "Rubric｜领域与能力对口度",
+            "judgement": "信息不足：缺少足够简历证据支持判断。",
+            "confidence": "低",
+            "evidenceQuotes": [
+              "信息不足"
+            ],
+            "evidenceStatus": "信息不足",
+            "missingInformation": [
+              "需要补充核心技能使用场景与熟练度"
+            ],
+            "id": "domain_alignment"
+          },
+          {
+            "key": "risk_flags",
+            "label": "Rubric｜主要风险信号",
+            "judgement": "简历/备注中已有风险信号，建议在初访里先核实。",
+            "confidence": "中",
+            "evidenceQuotes": [
+              "Ownership scope may be overstated",
+              "Has mostly operated in relatively mature organizations"
+            ],
+            "evidenceStatus": "证据充分",
+            "missingInformation": [
+              "需要补充离职动机、薪酬预期、管理跨度或城市意愿"
+            ],
+            "id": "risk_flags"
+          }
+        ],
+        "evidence": [
+          {
+            "claim": "候选人具备跨团队推进和交付经历",
+            "support": "Led a 20-engineer team through platform modernization",
+            "quality": "medium"
+          },
+          {
+            "claim": "候选人存在需要面试补证的 ownership 风险",
+            "support": "Ownership scope may be overstated",
+            "quality": "medium"
+          }
+        ],
+        "overallRisks": [
+          {
+            "label": "Evidence｜证据密度不足",
+            "detail": "虽然有结果线索，但仍缺少完整业务背景与本人贡献拆解。",
+            "confidence": "中",
+            "evidenceQuotes": [
+              "Led a 20-engineer team through platform modernization",
+              "Worked closely with product and sales on enterprise customer launches"
+            ],
+            "evidenceStatus": "证据有限"
+          }
+        ],
+        "followUpQuestions": [
+          "请拆一个你亲自主导的项目：目标、资源、动作、结果分别是什么？",
+          "你在上一段经历里真正拍板或 owner 的部分是什么？",
+          "如果加入当前岗位，前 90 天你会先解决哪三件事？"
+        ],
+        "candidateIndex": 0,
+        "weighted": false,
+        "strengths": [
+          "Led a 20-engineer team through platform modernization",
+          "Worked closely with product and sales on enterprise customer launches",
+          "Built execution cadence across engineering, QA, and solution teams"
+        ],
+        "concerns": [
+          "Ownership scope may be overstated",
+          "Has mostly operated in relatively mature organizations"
+        ]
+      }
+    ]
+  },
+  "metadata": {
+    "requestId": "req_e3e45115-3e95-4652-87bd-87b39da24cb3",
+    "runId": "run_cabad437-cd1c-4e4e-b515-7c242507d425",
+    "apiVersion": "v0.11",
+    "startedAt": "2026-03-15T17:02:56.029Z",
+    "completedAt": "2026-03-15T17:02:56.135Z",
+    "durationMs": 106,
+    "totalDurationMs": 92,
+    "workflowId": "talent-intelligence.remote-llm-run",
+    "workflowVersion": "v0.11",
+    "runnerId": "openai-chat",
+    "executionMode": "remote-llm",
+    "executionStatus": "completed",
+    "requestedMode": "openai",
+    "requestedRunner": "openai-chat",
+    "preferredRunnerId": "openai-chat",
+    "resolvedMode": "llm",
+    "fallbackApplied": false,
+    "fallbackKind": "none",
+    "fallbackReason": "Remote runner is explicitly enabled and configured for OpenAI-compatible chat completions.",
+    "stageCount": 8,
+    "stepCount": 8,
+    "artifactCount": 9,
+    "finalArtifactId": "report-markdown",
+    "performance": {
+      "totalDurationMs": 92,
+      "stepDurationMs": 106,
+      "tokenUsage": {
+        "promptTokens": 4432,
+        "completionTokens": 390,
+        "totalTokens": 4822
+      }
+    }
+  },
+  "orchestration": {
+    "requestId": "req_e3e45115-3e95-4652-87bd-87b39da24cb3",
+    "runId": "run_cabad437-cd1c-4e4e-b515-7c242507d425",
+    "workflow": {
+      "id": "talent-intelligence.remote-llm-run",
+      "version": "v0.11",
+      "executionMode": "remote-llm",
+      "runnerId": "openai-chat",
+      "futureHook": "workflowRunner.execute"
+    },
+    "execution": {
+      "status": "completed",
+      "runnerId": "openai-chat",
+      "boundary": "local-only",
+      "stageCount": 8,
+      "stepCount": 8,
+      "stages": [
+        {
+          "id": "ingest-request",
+          "label": "Ingest Request",
+          "order": 1,
+          "status": "completed",
+          "stepCount": 1,
+          "stepIds": [
+            "capture-request"
+          ],
+          "startedAt": "2026-03-15T17:02:56.031Z",
+          "completedAt": "2026-03-15T17:02:56.031Z",
+          "durationMs": 0,
+          "consumes": [],
+          "produces": [
+            "normalized-request"
+          ]
+        },
+        {
+          "id": "prepare-brief",
+          "label": "Prepare Workflow Brief",
+          "order": 2,
+          "status": "completed",
+          "stepCount": 1,
+          "stepIds": [
+            "build-brief"
+          ],
+          "startedAt": "2026-03-15T17:02:56.033Z",
+          "completedAt": "2026-03-15T17:02:56.033Z",
+          "durationMs": 0,
+          "consumes": [
+            "normalized-request"
+          ],
+          "produces": [
+            "workflow-brief"
+          ]
+        },
+        {
+          "id": "jd-diagnosis",
+          "label": "JD Diagnosis",
+          "order": 3,
+          "status": "completed",
+          "stepCount": 1,
+          "stepIds": [
+            "execute-jd-diagnosis"
+          ],
+          "startedAt": "2026-03-15T17:02:56.033Z",
+          "completedAt": "2026-03-15T17:02:56.085Z",
+          "durationMs": 52,
+          "consumes": [
+            "workflow-brief"
+          ],
+          "produces": [
+            "jd-diagnosis-result"
+          ]
+        },
+        {
+          "id": "search-plan",
+          "label": "Search Plan",
+          "order": 4,
+          "status": "completed",
+          "stepCount": 1,
+          "stepIds": [
+            "execute-search-plan"
+          ],
+          "startedAt": "2026-03-15T17:02:56.085Z",
+          "completedAt": "2026-03-15T17:02:56.096Z",
+          "durationMs": 11,
+          "consumes": [
+            "jd-diagnosis-result"
+          ],
+          "produces": [
+            "search-plan-result"
+          ]
+        },
+        {
+          "id": "sourcing-strategy",
+          "label": "Sourcing Strategy",
+          "order": 5,
+          "status": "completed",
+          "stepCount": 1,
+          "stepIds": [
+            "execute-sourcing-strategy"
+          ],
+          "startedAt": "2026-03-15T17:02:56.096Z",
+          "completedAt": "2026-03-15T17:02:56.103Z",
+          "durationMs": 7,
+          "consumes": [
+            "search-plan-result"
+          ],
+          "produces": [
+            "sourcing-strategy-result"
+          ]
+        },
+        {
+          "id": "candidate-assessment",
+          "label": "Candidate Assessment",
+          "order": 6,
+          "status": "completed",
+          "stepCount": 1,
+          "stepIds": [
+            "execute-candidate-assessment"
+          ],
+          "startedAt": "2026-03-15T17:02:56.103Z",
+          "completedAt": "2026-03-15T17:02:56.124Z",
+          "durationMs": 21,
+          "consumes": [
+            "sourcing-strategy-result"
+          ],
+          "produces": [
+            "candidate-assessment-result"
+          ]
+        },
+        {
+          "id": "compile-report",
+          "label": "Compile Final Report",
+          "order": 7,
+          "status": "completed",
+          "stepCount": 1,
+          "stepIds": [
+            "compile-results"
+          ],
+          "startedAt": "2026-03-15T17:02:56.124Z",
+          "completedAt": "2026-03-15T17:02:56.125Z",
+          "durationMs": 1,
+          "consumes": [
+            "candidate-assessment-result"
+          ],
+          "produces": [
+            "report-markdown"
+          ]
+        },
+        {
+          "id": "finalize-run",
+          "label": "Finalize Run",
+          "order": 8,
+          "status": "completed",
+          "stepCount": 1,
+          "stepIds": [
+            "finalize-response"
+          ],
+          "startedAt": "2026-03-15T17:02:56.125Z",
+          "completedAt": "2026-03-15T17:02:56.125Z",
+          "durationMs": 0,
+          "consumes": [
+            "report-markdown"
+          ],
+          "produces": [
+            "run-summary"
+          ]
+        }
+      ],
+      "steps": [
+        {
+          "id": "capture-request",
+          "stageId": "ingest-request",
+          "kind": "capture-input",
+          "runnerId": "openai-chat",
+          "status": "completed",
+          "startedAt": "2026-03-15T17:02:56.031Z",
+          "completedAt": "2026-03-15T17:02:56.031Z",
+          "durationMs": 0,
+          "consumes": [],
+          "produces": [
+            "normalized-request"
+          ],
+          "output": {
+            "artifactId": "normalized-request",
+            "fieldsCaptured": 44
+          },
+          "metrics": {
+            "durationMs": 0
+          }
+        },
+        {
+          "id": "build-brief",
+          "stageId": "prepare-brief",
+          "kind": "brief-synthesis",
+          "runnerId": "openai-chat",
+          "status": "completed",
+          "startedAt": "2026-03-15T17:02:56.033Z",
+          "completedAt": "2026-03-15T17:02:56.033Z",
+          "durationMs": 0,
+          "consumes": [
+            "normalized-request"
+          ],
+          "produces": [
+            "workflow-brief"
+          ],
+          "output": {
+            "artifactId": "workflow-brief",
+            "sourceArtifactId": "normalized-request",
+            "targetCompanyCount": 0
+          },
+          "metrics": {
+            "durationMs": 0
+          }
+        },
+        {
+          "id": "execute-jd-diagnosis",
+          "stageId": "jd-diagnosis",
+          "kind": "remote-llm-call",
+          "runnerId": "openai-chat",
+          "status": "completed",
+          "startedAt": "2026-03-15T17:02:56.033Z",
+          "completedAt": "2026-03-15T17:02:56.085Z",
+          "durationMs": 52,
+          "consumes": [
+            "workflow-brief"
+          ],
+          "produces": [
+            "jd-diagnosis-result"
+          ],
+          "output": {
+            "artifactId": "jd-diagnosis-result",
+            "renderer": "openai-compatible-chat-completions",
+            "templateId": "candidate_assessment_cn",
+            "sourceArtifactId": "workflow-brief",
+            "remoteInfo": {
+              "attempted": true,
+              "succeeded": true,
+              "baseUrl": "http://127.0.0.1:29099/v1",
+              "path": "/chat/completions",
+              "model": "mock-qwen",
+              "startedAt": "2026-03-15T17:02:56.033Z",
+              "completedAt": "2026-03-15T17:02:56.085Z",
+              "durationMs": 52,
+              "responseId": "chatcmpl_mock_731a6f80-ae74-442f-801c-db3f58ccd17c",
+              "finishReason": "stop",
+              "usage": {
+                "prompt_tokens": 1307,
+                "completion_tokens": 130,
+                "total_tokens": 1437
+              },
+              "tokenUsage": {
+                "promptTokens": 1307,
+                "completionTokens": 130,
+                "totalTokens": 1437,
+                "model": "mock-qwen"
+              },
+              "stream": false,
+              "stage": "jd-diagnosis"
+            }
+          },
+          "metrics": {
+            "durationMs": 52,
+            "tokenUsage": {
+              "promptTokens": 1307,
+              "completionTokens": 130,
+              "totalTokens": 1437,
+              "model": "mock-qwen"
+            }
+          }
+        },
+        {
+          "id": "execute-search-plan",
+          "stageId": "search-plan",
+          "kind": "remote-llm-call",
+          "runnerId": "openai-chat",
+          "status": "completed",
+          "startedAt": "2026-03-15T17:02:56.085Z",
+          "completedAt": "2026-03-15T17:02:56.096Z",
+          "durationMs": 11,
+          "consumes": [
+            "jd-diagnosis-result"
+          ],
+          "produces": [
+            "search-plan-result"
+          ],
+          "output": {
+            "artifactId": "search-plan-result",
+            "renderer": "openai-compatible-chat-completions",
+            "templateId": "candidate_assessment_cn",
+            "sourceArtifactId": "jd-diagnosis-result",
+            "remoteInfo": {
+              "attempted": true,
+              "succeeded": true,
+              "baseUrl": "http://127.0.0.1:29099/v1",
+              "path": "/chat/completions",
+              "model": "mock-qwen",
+              "startedAt": "2026-03-15T17:02:56.086Z",
+              "completedAt": "2026-03-15T17:02:56.096Z",
+              "durationMs": 10,
+              "responseId": "chatcmpl_mock_bb13a972-b0cf-4654-aa3e-1b709f0e25f1",
+              "finishReason": "stop",
+              "usage": {
+                "prompt_tokens": 1470,
+                "completion_tokens": 130,
+                "total_tokens": 1600
+              },
+              "tokenUsage": {
+                "promptTokens": 1470,
+                "completionTokens": 130,
+                "totalTokens": 1600,
+                "model": "mock-qwen"
+              },
+              "stream": false,
+              "stage": "search-plan"
+            }
+          },
+          "metrics": {
+            "durationMs": 11,
+            "tokenUsage": {
+              "promptTokens": 1470,
+              "completionTokens": 130,
+              "totalTokens": 1600,
+              "model": "mock-qwen"
+            }
+          }
+        },
+        {
+          "id": "execute-sourcing-strategy",
+          "stageId": "sourcing-strategy",
+          "kind": "remote-llm-call",
+          "runnerId": "openai-chat",
+          "status": "completed",
+          "startedAt": "2026-03-15T17:02:56.096Z",
+          "completedAt": "2026-03-15T17:02:56.103Z",
+          "durationMs": 7,
+          "consumes": [
+            "search-plan-result"
+          ],
+          "produces": [
+            "sourcing-strategy-result"
+          ],
+          "output": {
+            "artifactId": "sourcing-strategy-result",
+            "renderer": "openai-compatible-chat-completions",
+            "templateId": "candidate_assessment_cn",
+            "sourceArtifactId": "search-plan-result",
+            "remoteInfo": {
+              "attempted": true,
+              "succeeded": true,
+              "baseUrl": "http://127.0.0.1:29099/v1",
+              "path": "/chat/completions",
+              "model": "mock-qwen",
+              "startedAt": "2026-03-15T17:02:56.097Z",
+              "completedAt": "2026-03-15T17:02:56.103Z",
+              "durationMs": 6,
+              "responseId": "chatcmpl_mock_e214709e-98d0-4596-99f6-3a5688dcc0f5",
+              "finishReason": "stop",
+              "usage": {
+                "prompt_tokens": 1655,
+                "completion_tokens": 130,
+                "total_tokens": 1785
+              },
+              "tokenUsage": {
+                "promptTokens": 1655,
+                "completionTokens": 130,
+                "totalTokens": 1785,
+                "model": "mock-qwen"
+              },
+              "stream": false,
+              "stage": "sourcing-strategy"
+            }
+          },
+          "metrics": {
+            "durationMs": 7,
+            "tokenUsage": {
+              "promptTokens": 1655,
+              "completionTokens": 130,
+              "totalTokens": 1785,
+              "model": "mock-qwen"
+            }
+          }
+        },
+        {
+          "id": "execute-candidate-assessment",
+          "stageId": "candidate-assessment",
+          "kind": "remote-llm-call",
+          "runnerId": "openai-chat",
+          "status": "completed",
+          "startedAt": "2026-03-15T17:02:56.103Z",
+          "completedAt": "2026-03-15T17:02:56.124Z",
+          "durationMs": 21,
+          "consumes": [
+            "sourcing-strategy-result"
+          ],
+          "produces": [
+            "candidate-assessment-result"
+          ],
+          "output": {
+            "artifactId": "candidate-assessment-result",
+            "renderer": "openai-compatible-chat-completions",
+            "templateId": "candidate_assessment_cn",
+            "sourceArtifactId": "sourcing-strategy-result",
+            "totalCandidates": 1,
+            "successfulAssessments": 1,
+            "failedAssessments": 0,
+            "candidateAssessment": {
+              "mode": "batch",
+              "totalCandidates": 1,
+              "successfulAssessments": 1,
+              "failedAssessments": 0,
+              "rubrics": [],
+              "assessments": [
+                {
+                  "assessmentType": "trusted_assessment",
+                  "candidateName": "Alex Chen",
+                  "recommendation": "建议推进",
+                  "summary": "Engineering leader with platform and enterprise delivery background.",
+                  "confidence": {
+                    "score": 0.78,
+                    "label": "medium-high",
+                    "rationale": "Trusted assessment 依赖简历证据密度；当前结论适合继续验证，不适合直接终判。"
+                  },
+                  "dimensions": [
+                    {
+                      "key": "relevant_experience",
+                      "label": "Rubric｜相关经历匹配",
+                      "judgement": "Alex Chen 具备与目标岗位相邻的经历，可继续核实深度与迁移性。",
+                      "confidence": "中",
+                      "evidenceQuotes": [
+                        "Engineering leader with platform and enterprise delivery background."
+                      ],
+                      "evidenceStatus": "证据有限",
+                      "missingInformation": [
+                        "缺少每段经历的职责边界与起止时间"
+                      ],
+                      "id": "relevant_experience"
+                    },
+                    {
+                      "key": "achievement_ownership",
+                      "label": "Rubric｜业绩与 owner 程度",
+                      "judgement": "简历里出现了可验证结果线索，但仍需核实是否为本人主导。",
+                      "confidence": "中",
+                      "evidenceQuotes": [
+                        "Led a 20-engineer team through platform modernization",
+                        "Worked closely with product and sales on enterprise customer launches"
+                      ],
+                      "evidenceStatus": "证据充分",
+                      "missingInformation": [
+                        "需要补充目标、动作、结果、本人角色"
+                      ],
+                      "id": "achievement_ownership"
+                    },
+                    {
+                      "key": "domain_alignment",
+                      "label": "Rubric｜领域与能力对口度",
+                      "judgement": "信息不足：缺少足够简历证据支持判断。",
+                      "confidence": "低",
+                      "evidenceQuotes": [
+                        "信息不足"
+                      ],
+                      "evidenceStatus": "信息不足",
+                      "missingInformation": [
+                        "需要补充核心技能使用场景与熟练度"
+                      ],
+                      "id": "domain_alignment"
+                    },
+                    {
+                      "key": "risk_flags",
+                      "label": "Rubric｜主要风险信号",
+                      "judgement": "简历/备注中已有风险信号，建议在初访里先核实。",
+                      "confidence": "中",
+                      "evidenceQuotes": [
+                        "Ownership scope may be overstated",
+                        "Has mostly operated in relatively mature organizations"
+                      ],
+                      "evidenceStatus": "证据充分",
+                      "missingInformation": [
+                        "需要补充离职动机、薪酬预期、管理跨度或城市意愿"
+                      ],
+                      "id": "risk_flags"
+                    }
+                  ],
+                  "evidence": [
+                    {
+                      "claim": "候选人具备跨团队推进和交付经历",
+                      "support": "Led a 20-engineer team through platform modernization",
+                      "quality": "medium"
+                    },
+                    {
+                      "claim": "候选人存在需要面试补证的 ownership 风险",
+                      "support": "Ownership scope may be overstated",
+                      "quality": "medium"
+                    }
+                  ],
+                  "overallRisks": [
+                    {
+                      "label": "Evidence｜证据密度不足",
+                      "detail": "虽然有结果线索，但仍缺少完整业务背景与本人贡献拆解。",
+                      "confidence": "中",
+                      "evidenceQuotes": [
+                        "Led a 20-engineer team through platform modernization",
+                        "Worked closely with product and sales on enterprise customer launches"
+                      ],
+                      "evidenceStatus": "证据有限"
+                    }
+                  ],
+                  "followUpQuestions": [
+                    "请拆一个你亲自主导的项目：目标、资源、动作、结果分别是什么？",
+                    "你在上一段经历里真正拍板或 owner 的部分是什么？",
+                    "如果加入当前岗位，前 90 天你会先解决哪三件事？"
+                  ],
+                  "candidateIndex": 0,
+                  "weighted": false,
+                  "strengths": [
+                    "Led a 20-engineer team through platform modernization",
+                    "Worked closely with product and sales on enterprise customer launches",
+                    "Built execution cadence across engineering, QA, and solution teams"
+                  ],
+                  "concerns": [
+                    "Ownership scope may be overstated",
+                    "Has mostly operated in relatively mature organizations"
+                  ]
+                }
+              ]
+            }
+          },
+          "metrics": {
+            "durationMs": 21
+          }
+        },
+        {
+          "id": "compile-results",
+          "stageId": "compile-report",
+          "kind": "result-compilation",
+          "runnerId": "openai-chat",
+          "status": "completed",
+          "startedAt": "2026-03-15T17:02:56.124Z",
+          "completedAt": "2026-03-15T17:02:56.125Z",
+          "durationMs": 1,
+          "consumes": [
+            "candidate-assessment-result"
+          ],
+          "produces": [
+            "report-markdown"
+          ],
+          "output": {
+            "artifactId": "report-markdown",
+            "renderer": "multi-stage-combination",
+            "templateId": "candidate_assessment_cn",
+            "stageCount": 4
+          },
+          "metrics": {
+            "durationMs": 1
+          }
+        },
+        {
+          "id": "finalize-response",
+          "stageId": "finalize-run",
+          "kind": "response-finalization",
+          "runnerId": "openai-chat",
+          "status": "completed",
+          "startedAt": "2026-03-15T17:02:56.125Z",
+          "completedAt": "2026-03-15T17:02:56.125Z",
+          "durationMs": 0,
+          "consumes": [
+            "report-markdown"
+          ],
+          "produces": [
+            "run-summary"
+          ],
+          "output": {
+            "artifactId": "run-summary",
+            "finalArtifactId": "report-markdown"
+          },
+          "metrics": {
+            "durationMs": 0
+          }
+        }
+      ],
+      "artifacts": [
+        {
+          "id": "normalized-request",
+          "name": "Normalized Request Payload",
+          "kind": "json",
+          "mimeType": "application/json",
+          "stageId": "ingest-request",
+          "producedBy": "capture-request",
+          "boundary": "local-only",
+          "metadata": {
+            "templateId": "candidate_assessment_cn",
+            "roleTitle": "Senior Engineering Manager",
+            "projectName": "Confidential Client - Trusted Assessment Demo",
+            "preview": "{\n  \"templateId\": \"candidate_assessment_cn\",\n  \"searchContext\": {\n    \"projectName\": \"Confidential Client - Trusted Assessment Demo\",\n    \"roleTitle\": \"Senior Engineering Manager\",\n    \"clientName\": \"Confidential Client\",\n    \"searchType\": \"executive_search\",\n    \"companyConte..."
+          }
+        },
+        {
+          "id": "workflow-brief",
+          "name": "Workflow Brief",
+          "kind": "json",
+          "mimeType": "application/json",
+          "stageId": "prepare-brief",
+          "producedBy": "build-brief",
+          "boundary": "local-only",
+          "metadata": {
+            "sourceArtifactId": "normalized-request",
+            "targetCompanyCount": 0,
+            "preview": "{\n  \"templateId\": \"candidate_assessment_cn\",\n  \"projectName\": \"Confidential Client - Trusted Assessment Demo\",\n  \"roleTitle\": \"Senior Engineering Manager\",\n  \"objective\": \"Produce a trusted candidate assessment with rubric, evidence, and confidence\",\n  \"targetCompanies\": [],\n ..."
+          }
+        },
+        {
+          "id": "jd-diagnosis-result",
+          "name": "JD Diagnosis Result",
+          "kind": "markdown",
+          "mimeType": "text/markdown",
+          "stageId": "jd-diagnosis",
+          "producedBy": "execute-jd-diagnosis",
+          "boundary": "local-only",
+          "metadata": {
+            "templateId": "candidate_assessment_cn",
+            "sourceArtifactId": "workflow-brief",
+            "renderer": "openai-compatible-chat-completions",
+            "remoteInfo": {
+              "attempted": true,
+              "succeeded": true,
+              "baseUrl": "http://127.0.0.1:29099/v1",
+              "path": "/chat/completions",
+              "model": "mock-qwen",
+              "startedAt": "2026-03-15T17:02:56.033Z",
+              "completedAt": "2026-03-15T17:02:56.085Z",
+              "durationMs": 52,
+              "responseId": "chatcmpl_mock_731a6f80-ae74-442f-801c-db3f58ccd17c",
+              "finishReason": "stop",
+              "usage": {
+                "prompt_tokens": 1307,
+                "completion_tokens": 130,
+                "total_tokens": 1437
+              },
+              "tokenUsage": {
+                "promptTokens": 1307,
+                "completionTokens": 130,
+                "totalTokens": 1437,
+                "model": "mock-qwen"
+              },
+              "stream": false,
+              "stage": "jd-diagnosis"
+            },
+            "preview": "# 模拟远程人才情报报告｜Senior Engineering Manager\n\n## 结论\n\n- 该报告由本地 mock OpenAI-compatible provider 生成，用于离线集成测试。\n- Template: candidate_assessment_cn\n- Project: Confidential Client - Trusted Assessment Demo\n- Objective: Produce a trusted candidate assessment with rubric, evidence, and con..."
+          }
+        },
+        {
+          "id": "search-plan-result",
+          "name": "Search Plan Result",
+          "kind": "markdown",
+          "mimeType": "text/markdown",
+          "stageId": "search-plan",
+          "producedBy": "execute-search-plan",
+          "boundary": "local-only",
+          "metadata": {
+            "templateId": "candidate_assessment_cn",
+            "sourceArtifactId": "jd-diagnosis-result",
+            "renderer": "openai-compatible-chat-completions",
+            "remoteInfo": {
+              "attempted": true,
+              "succeeded": true,
+              "baseUrl": "http://127.0.0.1:29099/v1",
+              "path": "/chat/completions",
+              "model": "mock-qwen",
+              "startedAt": "2026-03-15T17:02:56.086Z",
+              "completedAt": "2026-03-15T17:02:56.096Z",
+              "durationMs": 10,
+              "responseId": "chatcmpl_mock_bb13a972-b0cf-4654-aa3e-1b709f0e25f1",
+              "finishReason": "stop",
+              "usage": {
+                "prompt_tokens": 1470,
+                "completion_tokens": 130,
+                "total_tokens": 1600
+              },
+              "tokenUsage": {
+                "promptTokens": 1470,
+                "completionTokens": 130,
+                "totalTokens": 1600,
+                "model": "mock-qwen"
+              },
+              "stream": false,
+              "stage": "search-plan"
+            },
+            "preview": "# 模拟远程人才情报报告｜Senior Engineering Manager\n\n## 结论\n\n- 该报告由本地 mock OpenAI-compatible provider 生成，用于离线集成测试。\n- Template: candidate_assessment_cn\n- Project: Confidential Client - Trusted Assessment Demo\n- Objective: Produce a trusted candidate assessment with rubric, evidence, and con..."
+          }
+        },
+        {
+          "id": "sourcing-strategy-result",
+          "name": "Sourcing Strategy Result",
+          "kind": "markdown",
+          "mimeType": "text/markdown",
+          "stageId": "sourcing-strategy",
+          "producedBy": "execute-sourcing-strategy",
+          "boundary": "local-only",
+          "metadata": {
+            "templateId": "candidate_assessment_cn",
+            "sourceArtifactId": "search-plan-result",
+            "renderer": "openai-compatible-chat-completions",
+            "remoteInfo": {
+              "attempted": true,
+              "succeeded": true,
+              "baseUrl": "http://127.0.0.1:29099/v1",
+              "path": "/chat/completions",
+              "model": "mock-qwen",
+              "startedAt": "2026-03-15T17:02:56.097Z",
+              "completedAt": "2026-03-15T17:02:56.103Z",
+              "durationMs": 6,
+              "responseId": "chatcmpl_mock_e214709e-98d0-4596-99f6-3a5688dcc0f5",
+              "finishReason": "stop",
+              "usage": {
+                "prompt_tokens": 1655,
+                "completion_tokens": 130,
+                "total_tokens": 1785
+              },
+              "tokenUsage": {
+                "promptTokens": 1655,
+                "completionTokens": 130,
+                "totalTokens": 1785,
+                "model": "mock-qwen"
+              },
+              "stream": false,
+              "stage": "sourcing-strategy"
+            },
+            "preview": "# 模拟远程人才情报报告｜Senior Engineering Manager\n\n## 结论\n\n- 该报告由本地 mock OpenAI-compatible provider 生成，用于离线集成测试。\n- Template: candidate_assessment_cn\n- Project: Confidential Client - Trusted Assessment Demo\n- Objective: Produce a trusted candidate assessment with rubric, evidence, and con..."
+          }
+        },
+        {
+          "id": "candidate-assessment-result",
+          "name": "Candidate Assessment Result Summary",
+          "kind": "json",
+          "mimeType": "application/json",
+          "stageId": "candidate-assessment",
+          "producedBy": "execute-candidate-assessment",
+          "boundary": "local-only",
+          "metadata": {
+            "templateId": "candidate_assessment_cn",
+            "sourceArtifactId": "sourcing-strategy-result",
+            "renderer": "openai-compatible-chat-completions",
+            "totalCandidates": 1,
+            "successfulCount": 1,
+            "failedCount": 0,
+            "preview": "{\n  \"totalCandidates\": 1,\n  \"successfulAssessments\": 1,\n  \"failedAssessments\": 0,\n  \"rubrics\": [],\n  \"assessments\": [\n    {\n      \"assessmentType\": \"trusted_assessment\",\n      \"candidateName\": \"Alex Chen\",\n      \"recommendation\": \"建议推进\",\n      \"summary\": \"Engineering leader wi..."
+          }
+        },
+        {
+          "id": "report-markdown",
+          "name": "Compiled Report",
+          "kind": "markdown",
+          "mimeType": "text/markdown",
+          "stageId": "compile-report",
+          "producedBy": "compile-results",
+          "boundary": "local-only",
+          "metadata": {
+            "templateId": "candidate_assessment_cn",
+            "renderer": "multi-stage-combination",
+            "stageCount": 4,
+            "sourceArtifacts": [
+              "jd-diagnosis-result",
+              "search-plan-result",
+              "sourcing-strategy-result",
+              "candidate-assessment-result"
+            ],
+            "hasParallelAssessments": true,
+            "totalCandidates": 1,
+            "preview": "# Senior Engineering Manager\n\n## Job Description Diagnosis\n\n# 模拟远程人才情报报告｜Senior Engineering Manager\n\n## 结论\n\n- 该报告由本地 mock OpenAI-compatible provider 生成，用于离线集成测试。\n- Template: candidate_assessment_cn\n- Project: Confidential Client - Trusted Assessment Demo\n- Objective: Produce a..."
+          }
+        },
+        {
+          "id": "run-summary",
+          "name": "Run Summary",
+          "kind": "json",
+          "mimeType": "application/json",
+          "stageId": "finalize-run",
+          "producedBy": "finalize-response",
+          "boundary": "local-only",
+          "metadata": {
+            "sourceArtifactId": "report-markdown",
+            "multiStage": true,
+            "preview": "{\n  \"runId\": \"run_cabad437-cd1c-4e4e-b515-7c242507d425\",\n  \"requestId\": \"req_e3e45115-3e95-4652-87bd-87b39da24cb3\",\n  \"templateId\": \"candidate_assessment_cn\",\n  \"resolvedRunnerId\": \"openai-chat\",\n  \"finalArtifactId\": \"report-markdown\",\n  \"remoteAttempted\": true,\n  \"remoteSucce..."
+          }
+        },
+        {
+          "id": "candidate-assessment-result-0",
+          "producedBy": "execute-candidate-assessment",
+          "boundary": "local-only",
+          "metadata": {
+            "templateId": "candidate_assessment_cn",
+            "sourceArtifactId": "sourcing-strategy-result",
+            "renderer": "openai-compatible-chat-completions",
+            "remoteInfo": {
+              "attempted": true,
+              "succeeded": true,
+              "baseUrl": "http://127.0.0.1:29099/v1",
+              "path": "/chat/completions",
+              "model": "mock-qwen",
+              "startedAt": "2026-03-15T17:02:56.104Z",
+              "completedAt": "2026-03-15T17:02:56.121Z",
+              "durationMs": 17,
+              "responseId": "chatcmpl_mock_087b76b2-920a-4461-b125-34642fba78b5",
+              "finishReason": "stop",
+              "usage": {
+                "prompt_tokens": 2377,
+                "completion_tokens": 529,
+                "total_tokens": 2906
+              },
+              "tokenUsage": {
+                "promptTokens": 2377,
+                "completionTokens": 529,
+                "totalTokens": 2906,
+                "model": "mock-qwen"
+              },
+              "stream": false,
+              "stage": "candidate-assessment"
+            },
+            "candidateIndex": 0,
+            "candidateName": "Alex Chen",
+            "preview": "{\n  \"assessmentType\": \"trusted_assessment\",\n  \"candidateName\": \"Alex Chen\",\n  \"recommendation\": \"建议推进\",\n  \"summary\": \"Engineering leader with platform and enterprise delivery background.\",\n  \"confidence\": {\n    \"score\": 0.78,\n    \"label\": \"medium-high\",\n    \"rationale\": \"Trust..."
+          }
+        }
+      ],
+      "finalArtifactId": "report-markdown",
+      "result": {
+        "renderer": "multi-stage-combination",
+        "templateId": "candidate_assessment_cn",
+        "artifactId": "report-markdown",
+        "finalArtifactId": "report-markdown",
+        "finalizationArtifactId": "run-summary",
+        "multiStage": true,
+        "stageResults": {
+          "jdDiagnosis": "# 模拟远程人才情报报告｜Senior Engineering Manager\n\n## 结论\n\n- 该报告由本地 mock OpenAI-compatible provider 生成，用于离线集成测试。\n- Template: candidate_assessment_cn\n- Project: Confidential Client - Trusted Assessment Demo\n- Objective: Produce a trusted candidate assessment with rubric, evidence, and confidence\n\n## 角色摘要\n\n- Role Title: Senior Engineering Manager\n- Location: Shanghai\n- Salary Range: Base 80-110k RMB/month\n\n## Target Companies\n\n- TBD\n\n## Must-Have Skills\n\n- Engineering leadership\n- Cross-functional execution\n- B2B product delivery\n\n## Mock Provider Notes\n\n- No external network was used.\n- This response is deterministic enough for local harness validation.",
+          "searchPlan": "# 模拟远程人才情报报告｜Senior Engineering Manager\n\n## 结论\n\n- 该报告由本地 mock OpenAI-compatible provider 生成，用于离线集成测试。\n- Template: candidate_assessment_cn\n- Project: Confidential Client - Trusted Assessment Demo\n- Objective: Produce a trusted candidate assessment with rubric, evidence, and confidence\n\n## 角色摘要\n\n- Role Title: Senior Engineering Manager\n- Location: Shanghai\n- Salary Range: Base 80-110k RMB/month\n\n## Target Companies\n\n- TBD\n\n## Must-Have Skills\n\n- Engineering leadership\n- Cross-functional execution\n- B2B product delivery\n\n## Mock Provider Notes\n\n- No external network was used.\n- This response is deterministic enough for local harness validation.",
+          "sourcingStrategy": "# 模拟远程人才情报报告｜Senior Engineering Manager\n\n## 结论\n\n- 该报告由本地 mock OpenAI-compatible provider 生成，用于离线集成测试。\n- Template: candidate_assessment_cn\n- Project: Confidential Client - Trusted Assessment Demo\n- Objective: Produce a trusted candidate assessment with rubric, evidence, and confidence\n\n## 角色摘要\n\n- Role Title: Senior Engineering Manager\n- Location: Shanghai\n- Salary Range: Base 80-110k RMB/month\n\n## Target Companies\n\n- TBD\n\n## Must-Have Skills\n\n- Engineering leadership\n- Cross-functional execution\n- B2B product delivery\n\n## Mock Provider Notes\n\n- No external network was used.\n- This response is deterministic enough for local harness validation.",
+          "candidateAssessment": {
+            "totalCandidates": 1,
+            "successfulAssessments": 1,
+            "failedAssessments": 0,
+            "rubrics": [],
+            "assessments": [
+              {
+                "assessmentType": "trusted_assessment",
+                "candidateName": "Alex Chen",
+                "recommendation": "建议推进",
+                "summary": "Engineering leader with platform and enterprise delivery background.",
+                "confidence": {
+                  "score": 0.78,
+                  "label": "medium-high",
+                  "rationale": "Trusted assessment 依赖简历证据密度；当前结论适合继续验证，不适合直接终判。"
+                },
+                "dimensions": [
+                  {
+                    "key": "relevant_experience",
+                    "label": "Rubric｜相关经历匹配",
+                    "judgement": "Alex Chen 具备与目标岗位相邻的经历，可继续核实深度与迁移性。",
+                    "confidence": "中",
+                    "evidenceQuotes": [
+                      "Engineering leader with platform and enterprise delivery background."
+                    ],
+                    "evidenceStatus": "证据有限",
+                    "missingInformation": [
+                      "缺少每段经历的职责边界与起止时间"
+                    ],
+                    "id": "relevant_experience"
+                  },
+                  {
+                    "key": "achievement_ownership",
+                    "label": "Rubric｜业绩与 owner 程度",
+                    "judgement": "简历里出现了可验证结果线索，但仍需核实是否为本人主导。",
+                    "confidence": "中",
+                    "evidenceQuotes": [
+                      "Led a 20-engineer team through platform modernization",
+                      "Worked closely with product and sales on enterprise customer launches"
+                    ],
+                    "evidenceStatus": "证据充分",
+                    "missingInformation": [
+                      "需要补充目标、动作、结果、本人角色"
+                    ],
+                    "id": "achievement_ownership"
+                  },
+                  {
+                    "key": "domain_alignment",
+                    "label": "Rubric｜领域与能力对口度",
+                    "judgement": "信息不足：缺少足够简历证据支持判断。",
+                    "confidence": "低",
+                    "evidenceQuotes": [
+                      "信息不足"
+                    ],
+                    "evidenceStatus": "信息不足",
+                    "missingInformation": [
+                      "需要补充核心技能使用场景与熟练度"
+                    ],
+                    "id": "domain_alignment"
+                  },
+                  {
+                    "key": "risk_flags",
+                    "label": "Rubric｜主要风险信号",
+                    "judgement": "简历/备注中已有风险信号，建议在初访里先核实。",
+                    "confidence": "中",
+                    "evidenceQuotes": [
+                      "Ownership scope may be overstated",
+                      "Has mostly operated in relatively mature organizations"
+                    ],
+                    "evidenceStatus": "证据充分",
+                    "missingInformation": [
+                      "需要补充离职动机、薪酬预期、管理跨度或城市意愿"
+                    ],
+                    "id": "risk_flags"
+                  }
+                ],
+                "evidence": [
+                  {
+                    "claim": "候选人具备跨团队推进和交付经历",
+                    "support": "Led a 20-engineer team through platform modernization",
+                    "quality": "medium"
+                  },
+                  {
+                    "claim": "候选人存在需要面试补证的 ownership 风险",
+                    "support": "Ownership scope may be overstated",
+                    "quality": "medium"
+                  }
+                ],
+                "overallRisks": [
+                  {
+                    "label": "Evidence｜证据密度不足",
+                    "detail": "虽然有结果线索，但仍缺少完整业务背景与本人贡献拆解。",
+                    "confidence": "中",
+                    "evidenceQuotes": [
+                      "Led a 20-engineer team through platform modernization",
+                      "Worked closely with product and sales on enterprise customer launches"
+                    ],
+                    "evidenceStatus": "证据有限"
+                  }
+                ],
+                "followUpQuestions": [
+                  "请拆一个你亲自主导的项目：目标、资源、动作、结果分别是什么？",
+                  "你在上一段经历里真正拍板或 owner 的部分是什么？",
+                  "如果加入当前岗位，前 90 天你会先解决哪三件事？"
+                ],
+                "candidateIndex": 0,
+                "weighted": false,
+                "strengths": [
+                  "Led a 20-engineer team through platform modernization",
+                  "Worked closely with product and sales on enterprise customer launches",
+                  "Built execution cadence across engineering, QA, and solution teams"
+                ],
+                "concerns": [
+                  "Ownership scope may be overstated",
+                  "Has mostly operated in relatively mature organizations"
+                ]
+              }
+            ],
+            "allAssessmentIds": [
+              "candidate-assessment-result-0"
+            ],
+            "timestamp": "2026-03-15T17:02:56.122Z"
+          }
+        },
+        "candidateAssessment": {
+          "mode": "batch",
+          "totalCandidates": 1,
+          "successfulAssessments": 1,
+          "failedAssessments": 0,
+          "rubrics": [],
+          "assessments": [
+            {
+              "assessmentType": "trusted_assessment",
+              "candidateName": "Alex Chen",
+              "recommendation": "建议推进",
+              "summary": "Engineering leader with platform and enterprise delivery background.",
+              "confidence": {
+                "score": 0.78,
+                "label": "medium-high",
+                "rationale": "Trusted assessment 依赖简历证据密度；当前结论适合继续验证，不适合直接终判。"
+              },
+              "dimensions": [
+                {
+                  "key": "relevant_experience",
+                  "label": "Rubric｜相关经历匹配",
+                  "judgement": "Alex Chen 具备与目标岗位相邻的经历，可继续核实深度与迁移性。",
+                  "confidence": "中",
+                  "evidenceQuotes": [
+                    "Engineering leader with platform and enterprise delivery background."
+                  ],
+                  "evidenceStatus": "证据有限",
+                  "missingInformation": [
+                    "缺少每段经历的职责边界与起止时间"
+                  ],
+                  "id": "relevant_experience"
+                },
+                {
+                  "key": "achievement_ownership",
+                  "label": "Rubric｜业绩与 owner 程度",
+                  "judgement": "简历里出现了可验证结果线索，但仍需核实是否为本人主导。",
+                  "confidence": "中",
+                  "evidenceQuotes": [
+                    "Led a 20-engineer team through platform modernization",
+                    "Worked closely with product and sales on enterprise customer launches"
+                  ],
+                  "evidenceStatus": "证据充分",
+                  "missingInformation": [
+                    "需要补充目标、动作、结果、本人角色"
+                  ],
+                  "id": "achievement_ownership"
+                },
+                {
+                  "key": "domain_alignment",
+                  "label": "Rubric｜领域与能力对口度",
+                  "judgement": "信息不足：缺少足够简历证据支持判断。",
+                  "confidence": "低",
+                  "evidenceQuotes": [
+                    "信息不足"
+                  ],
+                  "evidenceStatus": "信息不足",
+                  "missingInformation": [
+                    "需要补充核心技能使用场景与熟练度"
+                  ],
+                  "id": "domain_alignment"
+                },
+                {
+                  "key": "risk_flags",
+                  "label": "Rubric｜主要风险信号",
+                  "judgement": "简历/备注中已有风险信号，建议在初访里先核实。",
+                  "confidence": "中",
+                  "evidenceQuotes": [
+                    "Ownership scope may be overstated",
+                    "Has mostly operated in relatively mature organizations"
+                  ],
+                  "evidenceStatus": "证据充分",
+                  "missingInformation": [
+                    "需要补充离职动机、薪酬预期、管理跨度或城市意愿"
+                  ],
+                  "id": "risk_flags"
+                }
+              ],
+              "evidence": [
+                {
+                  "claim": "候选人具备跨团队推进和交付经历",
+                  "support": "Led a 20-engineer team through platform modernization",
+                  "quality": "medium"
+                },
+                {
+                  "claim": "候选人存在需要面试补证的 ownership 风险",
+                  "support": "Ownership scope may be overstated",
+                  "quality": "medium"
+                }
+              ],
+              "overallRisks": [
+                {
+                  "label": "Evidence｜证据密度不足",
+                  "detail": "虽然有结果线索，但仍缺少完整业务背景与本人贡献拆解。",
+                  "confidence": "中",
+                  "evidenceQuotes": [
+                    "Led a 20-engineer team through platform modernization",
+                    "Worked closely with product and sales on enterprise customer launches"
+                  ],
+                  "evidenceStatus": "证据有限"
+                }
+              ],
+              "followUpQuestions": [
+                "请拆一个你亲自主导的项目：目标、资源、动作、结果分别是什么？",
+                "你在上一段经历里真正拍板或 owner 的部分是什么？",
+                "如果加入当前岗位，前 90 天你会先解决哪三件事？"
+              ],
+              "candidateIndex": 0,
+              "weighted": false,
+              "strengths": [
+                "Led a 20-engineer team through platform modernization",
+                "Worked closely with product and sales on enterprise customer launches",
+                "Built execution cadence across engineering, QA, and solution teams"
+              ],
+              "concerns": [
+                "Ownership scope may be overstated",
+                "Has mostly operated in relatively mature organizations"
+              ]
+            }
+          ]
+        }
+      },
+      "metrics": {
+        "totalDurationMs": 92,
+        "tokenUsage": {
+          "promptTokens": 4432,
+          "completionTokens": 390,
+          "totalTokens": 4822
+        },
+        "requestTotalDurationMs": 106,
+        "executionDurationMs": 92
+      },
+      "remote": {
+        "attempted": true,
+        "succeeded": true,
+        "multiStage": true,
+        "stageCount": 4
+      }
+    },
+    "selection": {
+      "requestedMode": "openai",
+      "requestedRunner": "openai-chat",
+      "preferredRunnerId": "openai-chat",
+      "resolvedRunnerId": "openai-chat",
+      "resolvedMode": "llm",
+      "resolutionSource": "runner",
+      "strategy": "requested-runner",
+      "fallbackApplied": false,
+      "fallbackKind": "none",
+      "fallbackReason": "Remote runner is explicitly enabled and configured for OpenAI-compatible chat completions."
+    }
+  },
+  "artifacts": {
+    "rootDir": "/Users/eleven/.openclaw/workspace/projects/talent-intelligence-agent/state/runs/2026/03/15/run_cabad437-cd1c-4e4e-b515-7c242507d425",
+    "files": {
+      "request": "/Users/eleven/.openclaw/workspace/projects/talent-intelligence-agent/state/runs/2026/03/15/run_cabad437-cd1c-4e4e-b515-7c242507d425/request.json",
+      "response": "/Users/eleven/.openclaw/workspace/projects/talent-intelligence-agent/state/runs/2026/03/15/run_cabad437-cd1c-4e4e-b515-7c242507d425/response.json",
+      "reportMarkdown": "/Users/eleven/.openclaw/workspace/projects/talent-intelligence-agent/state/runs/2026/03/15/run_cabad437-cd1c-4e4e-b515-7c242507d425/report.md",
+      "events": "/Users/eleven/.openclaw/workspace/projects/talent-intelligence-agent/state/runs/2026/03/15/run_cabad437-cd1c-4e4e-b515-7c242507d425/events.log"
+    }
+  }
+}

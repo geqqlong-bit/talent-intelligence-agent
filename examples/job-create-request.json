@@ -1,0 +1,33 @@
+{
+  "templateId": "sourcing_strategy_cn",
+  "searchContext": {
+    "projectName": "Confidential Client - VP Product Search",
+    "roleTitle": "VP Product",
+    "clientName": "Confidential Client",
+    "searchType": "executive_search",
+    "mandateType": "retained",
+    "companyContext": "Series C AI infra company selling to enterprise customers",
+    "companyStage": "Series C",
+    "businessModel": "Enterprise SaaS + AI infrastructure",
+    "teamStage": "Scaling from 8 to 20 product team members",
+    "hiringBrief": "Find a product leader who can unify platform roadmap and enterprise customer requirements",
+    "objective": "Output search strategy and target-company map",
+    "targetIndustry": "Enterprise software, cloud, AI infrastructure",
+    "targetCompanies": ["Huawei Cloud", "Alibaba Cloud", "Volcano Engine", "Tencent Cloud"],
+    "location": "Shanghai",
+    "targetGeographies": ["Shanghai", "Hangzhou", "Shenzhen"],
+    "salaryRange": "Base 150-220k RMB/month"
+  },
+  "runtime": {
+    "mode": "openai",
+    "runner": "openai-chat",
+    "baseUrl": "http://127.0.0.1:8999/v1",
+    "apiKey": "test-key",
+    "allowRemote": true,
+    "model": "bailian/qwen3.5-plus",
+    "temperature": 0.4,
+    "maxTokens": 5000,
+    "timeoutMs": 120000
+  },
+  "webhookUrl": "https://your-app.com/webhooks/talent-intel-completed"
+}

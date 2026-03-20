@@ -1,0 +1,93 @@
+{
+  "templateId": "candidate_assessment_cn",
+  "searchContext": {
+    "projectName": "Confidential Client - Senior Engineering Team Expansion",
+    "roleTitle": "Senior Software Engineer",
+    "clientName": "Confidential Client",
+    "searchType": "technical_hire",
+    "mandateType": "retained",
+    "companyContext": "Series B fintech company building payment infrastructure",
+    "companyStage": "Series B",
+    "businessModel": "B2B Payment Infrastructure / Fintech",
+    "teamStage": "Growth phase; engineering team expanding from 15 to 25",
+    "hiringBrief": "Find senior engineers with experience in scalable payment systems and financial compliance",
+    "objective": "Evaluate multiple candidates for technical competency, cultural fit, and growth potential",
+    "targetIndustry": "Fintech, Payments, Banking Technology",
+    "location": "San Francisco",
+    "salaryRange": "Base 180-220k USD",
+    "compensationMix": "Base + equity + performance bonus",
+    "reportingLine": "Engineering Manager",
+    "level": "Senior",
+    "headcount": "3",
+    "urgency": "Medium",
+    "searchReason": "Team expansion to support product growth and regulatory compliance requirements",
+    "successProfile": "Within 6 months, contribute to core payment processing systems and mentor junior engineers",
+    "successMetrics": "Successful integration of payment features, improved code quality metrics, mentoring outcomes",
+    "stakeholderBrief": "CTO values system design skills; Engineering Manager focuses on team dynamics",
+    "mustHaveSkills": ["Payment systems", "Security compliance", "System design"],
+    "niceToHaveSkills": ["Financial regulations", "Scalability expertise", "Leadership experience"],
+    "dealBreakers": ["No fintech experience", "Poor communication skills"],
+    "processConstraints": "Need evaluations completed within 2 weeks",
+    "candidates": [
+      {
+        "name": "Alice Johnson",
+        "summary": "Principal engineer at Stripe with 8+ years in payment systems",
+        "experience": "Led development of fraud detection systems at Stripe, previously at PayPal",
+        "skills": ["Java", "Go", "Microservices", "Payment Systems", "Security"],
+        "highlights": [
+          "Architected fraud detection system processing $10B+ annually",
+          "Led team of 8 engineers during high-growth period",
+          "Published papers on secure payment protocols"
+        ],
+        "concerns": [
+          "May expect higher compensation than budget allows",
+          "Large company experience may not suit startup pace"
+        ],
+        "interviewerNotes": "Strong technical background, potential cultural fit concerns"
+      },
+      {
+        "name": "Bob Chen",
+        "summary": "Senior engineer at Capital One with banking technology expertise",
+        "experience": "7 years in banking tech, focus on compliance and risk systems",
+        "skills": ["Python", "SQL", "Risk Management", "Compliance Systems", "Data Pipelines"],
+        "highlights": [
+          "Built real-time transaction monitoring system",
+          "Reduced false positive alerts by 40%",
+          "Regulatory audit preparation specialist"
+        ],
+        "concerns": [
+          "Limited experience with high-volume consumer payments",
+          "May prefer corporate stability over startup growth"
+        ],
+        "interviewerNotes": "Excellent compliance background, needs assessment on innovation mindset"
+      },
+      {
+        "name": "Carol Davis",
+        "summary": "Staff engineer at Square with mobile payments focus",
+        "experience": "9 years in mobile payment systems, open-source contributor",
+        "skills": ["Swift", "iOS", "Mobile Payments", "API Design", "Performance Optimization"],
+        "highlights": [
+          "Led iOS SDK redesign serving millions of merchants",
+          "Open-source contributor to payment libraries",
+          "Mentored 12 junior engineers"
+        ],
+        "concerns": [
+          "Primarily mobile-focused, limited backend experience",
+          "May prefer product-focused role over infrastructure"
+        ],
+        "interviewerNotes": "Strong mobile expertise, assess backend learning capability"
+      }
+    ]
+  },
+  "runtime": {
+    "mode": "openai",
+    "runner": "openai-chat",
+    "baseUrl": "http://127.0.0.1:8999/v1",
+    "apiKey": "test-key",
+    "model": "bailian/qwen3.5-plus",
+    "temperature": 0.4,
+    "maxTokens": 5000,
+    "timeoutMs": 120000,
+    "maxConcurrency": 3
+  }
+}

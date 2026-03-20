@@ -10,13 +10,14 @@ http://127.0.0.1:8788
 
 ## Version note
 
-The live server currently returns `apiVersion: "v0.6"`.
+The live server currently returns `apiVersion: "v0.11"`.
 
-What changed in the backend is the **remote integration harness** and the tightened error surface. In other words:
-- the public HTTP envelope is still v0.6
-- the runtime now includes a real `openai-chat` runner harness for OpenAI-compatible chat completions
-- outbound remote calls happen only when the runner is both explicitly requested and enabled/configured
-- otherwise the request resolves to `local-template`, unless `runtime.remoteRequired=true`, in which case the server returns `REMOTE_RUNNER_REQUIRED_BUT_UNAVAILABLE`
+What changed in the backend is the addition of **trusted candidate assessment validation** on top of the existing parallel worker pool. In other words:
+- the public HTTP envelope is now v0.11
+- candidate assessment can request structured JSON for evidence-first trusted assessment validation
+- the local mock-provider path now validates rubric + evidence + confidence markers end-to-end
+- batch candidate assessment via `searchContext.candidates` and `runtime.maxConcurrency` remains available
+- token usage and performance metrics are still aggregated across parallel evaluations when batch mode is used
 
 ## Endpoints
 
@@ -47,6 +48,7 @@ Runs one talent-intelligence workflow request.
 Canonical request/response examples:
 - `examples/run-request.json`
 - `examples/run-response.json`
+- `examples/run-response-remote-success.json` - Example with detailed LLM metrics and token usage
 
 ## Execution and fallback semantics
 
@@ -96,6 +98,11 @@ These sample payloads are kept in `examples/` and should stay aligned with the d
 - `examples/schema-response.json`
 - `examples/run-request.json`
 - `examples/run-response.json`
+- `examples/run-response-remote-success.json`
+- `examples/run-request-batch-candidates.json` - NEW in v0.9: Example request with multiple candidates for parallel processing
+- `examples/run-request-trusted-assessment.json` - NEW in v0.11: trusted candidate-assessment request
+- `examples/run-response-trusted-assessment.json` - NEW in v0.11: trusted candidate-assessment response
+- `examples/run-response-batch-candidates.json` - NEW in v0.9: Example response from parallel candidate assessment
 - `examples/error-invalid-template.json`
 - `examples/error-missing-role-title.json`
 - `examples/error-invalid-json.json`
@@ -170,6 +177,7 @@ The current normalizer accepts these fields under `searchContext`:
 - `candidateHighlights`
 - `candidateConcerns`
 - `interviewerNotes`
+- `candidates` - **NEW in v0.9**: An array of candidate objects for batch processing. When provided, enables parallel worker pool execution for concurrent candidate assessments. Each candidate object should contain fields like `name`, `summary`, `experience`, `skills`, `highlights`, `concerns`, etc.
 
 ### Runtime fields currently recognized
 
@@ -189,6 +197,9 @@ The current normalizer accepts these fields under `searchContext`:
 - `temperature` — defaults to `0.4`
 - `maxTokens` — defaults to `5000`
 - `timeoutMs` — defaults to `120000`
+- `responseFormat` — specifies the desired response format (e.g., `{ type: "json_object" }` for JSON)
+- `jsonMode` — when true, forces JSON object response format
+- `maxConcurrency` — **NEW in v0.9**: Maximum number of concurrent worker threads for parallel candidate processing (defaults to 5)
 
 Important runtime notes:
 - A remote call is attempted only when the request explicitly selects the remote adapter (`openai-chat`, `openai`, `llm`, or `remote`) **and** outbound remote execution is enabled via `runtime.allowRemote=true`, `runtime.remoteEnabled=true`, or `TALENT_INTEL_ENABLE_REMOTE_RUNNER=1`.
@@ -238,6 +249,134 @@ From `examples/run-request.json`:
 
 From `examples/run-response.json`:
 
+### Multi-Stage LLM Pipeline and Structured JSON Output
+
+The v0.8 backend implements a comprehensive multi-stage execution pipeline with structured JSON output for all processing stages:
+
+#### Execution Stages
+The system now processes requests through 4 distinct stages:
+
+1. **ingest-request** - Captures and normalizes the incoming request
+2. **build-brief** - Constructs the structured workflow brief
+3. **llm-generation** - Executes LLM processing (when using `openai-chat` runner) or template rendering (when using `local-template` runner)
+4. **finalize-response** - Packages the final response and artifacts
+
+#### Structured JSON Output Capabilities
+Each stage now produces structured JSON output with:
+
+- Stage-level metrics and timing information
+- Step-by-step execution tracking
+- Artifact lineage with dependencies between stages
+- Comprehensive token usage tracking across all stages
+- Detailed performance metrics at each execution phase
+
+#### Enhanced Orchestration Data
+The response now includes detailed orchestration information in `orchestration.execution`:
+
+- `stages[]` - Array of all execution stages with status, timing, and dependencies
+- `steps[]` - Detailed step-by-step execution with metrics and output tracking
+- `artifacts[]` - Complete artifact lineage showing all intermediate and final outputs
+- `metrics` - Aggregated performance metrics across all stages
+
+#### LLM Prompt/Generation Phase and Metrics
+
+When using the `openai-chat` runner (remote LLM execution), the response includes comprehensive metrics about the LLM interaction:
+
+- `remoteInfo` object contains:
+  - `attempted`: boolean indicating if remote call was attempted
+  - `succeeded`: boolean indicating if remote call succeeded
+  - `baseUrl`: the LLM provider endpoint used
+  - `path`: the API path called
+  - `model`: the model used for generation
+  - `startedAt`: ISO timestamp when the request started
+  - `completedAt`: ISO timestamp when the request completed
+  - `durationMs`: total round-trip time in milliseconds
+  - `responseId`: the provider's unique response identifier
+  - `finishReason`: how the generation completed (e.g., "stop", "length", "content_filter")
+  - `usage`: token usage statistics with:
+    - `prompt_tokens`: number of tokens in the input prompt
+    - `completion_tokens`: number of tokens in the generated response
+    - `total_tokens`: total tokens consumed (input + output)
+
+#### v0.11 Trusted Assessment Structure
+
+The `candidate_assessment_cn` template in v0.11 includes enhanced structured assessment data in the `candidateAssessment` field:
+
+- `assessmentType`: `"trusted_assessment"` for v0.11+ structured assessments
+- `confidence`: Object containing:
+  - `score`: Numerical confidence score (0.0-1.0)
+  - `label`: Text label (e.g., "low", "medium", "high", "medium-high")
+  - `rationale`: Explanation of confidence level
+- `dimensions`: Array of assessment rubric dimensions, each containing:
+  - `key`: Unique identifier for the assessment dimension
+  - `label`: Display label for the dimension
+  - `judgement`: The assessment judgment for this dimension
+  - `confidence`: Confidence level for this specific dimension
+  - `evidenceQuotes`: Array of direct quotes from candidate materials supporting the assessment
+  - `evidenceStatus`: Status of evidence (e.g., "证据充分", "证据有限", "信息不足")
+  - `missingInformation`: Array of information gaps identified
+- `evidence`: Array of evidence claims with:
+  - `claim`: The assessment claim made
+  - `support`: Supporting evidence from candidate materials
+  - `quality`: Quality rating of the evidence
+- `overallRisks`: Array of overall risks identified during assessment
+- `followUpQuestions`: Specific questions to validate assessment conclusions
+- `strengths` and `concerns`: Organized lists of candidate strengths and concerns
+
+#### Structured Artifact Tracking
+All execution paths now include comprehensive artifact tracking:
+
+- `artifacts[]` in `orchestration.execution` tracks all intermediate and final outputs
+- Each artifact includes metadata about its producer, dependencies, and content preview
+- Artifact lineage enables traceability from initial request to final output
+- Structured metadata includes type, MIME type, stage association, and production details
+
+#### Parallel Worker Pool and Batch Candidate Processing (NEW in v0.9)
+The v0.9 backend introduces a parallel worker pool for concurrent candidate assessments:
+
+##### Batch Candidate Submission
+- Submit an array of candidates using the `searchContext.candidates` field
+- Each candidate in the array is processed concurrently using the parallel worker pool
+- Significantly reduces total processing time for batch evaluations compared to sequential processing
+- Default maximum concurrency is 5 workers; configurable via `runtime.maxConcurrency`
+
+##### Example Candidates Array
+```json
+{
+  "searchContext": {
+    "roleTitle": "Senior Software Engineer",
+    "candidates": [
+      {
+        "name": "Candidate A",
+        "summary": "10 years experience with React and Node.js",
+        "experience": "Lead developer at Tech Corp",
+        "skills": ["JavaScript", "React", "Node.js", "MongoDB"],
+        "highlights": ["Led team of 5 developers", "Reduced load time by 40%"],
+        "concerns": ["Limited Python experience"]
+      },
+      {
+        "name": "Candidate B", 
+        "summary": "8 years experience with Python and Django",
+        "experience": "Senior engineer at Startup Inc",
+        "skills": ["Python", "Django", "PostgreSQL", "AWS"],
+        "highlights": ["Built microservices architecture", "Improved deployment speed"],
+        "concerns": ["Limited frontend experience"]
+      }
+    ]
+  }
+}
+```
+
+##### Performance Benefits
+- Concurrent processing of multiple candidates
+- Configurable worker pool size via `maxConcurrency`
+- Aggregated metrics and token usage across all evaluations
+- Reduced wall-clock time for batch assessments
+
+### Local Template Runner
+
+When using the `local-template` runner, the response follows the same multi-stage structure but with template rendering instead of LLM generation, maintaining consistent structured JSON output across all execution modes.
+
 ```json
 {
   "ok": true,
@@ -257,7 +396,7 @@ From `examples/run-response.json`:
   },
   "engine": {
     "kind": "local-template-engine",
-    "version": "v0.6",
+    "version": "v0.8",
     "provider": "local",
     "adapter": "template-renderer",
     "runnerId": "local-template",
@@ -294,12 +433,12 @@ From `examples/run-response.json`:
   "metadata": {
     "requestId": "req_xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
     "runId": "run_xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
-    "apiVersion": "v0.6",
+    "apiVersion": "v0.8",
     "startedAt": "2026-03-15T00:00:00.000Z",
     "completedAt": "2026-03-15T00:00:00.000Z",
     "durationMs": 3,
     "workflowId": "talent-intelligence.local-template-render",
-    "workflowVersion": "v0.6",
+    "workflowVersion": "v0.8",
     "runnerId": "local-template",
     "executionMode": "local-template",
     "executionStatus": "completed",
@@ -320,7 +459,7 @@ From `examples/run-response.json`:
     "runId": "run_xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
     "workflow": {
       "id": "talent-intelligence.local-template-render",
-      "version": "v0.6",
+      "version": "v0.8",
       "executionMode": "local-template",
       "runnerId": "local-template",
       "futureHook": "workflowRunner.execute"
@@ -398,7 +537,7 @@ From `examples/error-invalid-template.json`:
   },
   "metadata": {
     "requestId": "req_2fd1f9b2-3ad1-4d69-a6f2-50cbb2b6d709",
-    "apiVersion": "v0.6",
+    "apiVersion": "v0.8",
     "status": 400,
     "timestamp": "2026-03-15T00:00:00.000Z"
   }
@@ -422,7 +561,7 @@ From `examples/error-missing-role-title.json`:
   },
   "metadata": {
     "requestId": "req_0c9f7f72-e79b-41de-b0fd-f1cec4e0fe28",
-    "apiVersion": "v0.6",
+    "apiVersion": "v0.8",
     "status": 400,
     "timestamp": "2026-03-15T00:00:00.000Z"
   }
@@ -446,7 +585,7 @@ From `examples/error-invalid-json.json`:
   },
   "metadata": {
     "requestId": "req_f64c1f72-e79b-41de-b0fd-f1cec4e0fe28",
-    "apiVersion": "v0.6",
+    "apiVersion": "v0.8",
     "status": 400,
     "timestamp": "2026-03-15T00:00:00.000Z"
   }
@@ -492,6 +631,22 @@ curl -X POST http://127.0.0.1:8788/api/talent-intelligence/run \
   --data @examples/run-request.json
 ```
 
+### Run trusted candidate assessment (v0.11)
+
+```bash
+curl -X POST http://127.0.0.1:8788/api/talent-intelligence/run \
+  -H 'Content-Type: application/json' \
+  --data @examples/run-request-trusted-assessment.json
+```
+
+### Run with batch candidate assessment (v0.9 parallel worker pool)
+
+```bash
+curl -X POST http://127.0.0.1:8788/api/talent-intelligence/run \
+  -H 'Content-Type: application/json' \
+  --data @examples/run-request-batch-candidates.json
+```
+
 ### Trigger invalid-template error
 
 ```bash
@@ -507,6 +662,25 @@ curl -X POST http://127.0.0.1:8788/api/talent-intelligence/run \
   -H 'Content-Type: application/json' \
   --data '{"templateId":"sourcing_strategy_cn","searchContext":{"roleTitle":"   "}}'
 ```
+
+## Testing and Validation
+
+### Trusted Assessment Validation
+
+Validate the v0.11 trusted assessment flow with mock provider:
+
+```bash
+# Basic validation
+bash demo/validate-trusted-assessment.sh
+
+# Comprehensive validation with local script
+node scripts/validate-trusted-assessment-local.mjs
+
+# Full end-to-end test with detailed output
+bash scripts/test-trusted-assessment-flow.sh
+```
+
+These scripts validate that the full rubric + evidence + confidence flow works correctly with mock providers.
 
 ## Notes
 

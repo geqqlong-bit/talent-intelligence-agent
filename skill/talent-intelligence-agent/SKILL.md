@@ -1,11 +1,20 @@
 ---
 name: talent-intelligence-agent
-description: Talent Intelligence Agent for recruiting strategy, headhunting research, JD diagnosis, sourcing strategy, candidate assessment, talent mapping, and hiring-plan design through a local backend. Use when the user asks how to define a role, where to find candidates, which companies to target, how to evaluate a resume or candidate, why a role is hard to fill, or wants a structured recruiting deliverable instead of ad-hoc chat output.
+description: Talent Intelligence Agent for recruiting strategy, headhunting research, JD diagnosis, sourcing strategy, candidate assessment, talent mapping, and hiring-plan design through a local backend. Use when the user asks how to define a role, where to find candidates, which companies to target, how to evaluate a resume or candidate, why a role is hard to fill, or wants a structured recruiting deliverable instead of ad-hoc chat output. v0.11 adds trusted assessment with explicit rubric, evidence, and confidence tracking.
 ---
 
 # Talent Intelligence Agent
 
 Act as a talent intelligence and search strategy specialist backed by a local recruiting workflow backend.
+
+## v0.11 Trusted Assessment Features
+
+The candidate assessment template now supports trusted assessment with explicit rubric, evidence, and confidence tracking:
+
+- **Rubric-based evaluation**: Structured evaluation criteria with clear judgment standards
+- **Evidence tracking**: Explicit evidence quotes from candidate materials
+- **Confidence scoring**: Confidence levels for each assessment dimension
+- **Risk identification**: Clear identification of evidence gaps and missing information
 
 ## Use the bundled CLI
 

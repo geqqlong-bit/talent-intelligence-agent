@@ -1,42 +1,42 @@
 {
   "ok": true,
   "requestId": "req_xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
-  "mode": "template-renderer",
+  "mode": "llm",
   "templateId": "sourcing_strategy_cn",
   "run": {
     "id": "run_xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
     "status": "completed",
     "templateId": "sourcing_strategy_cn",
-    "mode": "template-renderer",
-    "runnerId": "local-template",
+    "mode": "llm",
+    "runnerId": "openai-chat",
     "stageCount": 4,
     "stepCount": 4,
     "artifactCount": 4,
     "finalArtifactId": "report-markdown"
   },
   "engine": {
-    "kind": "local-template-engine",
+    "kind": "remote-llm-runner",
     "version": "v0.8",
-    "provider": "local",
-    "adapter": "template-renderer",
-    "runnerId": "local-template",
-    "executionMode": "local-template",
+    "provider": "openai-compatible",
+    "adapter": "chat-completions",
+    "runnerId": "openai-chat",
+    "executionMode": "remote-llm",
     "requestedMode": "openai",
     "requestedRunner": "openai-chat",
     "preferredRunnerId": "openai-chat",
     "requestedModel": "bailian/qwen3.5-plus",
-    "resolvedMode": "template-renderer",
-    "implementationStatus": "standby",
+    "resolvedMode": "llm",
+    "implementationStatus": "active",
     "resolutionSource": "runner",
-    "fallbackApplied": true,
-    "fallbackKind": "runner-unavailable",
-    "fallbackReason": "Requested runner openai-chat is not callable for this request; using local-template instead. Remote runner configuration exists, but outbound calls remain disabled until explicitly enabled.",
+    "fallbackApplied": false,
+    "fallbackKind": "none",
+    "fallbackReason": "Requested runner openai-chat is callable for this request.",
     "boundary": "local-only",
     "remote": {
-      "readiness": "configured-but-disabled",
-      "enabled": false,
+      "readiness": "callable",
+      "enabled": true,
       "configured": true,
-      "callable": false,
+      "callable": true,
       "required": false,
       "explicitRemoteRequest": true,
       "baseUrl": "http://127.0.0.1:8999/v1",
@@ -56,31 +56,31 @@
     "apiVersion": "v0.8",
     "startedAt": "2026-03-15T00:00:00.000Z",
     "completedAt": "2026-03-15T00:00:00.000Z",
-    "durationMs": 11,
-    "totalDurationMs": 11,
-    "workflowId": "talent-intelligence.local-template-render",
+    "durationMs": 1245,
+    "totalDurationMs": 1245,
+    "workflowId": "talent-intelligence.remote-llm-run",
     "workflowVersion": "v0.8",
-    "runnerId": "local-template",
-    "executionMode": "local-template",
+    "runnerId": "openai-chat",
+    "executionMode": "remote-llm",
     "executionStatus": "completed",
     "requestedMode": "openai",
     "requestedRunner": "openai-chat",
     "preferredRunnerId": "openai-chat",
-    "resolvedMode": "template-renderer",
-    "fallbackApplied": true,
-    "fallbackKind": "runner-unavailable",
-    "fallbackReason": "Requested runner openai-chat is not callable for this request; using local-template instead. Remote runner configuration exists, but outbound calls remain disabled until explicitly enabled.",
+    "resolvedMode": "llm",
+    "fallbackApplied": false,
+    "fallbackKind": "none",
+    "fallbackReason": "Requested runner openai-chat is callable for this request.",
     "stageCount": 4,
     "stepCount": 4,
     "artifactCount": 4,
     "finalArtifactId": "report-markdown",
     "performance": {
-      "totalDurationMs": 11,
-      "stepDurationMs": 11,
+      "totalDurationMs": 1245,
+      "stepDurationMs": 1245,
       "tokenUsage": {
-        "promptTokens": 0,
-        "completionTokens": 0,
-        "totalTokens": 0
+        "promptTokens": 1245,
+        "completionTokens": 876,
+        "totalTokens": 2121
       }
     }
   },
@@ -88,26 +88,26 @@
     "requestId": "req_xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
     "runId": "run_xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
     "workflow": {
-      "id": "talent-intelligence.local-template-render",
+      "id": "talent-intelligence.remote-llm-run",
       "version": "v0.8",
-      "executionMode": "local-template",
-      "runnerId": "local-template",
+      "executionMode": "remote-llm",
+      "runnerId": "openai-chat",
       "futureHook": "workflowRunner.execute"
     },
     "execution": {
       "status": "completed",
-      "runnerId": "local-template",
+      "runnerId": "openai-chat",
       "boundary": "local-only",
       "stageCount": 4,
       "stepCount": 4,
       "metrics": {
-        "totalDurationMs": 11,
-        "requestTotalDurationMs": 11,
-        "executionDurationMs": 11,
+        "totalDurationMs": 1245,
+        "requestTotalDurationMs": 1245,
+        "executionDurationMs": 1245,
         "tokenUsage": {
-          "promptTokens": 0,
-          "completionTokens": 0,
-          "totalTokens": 0
+          "promptTokens": 1245,
+          "completionTokens": 876,
+          "totalTokens": 2121
         }
       },
       "stages": [
@@ -122,7 +122,7 @@
           ],
           "startedAt": "2026-03-15T00:00:00.000Z",
           "completedAt": "2026-03-15T00:00:00.000Z",
-          "durationMs": 1,
+          "durationMs": 2,
           "consumes": [],
           "produces": [
             "normalized-request"
@@ -134,11 +134,11 @@
           "id": "render-template",
           "stageId": "render-report",
           "kind": "template-render",
-          "runnerId": "local-template",
+          "runnerId": "openai-chat",
           "status": "completed",
           "startedAt": "2026-03-15T00:00:00.000Z",
           "completedAt": "2026-03-15T00:00:00.000Z",
-          "durationMs": 3,
+          "durationMs": 1240,
           "consumes": [
             "workflow-brief"
           ],
@@ -147,16 +147,39 @@
           ],
           "output": {
             "artifactId": "report-markdown",
-            "renderer": "renderTemplate",
+            "renderer": "openai-compatible-chat-completions",
             "templateId": "sourcing_strategy_cn",
-            "sourceArtifactId": "workflow-brief"
+            "sourceArtifactId": "workflow-brief",
+            "remoteInfo": {
+              "attempted": true,
+              "succeeded": true,
+              "baseUrl": "http://127.0.0.1:8999/v1",
+              "path": "/chat/completions",
+              "model": "bailian/qwen3.5-plus",
+              "startedAt": "2026-03-15T00:00:00.000Z",
+              "completedAt": "2026-03-15T00:00:00.000Z",
+              "durationMs": 1238,
+              "responseId": "resp_abc123",
+              "finishReason": "stop",
+              "usage": {
+                "prompt_tokens": 1245,
+                "completion_tokens": 876,
+                "total_tokens": 2121
+              },
+              "tokenUsage": {
+                "promptTokens": 1245,
+                "completionTokens": 876,
+                "totalTokens": 2121,
+                "model": "bailian/qwen3.5-plus"
+              }
+            }
           },
           "metrics": {
-            "durationMs": 3,
+            "durationMs": 1240,
             "tokenUsage": {
-              "promptTokens": 0,
-              "completionTokens": 0,
-              "totalTokens": 0
+              "promptTokens": 1245,
+              "completionTokens": 876,
+              "totalTokens": 2121
             }
           }
         }
@@ -174,31 +197,54 @@
             "templateId": "sourcing_strategy_cn",
             "sourceArtifactId": "workflow-brief",
             "lineCount": 92,
-            "renderer": "renderTemplate",
+            "renderer": "openai-compatible-chat-completions",
             "preview": "# 人才寻访策略报告｜VP Product..."
           }
         }
       ],
       "finalArtifactId": "report-markdown",
       "result": {
-        "renderer": "renderTemplate",
+        "renderer": "openai-compatible-chat-completions",
         "templateId": "sourcing_strategy_cn",
         "artifactId": "report-markdown",
         "finalArtifactId": "report-markdown",
-        "finalizationArtifactId": "run-summary"
+        "finalizationArtifactId": "run-summary",
+        "remoteInfo": {
+          "attempted": true,
+          "succeeded": true,
+          "baseUrl": "http://127.0.0.1:8999/v1",
+          "path": "/chat/completions",
+          "model": "bailian/qwen3.5-plus",
+          "startedAt": "2026-03-15T00:00:00.000Z",
+          "completedAt": "2026-03-15T00:00:00.000Z",
+          "durationMs": 1238,
+          "responseId": "resp_abc123",
+          "finishReason": "stop",
+          "usage": {
+            "prompt_tokens": 1245,
+            "completion_tokens": 876,
+            "total_tokens": 2121
+          },
+          "tokenUsage": {
+            "promptTokens": 1245,
+            "completionTokens": 876,
+            "totalTokens": 2121,
+            "model": "bailian/qwen3.5-plus"
+          }
+        }
       }
     },
     "selection": {
       "requestedMode": "openai",
       "requestedRunner": "openai-chat",
       "preferredRunnerId": "openai-chat",
-      "resolvedRunnerId": "local-template",
-      "resolvedMode": "template-renderer",
+      "resolvedRunnerId": "openai-chat",
+      "resolvedMode": "llm",
       "resolutionSource": "runner",
       "strategy": "requested-runner",
-      "fallbackApplied": true,
-      "fallbackKind": "runner-unavailable",
-      "fallbackReason": "Requested runner openai-chat is not callable for this request; using local-template instead. Remote runner configuration exists, but outbound calls remain disabled until explicitly enabled."
+      "fallbackApplied": false,
+      "fallbackKind": "none",
+      "fallbackReason": "Requested runner openai-chat is callable for this request."
     }
   },
   "artifacts": {

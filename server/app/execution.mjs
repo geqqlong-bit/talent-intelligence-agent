@@ -1,6 +1,53 @@
 import { API_VERSION, createError } from './schema.mjs';
 import { callRemoteOpenAICompatible, resolveRemoteOpenAIConfig } from './remote-openai.mjs';
 
+// Concurrency limiter implementation
+function createConcurrencyLimiter(concurrency = 5) {
+  const queue = [];
+  let activeCount = 0;
+  
+  function next() {
+    if (queue.length === 0 || activeCount >= concurrency) return;
+    
+    activeCount++;
+    const { promiseFn, resolve, reject } = queue.shift();
+    
+    promiseFn()
+      .then(result => {
+        resolve(result);
+      })
+      .catch(error => {
+        reject(error);
+      })
+      .finally(() => {
+        activeCount--;
+        next();
+      });
+  }
+  
+  return async function(promiseFn) {
+    if (activeCount < concurrency) {
+      activeCount++;
+      
+      try {
+        const result = await promiseFn();
+        activeCount--;
+        next();
+        return result;
+      } catch (error) {
+        activeCount--;
+        next();
+        throw error;
+      }
+    } else {
+      return new Promise((resolve, reject) => {
+        queue.push({ promiseFn, resolve, reject });
+        next();
+      });
+    }
+  };
+}
+
 export const WORKFLOW_ID = 'talent-intelligence.local-template-render';
 export const REMOTE_WORKFLOW_ID = 'talent-intelligence.remote-llm-run';
 export const LOCAL_ONLY_BOUNDARY = 'local-only';
@@ -280,6 +327,16 @@ function summarizeValue(value, maxLength = 280) {
 }
 
 function createStepSummary(step, startedAtMs, completedAtMs, output = undefined, status = 'completed') {
+  // Extract token usage from output if available
+  let tokenUsage = undefined;
+  if (output && typeof output === 'object') {
+    if (output.tokenUsage) {
+      tokenUsage = output.tokenUsage;
+    } else if (output.remoteInfo && output.remoteInfo.tokenUsage) {
+      tokenUsage = output.remoteInfo.tokenUsage;
+    }
+  }
+  
   return {
     id: step.id,
     stageId: step.stageId,
@@ -291,7 +348,11 @@ function createStepSummary(step, startedAtMs, completedAtMs, output = undefined,
     durationMs: completedAtMs - startedAtMs,
     consumes: [...(step.consumes || [])],
     produces: [...(step.produces || [])],
-    output
+    output,
+    metrics: {
+      durationMs: completedAtMs - startedAtMs,
+      tokenUsage
+    }
   };
 }
 
@@ -389,9 +450,183 @@ function createRunStep(executionPlan, completedSteps) {
   };
 }
 
+function renderEvidenceBasedAssessmentMarkdown(assessment, index = 0) {
+  if (!assessment || typeof assessment !== 'object') {
+    return '信息不足：未返回结构化候选人评估。';
+  }
+
+  const dimensions = Array.isArray(assessment.dimensions) ? assessment.dimensions : [];
+  const overallRisks = Array.isArray(assessment.overallRisks) ? assessment.overallRisks : [];
+  const followUpQuestions = Array.isArray(assessment.followUpQuestions) ? assessment.followUpQuestions : [];
+
+  const dimensionSections = dimensions.map((dimension) => {
+    const evidenceQuotes = Array.isArray(dimension.evidenceQuotes) && dimension.evidenceQuotes.length
+      ? dimension.evidenceQuotes.map((quote) => `  - "${quote}"`).join('\n')
+      : '  - 信息不足';
+    const missingInformation = Array.isArray(dimension.missingInformation) && dimension.missingInformation.length
+      ? dimension.missingInformation.map((item) => `  - ${item}`).join('\n')
+      : '  - 无';
+
+    return [
+      `#### ${dimension.label || dimension.key || `维度 ${index + 1}`}`,
+      `- 判断：${dimension.judgement || '信息不足'}`,
+      `- 置信度：${dimension.confidence || '低'}`,
+      `- 证据状态：${dimension.evidenceStatus || '信息不足'}`,
+      '- 简历证据：',
+      evidenceQuotes,
+      '- 缺失信息：',
+      missingInformation
+    ].join('\n');
+  }).join('\n\n');
+
+  const riskSection = overallRisks.length
+    ? overallRisks.map((risk) => `- ${risk.label || '风险'}：${risk.detail || '信息不足'}（置信度：${risk.confidence || '低'}；证据状态：${risk.evidenceStatus || '信息不足'}）`).join('\n')
+    : '- 无明确补充风险';
+
+  const questionSection = followUpQuestions.length
+    ? followUpQuestions.map((question) => `- ${question}`).join('\n')
+    : '- 无';
+
+  return [
+    `### 候选人评估｜${assessment.candidateName || `候选人 ${index + 1}`}`,
+    `- 推荐结论：${assessment.recommendation || '谨慎推进'}`,
+    `- 摘要：${assessment.summary || '信息不足'}`,
+    '',
+    '#### 评估维度',
+    dimensionSections || '- 信息不足',
+    '',
+    '#### 综合风险',
+    riskSection,
+    '',
+    '#### 下一轮追问',
+    questionSection
+  ].join('\n');
+}
+
+function toAssessmentScore(value) {
+  const numeric = Number(value);
+  if (!Number.isFinite(numeric)) return undefined;
+  return Math.min(100, Math.max(0, Number(numeric.toFixed(2))));
+}
+
+function normalizeAssessmentRubrics(rubrics = []) {
+  if (!Array.isArray(rubrics) || rubrics.length === 0) return [];
+  const totalWeight = rubrics.reduce((sum, rubric) => sum + (Number(rubric?.weight) > 0 ? Number(rubric.weight) : 0), 0) || rubrics.length;
+  return rubrics.map((rubric, index) => {
+    const weight = Number(rubric?.weight) > 0 ? Number(rubric.weight) : 1;
+    return {
+      id: rubric?.id || `dimension_${index + 1}`,
+      label: rubric?.label || rubric?.name || rubric?.dimension || `维度 ${index + 1}`,
+      description: rubric?.description,
+      weight,
+      normalizedWeight: Number((weight / totalWeight).toFixed(6))
+    };
+  });
+}
+
+function inferLegacyDimensionScore(payload, rubric, index) {
+  if (!payload || typeof payload !== 'object') return undefined;
+  const compactLabel = String(rubric.label || '').replace(/\s+/g, '');
+  const keys = [
+    `${rubric.id}Score`,
+    `${compactLabel}Score`,
+    ['technicalScore', 'culturalFitScore', 'experienceScore'][index]
+  ].filter(Boolean);
+
+  for (const key of keys) {
+    const score = toAssessmentScore(payload[key]);
+    if (score !== undefined) return score;
+  }
+
+  return toAssessmentScore(payload.overallScore ?? payload.score);
+}
+
+function normalizeCandidateAssessmentOutput(rawAssessment, { candidate = {}, rubrics = [], candidateIndex = 0 } = {}) {
+  const normalizedRubrics = normalizeAssessmentRubrics(rubrics);
+  const payload = rawAssessment && typeof rawAssessment === 'object' ? rawAssessment : { rawContent: rawAssessment };
+  const existingDimensions = Array.isArray(payload.dimensions) ? payload.dimensions : [];
+  const isEvidenceBased = existingDimensions.some((dimension) => Array.isArray(dimension?.evidenceQuotes) || dimension?.evidenceStatus);
+
+  const dimensions = isEvidenceBased
+    ? existingDimensions.map((dimension, index) => ({
+        ...dimension,
+        key: dimension.key || dimension.id || `dimension_${index + 1}`,
+        id: dimension.id || dimension.key || `dimension_${index + 1}`,
+        label: dimension.label || `维度 ${index + 1}`,
+        evidenceQuotes: Array.isArray(dimension.evidenceQuotes) ? dimension.evidenceQuotes : [],
+        missingInformation: Array.isArray(dimension.missingInformation) ? dimension.missingInformation : [],
+        confidence: dimension.confidence || '低',
+        evidenceStatus: dimension.evidenceStatus || '信息不足'
+      }))
+    : normalizedRubrics.length
+      ? normalizedRubrics.map((rubric, index) => {
+          const matched = existingDimensions.find((dimension) => {
+            const key = dimension?.key || dimension?.id;
+            const label = dimension?.label;
+            return key === rubric.id || label === rubric.label;
+          }) || {};
+          const score = toAssessmentScore(matched.score ?? matched.dimensionScore ?? inferLegacyDimensionScore(payload, rubric, index));
+          return {
+            ...matched,
+            key: matched.key || rubric.id,
+            id: matched.id || rubric.id,
+            label: matched.label || rubric.label,
+            description: matched.description || rubric.description,
+            weight: rubric.weight,
+            normalizedWeight: rubric.normalizedWeight,
+            score,
+            weightedScore: score === undefined ? undefined : Number((score * rubric.normalizedWeight).toFixed(2))
+          };
+        })
+      : existingDimensions;
+
+  const weightedOverallScore = isEvidenceBased || !dimensions.length
+    ? undefined
+    : Number(dimensions.reduce((sum, dimension) => sum + (dimension.weightedScore || 0), 0).toFixed(2));
+  const overallScore = isEvidenceBased
+    ? undefined
+    : toAssessmentScore(payload.overallScore ?? payload.score ?? weightedOverallScore);
+
+  return {
+    ...payload,
+    candidateIndex,
+    candidateName: payload.candidateName || candidate.name || `Candidate ${candidateIndex + 1}`,
+    overallScore,
+    score: overallScore,
+    weightedOverallScore,
+    weighted: !isEvidenceBased && dimensions.length > 0,
+    dimensions,
+    strengths: Array.isArray(payload.strengths) ? payload.strengths : (Array.isArray(candidate.highlights) ? candidate.highlights : []),
+    concerns: Array.isArray(payload.concerns) ? payload.concerns : (Array.isArray(candidate.concerns) ? candidate.concerns : [])
+  };
+}
+
 function buildExecutionEnvelope({ executionPlan, artifactStore, completedSteps, runnerId, result, extra = {} }) {
   const stages = executionPlan.stages.map((stage) => createStageSummary(stage, completedSteps));
   const artifacts = artifactStore.listSummaries();
+  
+  // Calculate aggregated metrics
+  const totalDurationMs = completedSteps.reduce((total, step) => total + (step.metrics?.durationMs || 0), 0);
+  const totalPromptTokens = completedSteps.reduce((total, step) => {
+    const tokens = step.metrics?.tokenUsage?.promptTokens;
+    return total + (typeof tokens === 'number' ? tokens : 0);
+  }, 0);
+  const totalCompletionTokens = completedSteps.reduce((total, step) => {
+    const tokens = step.metrics?.tokenUsage?.completionTokens;
+    return total + (typeof tokens === 'number' ? tokens : 0);
+  }, 0);
+  const totalTokens = completedSteps.reduce((total, step) => {
+    const tokens = step.metrics?.tokenUsage?.totalTokens;
+    return total + (typeof tokens === 'number' ? tokens : 0);
+  }, 0);
+  
+  const aggregatedTokenUsage = totalPromptTokens > 0 || totalCompletionTokens > 0 || totalTokens > 0 
+    ? {
+        promptTokens: totalPromptTokens,
+        completionTokens: totalCompletionTokens,
+        totalTokens: totalTokens
+      }
+    : undefined;
 
   return {
     status: 'completed',
@@ -404,6 +639,10 @@ function buildExecutionEnvelope({ executionPlan, artifactStore, completedSteps, 
     artifacts,
     finalArtifactId: result.finalArtifactId,
     result,
+    metrics: {
+      totalDurationMs,
+      tokenUsage: aggregatedTokenUsage
+    },
     ...extra
   };
 }
@@ -570,29 +809,405 @@ async function executeRemoteRunner({ payload, executionPlan, requestContext }) {
     };
   });
 
-  const remoteOutput = await runStep('render-template', async () => {
-    const remoteResult = await callRemoteOpenAICompatible({
-      payload,
-      runtime: requestContext.runtime,
-      requestContext
-    });
+  // Execute multi-stage pipeline for remote runner
+  await runStep('execute-jd-diagnosis', async () => {
     const briefArtifact = artifactStore.get('workflow-brief');
-    const artifact = artifactStore.materialize('report-markdown', remoteResult.reportMarkdown, {
-      producedBy: 'render-template',
+    const stage = { id: 'jd-diagnosis', label: 'JD Diagnosis' };
+    
+    const stagePayload = {
+      ...payload,
+      currentStage: stage,
+      stageContext: {
+        ...payload.searchContext,
+        currentStage: stage.label
+      }
+    };
+
+    const stageResult = await callRemoteOpenAICompatible({
+      payload: stagePayload,
+      runtime: requestContext.runtime,
+      requestContext,
+      stage: stage
+    });
+
+    const artifact = artifactStore.materialize('jd-diagnosis-result', stageResult.reportMarkdown, {
+      producedBy: 'execute-jd-diagnosis',
       metadata: {
         templateId: payload.templateId,
         sourceArtifactId: briefArtifact?.id,
-        lineCount: remoteResult.reportMarkdown.split('\n').length,
         renderer: 'openai-compatible-chat-completions',
-        remoteInfo: remoteResult.remoteInfo
+        remoteInfo: stageResult.remoteInfo
       }
     });
+
     return {
       artifactId: artifact.id,
       renderer: 'openai-compatible-chat-completions',
       templateId: payload.templateId,
       sourceArtifactId: briefArtifact?.id,
-      remoteInfo: remoteResult.remoteInfo
+      remoteInfo: stageResult.remoteInfo
+    };
+  });
+
+  await runStep('execute-search-plan', async () => {
+    const prevArtifact = artifactStore.get('jd-diagnosis-result');
+    const stage = { id: 'search-plan', label: 'Search Plan' };
+    
+    const stagePayload = {
+      ...payload,
+      currentStage: stage,
+      stageContext: {
+        ...payload.searchContext,
+        jdDiagnosis: prevArtifact?.content,
+        currentStage: stage.label
+      }
+    };
+
+    const stageResult = await callRemoteOpenAICompatible({
+      payload: stagePayload,
+      runtime: requestContext.runtime,
+      requestContext,
+      stage: stage
+    });
+
+    const artifact = artifactStore.materialize('search-plan-result', stageResult.reportMarkdown, {
+      producedBy: 'execute-search-plan',
+      metadata: {
+        templateId: payload.templateId,
+        sourceArtifactId: prevArtifact?.id,
+        renderer: 'openai-compatible-chat-completions',
+        remoteInfo: stageResult.remoteInfo
+      }
+    });
+
+    return {
+      artifactId: artifact.id,
+      renderer: 'openai-compatible-chat-completions',
+      templateId: payload.templateId,
+      sourceArtifactId: prevArtifact?.id,
+      remoteInfo: stageResult.remoteInfo
+    };
+  });
+
+  await runStep('execute-sourcing-strategy', async () => {
+    const prevArtifact = artifactStore.get('search-plan-result');
+    const stage = { id: 'sourcing-strategy', label: 'Sourcing Strategy' };
+    
+    const stagePayload = {
+      ...payload,
+      currentStage: stage,
+      stageContext: {
+        ...payload.searchContext,
+        jdDiagnosis: artifactStore.get('jd-diagnosis-result')?.content,
+        searchPlan: prevArtifact?.content,
+        currentStage: stage.label
+      }
+    };
+
+    const stageResult = await callRemoteOpenAICompatible({
+      payload: stagePayload,
+      runtime: requestContext.runtime,
+      requestContext,
+      stage: stage
+    });
+
+    const artifact = artifactStore.materialize('sourcing-strategy-result', stageResult.reportMarkdown, {
+      producedBy: 'execute-sourcing-strategy',
+      metadata: {
+        templateId: payload.templateId,
+        sourceArtifactId: prevArtifact?.id,
+        renderer: 'openai-compatible-chat-completions',
+        remoteInfo: stageResult.remoteInfo
+      }
+    });
+
+    return {
+      artifactId: artifact.id,
+      renderer: 'openai-compatible-chat-completions',
+      templateId: payload.templateId,
+      sourceArtifactId: prevArtifact?.id,
+      remoteInfo: stageResult.remoteInfo
+    };
+  });
+
+  const candidateOutput = await runStep('execute-candidate-assessment', async () => {
+    const prevArtifact = artifactStore.get('sourcing-strategy-result');
+    const stage = { id: 'candidate-assessment', label: 'Candidate Assessment' };
+    
+    // Check if we need to run candidate assessment in parallel for multiple candidates
+    const candidates = payload.searchContext?.candidates || []; // Get candidates from searchContext for consistency with schema
+    const rubrics = payload.searchContext?.rubrics || [];
+    
+    if (Array.isArray(candidates) && candidates.length > 0) {
+      // Parallel execution for multiple candidates
+      const maxConcurrency = payload.runtime?.maxConcurrency || 5; // Default to 5 concurrent calls
+      const concurrencyLimit = Math.min(candidates.length, maxConcurrency); // Use configured or default limit
+      const limiter = createConcurrencyLimiter(concurrencyLimit);
+      
+      // Run candidate assessments in parallel
+      const promises = candidates.map(async (candidate, index) => {
+        try {
+          const stagePayload = {
+            ...payload,
+            currentStage: stage,
+            candidateIndex: index, // Track which candidate this is
+            candidateData: candidate, // Include candidate-specific data
+            stageContext: {
+              ...payload.searchContext,
+              jdDiagnosis: artifactStore.get('jd-diagnosis-result')?.content,
+              searchPlan: artifactStore.get('search-plan-result')?.content,
+              sourcingStrategy: prevArtifact?.content,
+              candidate: candidate,
+              currentStage: stage.label
+            }
+          };
+
+          const stageResult = await limiter(() => callRemoteOpenAICompatible({
+            payload: stagePayload,
+            runtime: {
+              ...requestContext.runtime,
+              jsonMode: true
+            },
+            requestContext,
+            stage: stage
+          }));
+
+          const assessmentPayload = normalizeCandidateAssessmentOutput(
+            stageResult.structuredOutput || { rawContent: stageResult.reportMarkdown },
+            { candidate, rubrics, candidateIndex: index }
+          );
+
+          // Create a unique artifact for each candidate assessment
+          const artifactId = `candidate-assessment-result-${index}`;
+          const artifact = artifactStore.materialize(artifactId, assessmentPayload, {
+            producedBy: 'execute-candidate-assessment',
+            metadata: {
+              templateId: payload.templateId,
+              sourceArtifactId: prevArtifact?.id,
+              renderer: 'openai-compatible-chat-completions',
+              remoteInfo: stageResult.remoteInfo,
+              candidateIndex: index,
+              candidateName: candidate.name || `Candidate ${index + 1}`
+            }
+          });
+
+          return {
+            artifactId: artifact.id,
+            renderer: 'openai-compatible-chat-completions',
+            templateId: payload.templateId,
+            sourceArtifactId: prevArtifact?.id,
+            remoteInfo: stageResult.remoteInfo,
+            candidateIndex: index,
+            candidateName: assessmentPayload.candidateName,
+            assessment: assessmentPayload,
+            success: true
+          };
+        } catch (error) {
+          // If one candidate assessment fails, log the error but don't crash others
+          console.error(`Failed to assess candidate ${index}:`, error);
+          
+          // Create a failure artifact for this candidate
+          const artifactId = `candidate-assessment-result-${index}`;
+          const artifact = artifactStore.materialize(artifactId, `Candidate assessment failed: ${error.message}`, {
+            producedBy: 'execute-candidate-assessment',
+            metadata: {
+              templateId: payload.templateId,
+              sourceArtifactId: prevArtifact?.id,
+              renderer: 'openai-compatible-chat-completions',
+              error: error.message,
+              candidateIndex: index,
+              candidateName: candidate.name || `Candidate ${index + 1}`,
+              success: false
+            }
+          });
+
+          return {
+            artifactId: artifact.id,
+            renderer: 'openai-compatible-chat-completions',
+            templateId: payload.templateId,
+            sourceArtifactId: prevArtifact?.id,
+            remoteInfo: null,
+            candidateIndex: index,
+            success: false,
+            error: error.message
+          };
+        }
+      });
+
+      // Wait for all candidate assessments to complete (using Promise.allSettled to prevent one failure from crashing all)
+      const results = await Promise.allSettled(promises);
+      
+      // Count successes and failures
+      const successfulAssessments = results.filter(r => r.status === 'fulfilled' && r.value.success).length;
+      const failedAssessments = results.filter(r => r.status === 'rejected' || (r.status === 'fulfilled' && !r.value.success)).length;
+      
+      // Create a summary artifact containing all candidate assessments
+      const allAssessments = results
+        .filter(r => r.status === 'fulfilled')
+        .map(r => r.value)
+        .filter(Boolean);
+      const structuredAssessments = allAssessments
+        .map((item) => item.assessment)
+        .filter(Boolean);
+        
+      const summaryArtifact = artifactStore.materialize('candidate-assessment-result', {
+        totalCandidates: candidates.length,
+        successfulAssessments,
+        failedAssessments,
+        rubrics: normalizeAssessmentRubrics(rubrics),
+        assessments: structuredAssessments,
+        allAssessmentIds: Array.from({ length: candidates.length }, (_, i) => `candidate-assessment-result-${i}`),
+        timestamp: new Date().toISOString()
+      }, {
+        producedBy: 'execute-candidate-assessment',
+        metadata: {
+          templateId: payload.templateId,
+          sourceArtifactId: prevArtifact?.id,
+          renderer: 'openai-compatible-chat-completions',
+          totalCandidates: candidates.length,
+          successfulCount: successfulAssessments,
+          failedCount: failedAssessments
+        }
+      });
+
+      return {
+        artifactId: summaryArtifact.id,
+        renderer: 'openai-compatible-chat-completions',
+        templateId: payload.templateId,
+        sourceArtifactId: prevArtifact?.id,
+        totalCandidates: candidates.length,
+        successfulAssessments,
+        failedAssessments,
+        candidateAssessment: {
+          mode: 'batch',
+          totalCandidates: candidates.length,
+          successfulAssessments,
+          failedAssessments,
+          rubrics: normalizeAssessmentRubrics(rubrics),
+          assessments: structuredAssessments
+        }
+      };
+    } else {
+      // Original single candidate assessment behavior
+      const stagePayload = {
+        ...payload,
+        currentStage: stage,
+        stageContext: {
+          ...payload.searchContext,
+          jdDiagnosis: artifactStore.get('jd-diagnosis-result')?.content,
+          searchPlan: artifactStore.get('search-plan-result')?.content,
+          sourcingStrategy: prevArtifact?.content,
+          currentStage: stage.label
+        }
+      };
+
+      const stageResult = await callRemoteOpenAICompatible({
+        payload: stagePayload,
+        runtime: {
+          ...requestContext.runtime,
+          jsonMode: true
+        },
+        requestContext,
+        stage: stage
+      });
+
+      const assessmentPayload = normalizeCandidateAssessmentOutput(
+        stageResult.structuredOutput || { rawContent: stageResult.reportMarkdown },
+        {
+          candidate: {
+            name: payload.searchContext?.candidateName,
+            highlights: payload.searchContext?.candidateHighlights,
+            concerns: payload.searchContext?.candidateConcerns
+          },
+          rubrics,
+          candidateIndex: 0
+        }
+      );
+
+      const artifact = artifactStore.materialize('candidate-assessment-result', assessmentPayload, {
+        producedBy: 'execute-candidate-assessment',
+        metadata: {
+          templateId: payload.templateId,
+          sourceArtifactId: prevArtifact?.id,
+          renderer: 'openai-compatible-chat-completions',
+          remoteInfo: stageResult.remoteInfo
+        }
+      });
+
+      return {
+        artifactId: artifact.id,
+        renderer: 'openai-compatible-chat-completions',
+        templateId: payload.templateId,
+        sourceArtifactId: prevArtifact?.id,
+        remoteInfo: stageResult.remoteInfo,
+        candidateAssessment: {
+          mode: 'single',
+          totalCandidates: 1,
+          rubrics: normalizeAssessmentRubrics(rubrics),
+          assessment: assessmentPayload
+        }
+      };
+    }
+  });
+
+  const compileOutput = await runStep('compile-results', async () => {
+    // Combine all stage results into a final report
+    const jdDiagnosis = artifactStore.get('jd-diagnosis-result')?.content || '';
+    const searchPlan = artifactStore.get('search-plan-result')?.content || '';
+    const sourcingStrategy = artifactStore.get('sourcing-strategy-result')?.content || '';
+    
+    // Get the candidate assessment summary
+    const candidateAssessmentSummary = artifactStore.get('candidate-assessment-result')?.content || '';
+    
+    // If there are multiple candidate assessments, get them individually
+    let candidateAssessmentContent = '';
+    if (typeof candidateAssessmentSummary === 'object' && candidateAssessmentSummary.totalCandidates > 0) {
+      // This is a parallel assessment scenario - get individual assessments
+      candidateAssessmentContent = `## Individual Candidate Assessments (${candidateAssessmentSummary.totalCandidates} total)\n\n`;
+      
+      for (let i = 0; i < candidateAssessmentSummary.totalCandidates; i++) {
+        const artifactId = `candidate-assessment-result-${i}`;
+        const individualAssessment = artifactStore.get(artifactId)?.content;
+        
+        if (individualAssessment) {
+          candidateAssessmentContent += `${renderEvidenceBasedAssessmentMarkdown(individualAssessment, i)}\n\n`;
+        }
+      }
+    } else {
+      // Single assessment scenario
+      candidateAssessmentContent = `## Candidate Assessment Framework\n\n${renderEvidenceBasedAssessmentMarkdown(candidateAssessmentSummary)}\n\n`;
+    }
+
+    const combinedReport = [
+      `# ${payload.searchContext?.roleTitle || 'Talent Intelligence Report'}\n\n`,
+      `## Job Description Diagnosis\n\n${jdDiagnosis}\n\n`,
+      `## Search Plan\n\n${searchPlan}\n\n`,
+      `## Sourcing Strategy\n\n${sourcingStrategy}\n\n`,
+      candidateAssessmentContent
+    ].join('');
+
+    const artifact = artifactStore.materialize('report-markdown', combinedReport, {
+      producedBy: 'compile-results',
+      metadata: {
+        templateId: payload.templateId,
+        renderer: 'multi-stage-combination',
+        stageCount: 4,
+        sourceArtifacts: [
+          'jd-diagnosis-result',
+          'search-plan-result', 
+          'sourcing-strategy-result',
+          'candidate-assessment-result'
+        ],
+        hasParallelAssessments: typeof candidateAssessmentSummary === 'object' && candidateAssessmentSummary.totalCandidates > 0,
+        totalCandidates: typeof candidateAssessmentSummary === 'object' ? candidateAssessmentSummary.totalCandidates : 0
+      }
+    });
+
+    return {
+      artifactId: artifact.id,
+      renderer: 'multi-stage-combination',
+      templateId: payload.templateId,
+      stageCount: 4
     };
   });
 
@@ -605,12 +1220,14 @@ async function executeRemoteRunner({ payload, executionPlan, requestContext }) {
       resolvedRunnerId: executionPlan.engine.runnerId,
       finalArtifactId: reportArtifact?.id,
       remoteAttempted: true,
-      remoteSucceeded: true
+      remoteSucceeded: true,
+      multiStage: true
     };
     const artifact = artifactStore.materialize('run-summary', runSummary, {
       producedBy: 'finalize-response',
       metadata: {
-        sourceArtifactId: reportArtifact?.id
+        sourceArtifactId: reportArtifact?.id,
+        multiStage: true
       }
     });
     return {
@@ -621,12 +1238,19 @@ async function executeRemoteRunner({ payload, executionPlan, requestContext }) {
 
   const reportArtifact = artifactStore.get('report-markdown');
   const result = {
-    renderer: 'openai-compatible-chat-completions',
+    renderer: 'multi-stage-combination',
     templateId: payload.templateId,
-    artifactId: remoteOutput.artifactId,
+    artifactId: compileOutput.artifactId,
     finalArtifactId: finalizationOutput.finalArtifactId,
     finalizationArtifactId: finalizationOutput.artifactId,
-    remoteInfo: remoteOutput.remoteInfo
+    multiStage: true,
+    stageResults: {
+      jdDiagnosis: artifactStore.get('jd-diagnosis-result')?.content,
+      searchPlan: artifactStore.get('search-plan-result')?.content,
+      sourcingStrategy: artifactStore.get('sourcing-strategy-result')?.content,
+      candidateAssessment: artifactStore.get('candidate-assessment-result')?.content
+    },
+    candidateAssessment: candidateOutput.candidateAssessment
   };
 
   return {
@@ -641,7 +1265,8 @@ async function executeRemoteRunner({ payload, executionPlan, requestContext }) {
         remote: {
           attempted: true,
           succeeded: true,
-          ...remoteOutput.remoteInfo
+          multiStage: true,
+          stageCount: 4
         }
       }
     })

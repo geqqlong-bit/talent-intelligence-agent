@@ -1,0 +1,212 @@
+[
+  {
+    "templateId": "candidate_assessment_cn",
+    "searchContext": {
+      "projectName": "Confidential Client - Senior Software Engineer Search",
+      "roleTitle": "Senior Software Engineer",
+      "clientName": "Confidential Client",
+      "candidateName": "Alice Johnson",
+      "candidateExperience": "8 years in backend development, Python/Go expertise",
+      "candidateSkills": ["Python", "Go", "Distributed Systems", "Cloud Architecture"],
+      "candidateEducation": "MS Computer Science, Stanford University",
+      "currentCompany": "TechCorp",
+      "salaryExpectation": "180-220k RMB/year",
+      "availability": "Available immediately",
+      "companyContext": "Series B fintech startup focusing on payment solutions",
+      "hiringBrief": "Find a senior engineer with strong backend skills and fintech experience",
+      "reportingLine": "Engineering Manager",
+      "level": "Senior",
+      "targetIndustry": "Fintech, Payment systems",
+      "location": "Shanghai",
+      "salaryRange": "Base 180-250k RMB/year",
+      "mustHaveSkills": [
+        "Backend development",
+        "Python or Go proficiency",
+        "Database design",
+        "Microservices architecture"
+      ],
+      "offLimits": ["Direct competitors in payment space"],
+      "objective": "Output detailed candidate assessment with fit score and recommendations"
+    },
+    "runtime": {
+      "mode": "openai",
+      "runner": "openai-chat",
+      "allowRemote": true,
+      "baseUrl": "http://127.0.0.1:8999/v1",
+      "apiKey": "test-key",
+      "model": "mock-qwen",
+      "temperature": 0.2,
+      "maxTokens": 1200,
+      "timeoutMs": 15000,
+      "jsonMode": true
+    }
+  },
+  {
+    "templateId": "candidate_assessment_cn",
+    "searchContext": {
+      "projectName": "Confidential Client - Senior Software Engineer Search",
+      "roleTitle": "Senior Software Engineer",
+      "clientName": "Confidential Client",
+      "candidateName": "Bob Smith",
+      "candidateExperience": "6 years in frontend development, React/TypeScript expertise",
+      "candidateSkills": ["React", "TypeScript", "Node.js", "UI/UX Design"],
+      "candidateEducation": "BS Computer Science, MIT",
+      "currentCompany": "WebSolutions Inc.",
+      "salaryExpectation": "160-200k RMB/year",
+      "availability": "2 weeks notice",
+      "companyContext": "Series B fintech startup focusing on payment solutions",
+      "hiringBrief": "Find a senior engineer with strong backend skills and fintech experience",
+      "reportingLine": "Engineering Manager",
+      "level": "Senior",
+      "targetIndustry": "Fintech, Payment systems",
+      "location": "Shanghai",
+      "salaryRange": "Base 180-250k RMB/year",
+      "mustHaveSkills": [
+        "Backend development",
+        "Python or Go proficiency",
+        "Database design",
+        "Microservices architecture"
+      ],
+      "offLimits": ["Direct competitors in payment space"],
+      "objective": "Output detailed candidate assessment with fit score and recommendations"
+    },
+    "runtime": {
+      "mode": "openai",
+      "runner": "openai-chat",
+      "allowRemote": true,
+      "baseUrl": "http://127.0.0.1:8999/v1",
+      "apiKey": "test-key",
+      "model": "mock-qwen",
+      "temperature": 0.2,
+      "maxTokens": 1200,
+      "timeoutMs": 15000,
+      "jsonMode": true
+    }
+  },
+  {
+    "templateId": "candidate_assessment_cn",
+    "searchContext": {
+      "projectName": "Confidential Client - Senior Software Engineer Search",
+      "roleTitle": "Senior Software Engineer",
+      "clientName": "Confidential Client",
+      "candidateName": "Carol Davis",
+      "candidateExperience": "10 years in full-stack development, JavaScript/Java expertise",
+      "candidateSkills": ["JavaScript", "Java", "Spring Boot", "AWS", "DevOps"],
+      "candidateEducation": "MS Software Engineering, Carnegie Mellon",
+      "currentCompany": "CloudFirst Solutions",
+      "salaryExpectation": "200-240k RMB/year",
+      "availability": "1 month notice",
+      "companyContext": "Series B fintech startup focusing on payment solutions",
+      "hiringBrief": "Find a senior engineer with strong backend skills and fintech experience",
+      "reportingLine": "Engineering Manager",
+      "level": "Senior",
+      "targetIndustry": "Fintech, Payment systems",
+      "location": "Shanghai",
+      "salaryRange": "Base 180-250k RMB/year",
+      "mustHaveSkills": [
+        "Backend development",
+        "Python or Go proficiency",
+        "Database design",
+        "Microservices architecture"
+      ],
+      "offLimits": ["Direct competitors in payment space"],
+      "objective": "Output detailed candidate assessment with fit score and recommendations"
+    },
+    "runtime": {
+      "mode": "openai",
+      "runner": "openai-chat",
+      "allowRemote": true,
+      "baseUrl": "http://127.0.0.1:8999/v1",
+      "apiKey": "test-key",
+      "model": "mock-qwen",
+      "temperature": 0.2,
+      "maxTokens": 1200,
+      "timeoutMs": 15000,
+      "jsonMode": true
+    }
+  },
+  {
+    "templateId": "candidate_assessment_cn",
+    "searchContext": {
+      "projectName": "Confidential Client - Senior Software Engineer Search",
+      "roleTitle": "Senior Software Engineer",
+      "clientName": "Confidential Client",
+      "candidateName": "David Wilson",
+      "candidateExperience": "7 years in mobile development, iOS/Android expertise",
+      "candidateSkills": ["Swift", "Kotlin", "Mobile Architecture", "Agile Development"],
+      "candidateEducation": "BS Computer Science, UC Berkeley",
+      "currentCompany": "MobileFirst Apps",
+      "salaryExpectation": "170-210k RMB/year",
+      "availability": "Available immediately",
+      "companyContext": "Series B fintech startup focusing on payment solutions",
+      "hiringBrief": "Find a senior engineer with strong backend skills and fintech experience",
+      "reportingLine": "Engineering Manager",
+      "level": "Senior",
+      "targetIndustry": "Fintech, Payment systems",
+      "location": "Shanghai",
+      "salaryRange": "Base 180-250k RMB/year",
+      "mustHaveSkills": [
+        "Backend development",
+        "Python or Go proficiency",
+        "Database design",
+        "Microservices architecture"
+      ],
+      "offLimits": ["Direct competitors in payment space"],
+      "objective": "Output detailed candidate assessment with fit score and recommendations"
+    },
+    "runtime": {
+      "mode": "openai",
+      "runner": "openai-chat",
+      "allowRemote": true,
+      "baseUrl": "http://127.0.0.1:8999/v1",
+      "apiKey": "test-key",
+      "model": "mock-qwen",
+      "temperature": 0.2,
+      "maxTokens": 1200,
+      "timeoutMs": 15000,
+      "jsonMode": true
+    }
+  },
+  {
+    "templateId": "candidate_assessment_cn",
+    "searchContext": {
+      "projectName": "Confidential Client - Senior Software Engineer Search",
+      "roleTitle": "Senior Software Engineer",
+      "clientName": "Confidential Client",
+      "candidateName": "Eva Chen",
+      "candidateExperience": "9 years in data engineering, Python/SQL expertise",
+      "candidateSkills": ["Python", "SQL", "Spark", "Data Pipelines", "Machine Learning"],
+      "candidateEducation": "MS Data Science, Columbia University",
+      "currentCompany": "DataInsights Co.",
+      "salaryExpectation": "190-230k RMB/year",
+      "availability": "3 weeks notice",
+      "companyContext": "Series B fintech startup focusing on payment solutions",
+      "hiringBrief": "Find a senior engineer with strong backend skills and fintech experience",
+      "reportingLine": "Engineering Manager",
+      "level": "Senior",
+      "targetIndustry": "Fintech, Payment systems",
+      "location": "Shanghai",
+      "salaryRange": "Base 180-250k RMB/year",
+      "mustHaveSkills": [
+        "Backend development",
+        "Python or Go proficiency",
+        "Database design",
+        "Microservices architecture"
+      ],
+      "offLimits": ["Direct competitors in payment space"],
+      "objective": "Output detailed candidate assessment with fit score and recommendations"
+    },
+    "runtime": {
+      "mode": "openai",
+      "runner": "openai-chat",
+      "allowRemote": true,
+      "baseUrl": "http://127.0.0.1:8999/v1",
+      "apiKey": "test-key",
+      "model": "mock-qwen",
+      "temperature": 0.2,
+      "maxTokens": 1200,
+      "timeoutMs": 15000,
+      "jsonMode": true
+    }
+  }
+]

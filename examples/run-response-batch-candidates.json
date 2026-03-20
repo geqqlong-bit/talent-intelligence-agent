@@ -1,0 +1,836 @@
+{
+  "ok": true,
+  "requestId": "req_xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+  "mode": "llm",
+  "templateId": "candidate_assessment_cn",
+  "run": {
+    "id": "run_xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+    "status": "completed",
+    "templateId": "candidate_assessment_cn",
+    "mode": "llm",
+    "runnerId": "openai-chat",
+    "stageCount": 8,
+    "stepCount": 8,
+    "artifactCount": 12,
+    "finalArtifactId": "report-markdown"
+  },
+  "engine": {
+    "kind": "remote-llm-runner",
+    "version": "v0.9",
+    "provider": "openai-compatible",
+    "adapter": "chat-completions",
+    "runnerId": "openai-chat",
+    "executionMode": "remote-llm",
+    "requestedMode": "openai",
+    "requestedRunner": "openai-chat",
+    "preferredRunnerId": "openai-chat",
+    "requestedModel": "bailian/qwen3.5-plus",
+    "resolvedMode": "llm",
+    "implementationStatus": "active",
+    "resolutionSource": "runner",
+    "fallbackApplied": false,
+    "fallbackKind": "none",
+    "fallbackReason": "OpenAI-compatible chat-completions adapter is available when explicitly enabled and configured.",
+    "boundary": "local-only",
+    "remote": {
+      "readiness": "callable",
+      "enabled": true,
+      "configured": true,
+      "callable": true,
+      "required": false,
+      "explicitRemoteRequest": true,
+      "baseUrl": "http://127.0.0.1:8999/v1",
+      "path": "/chat/completions",
+      "model": "bailian/qwen3.5-plus"
+    }
+  },
+  "summary": {
+    "projectName": "Confidential Client - Senior Engineering Team Expansion",
+    "roleTitle": "Senior Software Engineer",
+    "templateId": "candidate_assessment_cn"
+  },
+  "reportMarkdown": "# Senior Software Engineer - Talent Intelligence Report\n\n## Job Description Diagnosis\n\n[JD Diagnosis Content]\n\n## Search Plan\n\n[Search Plan Content]\n\n## Sourcing Strategy\n\n[Sourcing Strategy Content]\n\n## Individual Candidate Assessments (3 total)\n\n### Candidate Assessment 1\n\n[Alice Johnson Assessment Content]\n\n### Candidate Assessment 2\n\n[Bob Chen Assessment Content]\n\n### Candidate Assessment 3\n\n[Carol Davis Assessment Content]\n\n",
+  "metadata": {
+    "requestId": "req_xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+    "runId": "run_xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+    "apiVersion": "v0.9",
+    "startedAt": "2026-03-15T00:00:00.000Z",
+    "completedAt": "2026-03-15T00:00:00.000Z",
+    "durationMs": 1200,
+    "totalDurationMs": 1200,
+    "workflowId": "talent-intelligence.remote-llm-run",
+    "workflowVersion": "v0.9",
+    "runnerId": "openai-chat",
+    "executionMode": "remote-llm",
+    "executionStatus": "completed",
+    "requestedMode": "openai",
+    "requestedRunner": "openai-chat",
+    "preferredRunnerId": "openai-chat",
+    "resolvedMode": "llm",
+    "fallbackApplied": false,
+    "fallbackKind": "none",
+    "stageCount": 8,
+    "stepCount": 8,
+    "artifactCount": 12,
+    "finalArtifactId": "report-markdown",
+    "performance": {
+      "totalDurationMs": 1200,
+      "stepDurationMs": 1200,
+      "tokenUsage": {
+        "promptTokens": 2450,
+        "completionTokens": 1200,
+        "totalTokens": 3650
+      }
+    }
+  },
+  "orchestration": {
+    "requestId": "req_xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+    "runId": "run_xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+    "workflow": {
+      "id": "talent-intelligence.remote-llm-run",
+      "version": "v0.9",
+      "executionMode": "remote-llm",
+      "runnerId": "openai-chat",
+      "futureHook": "workflowRunner.execute"
+    },
+    "execution": {
+      "status": "completed",
+      "runnerId": "openai-chat",
+      "boundary": "local-only",
+      "stageCount": 8,
+      "stepCount": 8,
+      "metrics": {
+        "totalDurationMs": 1200,
+        "requestTotalDurationMs": 1200,
+        "executionDurationMs": 1200,
+        "tokenUsage": {
+          "promptTokens": 2450,
+          "completionTokens": 1200,
+          "totalTokens": 3650
+        }
+      },
+      "stages": [
+        {
+          "id": "ingest-request",
+          "label": "Ingest Request",
+          "order": 1,
+          "status": "completed",
+          "stepCount": 1,
+          "stepIds": [
+            "capture-request"
+          ],
+          "startedAt": "2026-03-15T00:00:00.000Z",
+          "completedAt": "2026-03-15T00:00:00.000Z",
+          "durationMs": 2,
+          "consumes": [],
+          "produces": [
+            "normalized-request"
+          ]
+        },
+        {
+          "id": "prepare-brief",
+          "label": "Prepare Workflow Brief",
+          "order": 2,
+          "status": "completed",
+          "stepCount": 1,
+          "stepIds": [
+            "build-brief"
+          ],
+          "startedAt": "2026-03-15T00:00:00.000Z",
+          "completedAt": "2026-03-15T00:00:00.000Z",
+          "durationMs": 3,
+          "consumes": [
+            "normalized-request"
+          ],
+          "produces": [
+            "workflow-brief"
+          ]
+        },
+        {
+          "id": "jd-diagnosis",
+          "label": "JD Diagnosis",
+          "order": 3,
+          "status": "completed",
+          "stepCount": 1,
+          "stepIds": [
+            "execute-jd-diagnosis"
+          ],
+          "startedAt": "2026-03-15T00:00:00.000Z",
+          "completedAt": "2026-03-15T00:00:00.000Z",
+          "durationMs": 180,
+          "consumes": [
+            "workflow-brief"
+          ],
+          "produces": [
+            "jd-diagnosis-result"
+          ]
+        },
+        {
+          "id": "search-plan",
+          "label": "Search Plan",
+          "order": 4,
+          "status": "completed",
+          "stepCount": 1,
+          "stepIds": [
+            "execute-search-plan"
+          ],
+          "startedAt": "2026-03-15T00:00:00.000Z",
+          "completedAt": "2026-03-15T00:00:00.000Z",
+          "durationMs": 150,
+          "consumes": [
+            "jd-diagnosis-result"
+          ],
+          "produces": [
+            "search-plan-result"
+          ]
+        },
+        {
+          "id": "sourcing-strategy",
+          "label": "Sourcing Strategy",
+          "order": 5,
+          "status": "completed",
+          "stepCount": 1,
+          "stepIds": [
+            "execute-sourcing-strategy"
+          ],
+          "startedAt": "2026-03-15T00:00:00.000Z",
+          "completedAt": "2026-03-15T00:00:00.000Z",
+          "durationMs": 200,
+          "consumes": [
+            "search-plan-result"
+          ],
+          "produces": [
+            "sourcing-strategy-result"
+          ]
+        },
+        {
+          "id": "candidate-assessment",
+          "label": "Candidate Assessment",
+          "order": 6,
+          "status": "completed",
+          "stepCount": 1,
+          "stepIds": [
+            "execute-candidate-assessment"
+          ],
+          "startedAt": "2026-03-15T00:00:00.000Z",
+          "completedAt": "2026-03-15T00:00:01.000Z",
+          "durationMs": 800,
+          "consumes": [
+            "sourcing-strategy-result"
+          ],
+          "produces": [
+            "candidate-assessment-result"
+          ]
+        },
+        {
+          "id": "compile-report",
+          "label": "Compile Final Report",
+          "order": 7,
+          "status": "completed",
+          "stepCount": 1,
+          "stepIds": [
+            "compile-results"
+          ],
+          "startedAt": "2026-03-15T00:00:01.000Z",
+          "completedAt": "2026-03-15T00:00:01.000Z",
+          "durationMs": 10,
+          "consumes": [
+            "candidate-assessment-result"
+          ],
+          "produces": [
+            "report-markdown"
+          ]
+        },
+        {
+          "id": "finalize-run",
+          "label": "Finalize Run",
+          "order": 8,
+          "status": "completed",
+          "stepCount": 1,
+          "stepIds": [
+            "finalize-response"
+          ],
+          "startedAt": "2026-03-15T00:00:01.000Z",
+          "completedAt": "2026-03-15T00:00:01.000Z",
+          "durationMs": 5,
+          "consumes": [
+            "report-markdown"
+          ],
+          "produces": [
+            "run-summary"
+          ]
+        }
+      ],
+      "steps": [
+        {
+          "id": "capture-request",
+          "stageId": "ingest-request",
+          "kind": "capture-input",
+          "runnerId": "openai-chat",
+          "status": "completed",
+          "startedAt": "2026-03-15T00:00:00.000Z",
+          "completedAt": "2026-03-15T00:00:00.000Z",
+          "durationMs": 2,
+          "consumes": [],
+          "produces": [
+            "normalized-request"
+          ],
+          "output": {
+            "artifactId": "normalized-request",
+            "fieldsCaptured": 35
+          },
+          "metrics": {
+            "durationMs": 2,
+            "tokenUsage": {
+              "promptTokens": 0,
+              "completionTokens": 0,
+              "totalTokens": 0
+            }
+          }
+        },
+        {
+          "id": "build-brief",
+          "stageId": "prepare-brief",
+          "kind": "brief-synthesis",
+          "runnerId": "openai-chat",
+          "status": "completed",
+          "startedAt": "2026-03-15T00:00:00.000Z",
+          "completedAt": "2026-03-15T00:00:00.000Z",
+          "durationMs": 3,
+          "consumes": [
+            "normalized-request"
+          ],
+          "produces": [
+            "workflow-brief"
+          ],
+          "output": {
+            "artifactId": "workflow-brief",
+            "sourceArtifactId": "normalized-request",
+            "targetCompanyCount": 4
+          },
+          "metrics": {
+            "durationMs": 3,
+            "tokenUsage": {
+              "promptTokens": 0,
+              "completionTokens": 0,
+              "totalTokens": 0
+            }
+          }
+        },
+        {
+          "id": "execute-jd-diagnosis",
+          "stageId": "jd-diagnosis",
+          "kind": "remote-llm-call",
+          "runnerId": "openai-chat",
+          "status": "completed",
+          "startedAt": "2026-03-15T00:00:00.000Z",
+          "completedAt": "2026-03-15T00:00:00.000Z",
+          "durationMs": 180,
+          "consumes": [
+            "workflow-brief"
+          ],
+          "produces": [
+            "jd-diagnosis-result"
+          ],
+          "output": {
+            "artifactId": "jd-diagnosis-result",
+            "renderer": "openai-compatible-chat-completions",
+            "templateId": "candidate_assessment_cn",
+            "sourceArtifactId": "workflow-brief",
+            "remoteInfo": {
+              "attempted": true,
+              "succeeded": true,
+              "baseUrl": "http://127.0.0.1:8999/v1",
+              "path": "/chat/completions",
+              "model": "bailian/qwen3.5-plus",
+              "startedAt": "2026-03-15T00:00:00.000Z",
+              "completedAt": "2026-03-15T00:00:00.000Z",
+              "durationMs": 178,
+              "responseId": "resp_jd_diag_123",
+              "finishReason": "stop",
+              "usage": {
+                "prompt_tokens": 250,
+                "completion_tokens": 120,
+                "total_tokens": 370
+              }
+            }
+          },
+          "metrics": {
+            "durationMs": 180,
+            "tokenUsage": {
+              "promptTokens": 250,
+              "completionTokens": 120,
+              "totalTokens": 370
+            }
+          }
+        },
+        {
+          "id": "execute-search-plan",
+          "stageId": "search-plan",
+          "kind": "remote-llm-call",
+          "runnerId": "openai-chat",
+          "status": "completed",
+          "startedAt": "2026-03-15T00:00:00.000Z",
+          "completedAt": "2026-03-15T00:00:00.000Z",
+          "durationMs": 150,
+          "consumes": [
+            "jd-diagnosis-result"
+          ],
+          "produces": [
+            "search-plan-result"
+          ],
+          "output": {
+            "artifactId": "search-plan-result",
+            "renderer": "openai-compatible-chat-completions",
+            "templateId": "candidate_assessment_cn",
+            "sourceArtifactId": "jd-diagnosis-result",
+            "remoteInfo": {
+              "attempted": true,
+              "succeeded": true,
+              "baseUrl": "http://127.0.0.1:8999/v1",
+              "path": "/chat/completions",
+              "model": "bailian/qwen3.5-plus",
+              "startedAt": "2026-03-15T00:00:00.000Z",
+              "completedAt": "2026-03-15T00:00:00.000Z",
+              "durationMs": 148,
+              "responseId": "resp_search_plan_456",
+              "finishReason": "stop",
+              "usage": {
+                "prompt_tokens": 320,
+                "completion_tokens": 180,
+                "total_tokens": 500
+              }
+            }
+          },
+          "metrics": {
+            "durationMs": 150,
+            "tokenUsage": {
+              "promptTokens": 320,
+              "completionTokens": 180,
+              "totalTokens": 500
+            }
+          }
+        },
+        {
+          "id": "execute-sourcing-strategy",
+          "stageId": "sourcing-strategy",
+          "kind": "remote-llm-call",
+          "runnerId": "openai-chat",
+          "status": "completed",
+          "startedAt": "2026-03-15T00:00:00.000Z",
+          "completedAt": "2026-03-15T00:00:00.000Z",
+          "durationMs": 200,
+          "consumes": [
+            "search-plan-result"
+          ],
+          "produces": [
+            "sourcing-strategy-result"
+          ],
+          "output": {
+            "artifactId": "sourcing-strategy-result",
+            "renderer": "openai-compatible-chat-completions",
+            "templateId": "candidate_assessment_cn",
+            "sourceArtifactId": "search-plan-result",
+            "remoteInfo": {
+              "attempted": true,
+              "succeeded": true,
+              "baseUrl": "http://127.0.0.1:8999/v1",
+              "path": "/chat/completions",
+              "model": "bailian/qwen3.5-plus",
+              "startedAt": "2026-03-15T00:00:00.000Z",
+              "completedAt": "2026-03-15T00:00:00.000Z",
+              "durationMs": 198,
+              "responseId": "resp_sourcing_strat_789",
+              "finishReason": "stop",
+              "usage": {
+                "prompt_tokens": 410,
+                "completion_tokens": 220,
+                "totalTokens": 630
+              }
+            }
+          },
+          "metrics": {
+            "durationMs": 200,
+            "tokenUsage": {
+              "promptTokens": 410,
+              "completionTokens": 220,
+              "totalTokens": 630
+            }
+          }
+        },
+        {
+          "id": "execute-candidate-assessment",
+          "stageId": "candidate-assessment",
+          "kind": "remote-llm-call",
+          "runnerId": "openai-chat",
+          "status": "completed",
+          "startedAt": "2026-03-15T00:00:00.000Z",
+          "completedAt": "2026-03-15T00:00:01.000Z",
+          "durationMs": 800,
+          "consumes": [
+            "sourcing-strategy-result"
+          ],
+          "produces": [
+            "candidate-assessment-result"
+          ],
+          "output": {
+            "artifactId": "candidate-assessment-result",
+            "renderer": "openai-compatible-chat-completions",
+            "templateId": "candidate_assessment_cn",
+            "sourceArtifactId": "sourcing-strategy-result",
+            "totalCandidates": 3,
+            "successfulAssessments": 3,
+            "failedAssessments": 0
+          },
+          "metrics": {
+            "durationMs": 800,
+            "tokenUsage": {
+              "promptTokens": 1470,
+              "completionTokens": 680,
+              "totalTokens": 2150
+            }
+          }
+        },
+        {
+          "id": "compile-results",
+          "stageId": "compile-report",
+          "kind": "result-compilation",
+          "runnerId": "openai-chat",
+          "status": "completed",
+          "startedAt": "2026-03-15T00:00:01.000Z",
+          "completedAt": "2026-03-15T00:00:01.000Z",
+          "durationMs": 10,
+          "consumes": [
+            "candidate-assessment-result"
+          ],
+          "produces": [
+            "report-markdown"
+          ],
+          "output": {
+            "artifactId": "report-markdown",
+            "renderer": "multi-stage-combination",
+            "templateId": "candidate_assessment_cn",
+            "stageCount": 4
+          },
+          "metrics": {
+            "durationMs": 10,
+            "tokenUsage": {
+              "promptTokens": 0,
+              "completionTokens": 0,
+              "totalTokens": 0
+            }
+          }
+        },
+        {
+          "id": "finalize-response",
+          "stageId": "finalize-run",
+          "kind": "response-finalization",
+          "runnerId": "openai-chat",
+          "status": "completed",
+          "startedAt": "2026-03-15T00:00:01.000Z",
+          "completedAt": "2026-03-15T00:00:01.000Z",
+          "durationMs": 5,
+          "consumes": [
+            "report-markdown"
+          ],
+          "produces": [
+            "run-summary"
+          ],
+          "output": {
+            "artifactId": "run-summary",
+            "finalArtifactId": "report-markdown"
+          },
+          "metrics": {
+            "durationMs": 5,
+            "tokenUsage": {
+              "promptTokens": 0,
+              "completionTokens": 0,
+              "totalTokens": 0
+            }
+          }
+        }
+      ],
+      "artifacts": [
+        {
+          "id": "normalized-request",
+          "name": "Normalized Request Payload",
+          "kind": "json",
+          "mimeType": "application/json",
+          "stageId": "ingest-request",
+          "producedBy": "capture-request",
+          "boundary": "local-only",
+          "metadata": {
+            "preview": "{\\"templateId\\":\\"candidate_assessment_cn\\",\\"searchContext\\":{\\"projectName\\":\\"Confidential Client - Senior Engineering Team Expansion\\",\\"roleTitle\\":\\"Senior Software Engineer\\",\\"candidates\\":[...]},\\"runtime\\":{...}}"
+          }
+        },
+        {
+          "id": "workflow-brief",
+          "name": "Workflow Brief",
+          "kind": "json",
+          "mimeType": "application/json",
+          "stageId": "prepare-brief",
+          "producedBy": "build-brief",
+          "boundary": "local-only",
+          "metadata": {
+            "preview": "{\\"templateId\\":\\"candidate_assessment_cn\\",\\"projectName\\":\\"Confidential Client - Senior Engineering Team Expansion\\",\\"roleTitle\\":\\"Senior Software Engineer\\",\\"objective\\":\\"Evaluate multiple candidates for technical competency, cultural fit, and growth potential\\",\\"targetCompanies\\":[],\\"sourceArtifactId\\":\\"normalized-request\\"}"
+          }
+        },
+        {
+          "id": "jd-diagnosis-result",
+          "name": "JD Diagnosis Result",
+          "kind": "markdown",
+          "mimeType": "text/markdown",
+          "stageId": "jd-diagnosis",
+          "producedBy": "execute-jd-diagnosis",
+          "boundary": "local-only",
+          "metadata": {
+            "preview": "# Job Description Analysis..."
+          }
+        },
+        {
+          "id": "search-plan-result",
+          "name": "Search Plan Result",
+          "kind": "markdown",
+          "mimeType": "text/markdown",
+          "stageId": "search-plan",
+          "producedBy": "execute-search-plan",
+          "boundary": "local-only",
+          "metadata": {
+            "preview": "# Search Plan for Senior Software Engineer..."
+          }
+        },
+        {
+          "id": "sourcing-strategy-result",
+          "name": "Sourcing Strategy Result",
+          "kind": "markdown",
+          "mimeType": "text/markdown",
+          "stageId": "sourcing-strategy",
+          "producedBy": "execute-sourcing-strategy",
+          "boundary": "local-only",
+          "metadata": {
+            "preview": "# Sourcing Strategy for Senior Software Engineer..."
+          }
+        },
+        {
+          "id": "candidate-assessment-result",
+          "name": "Candidate Assessment Summary",
+          "kind": "json",
+          "mimeType": "application/json",
+          "stageId": "candidate-assessment",
+          "producedBy": "execute-candidate-assessment",
+          "boundary": "local-only",
+          "metadata": {
+            "templateId": "candidate_assessment_cn",
+            "sourceArtifactId": "sourcing-strategy-result",
+            "totalCandidates": 3,
+            "successfulCount": 3,
+            "failedCount": 0
+          }
+        },
+        {
+          "id": "candidate-assessment-result-0",
+          "name": "Candidate Assessment Result 0",
+          "kind": "markdown",
+          "mimeType": "text/markdown",
+          "stageId": "candidate-assessment",
+          "producedBy": "execute-candidate-assessment",
+          "boundary": "local-only",
+          "metadata": {
+            "templateId": "candidate_assessment_cn",
+            "sourceArtifactId": "sourcing-strategy-result",
+            "renderer": "openai-compatible-chat-completions",
+            "remoteInfo": {
+              "attempted": true,
+              "succeeded": true,
+              "baseUrl": "http://127.0.0.1:8999/v1",
+              "path": "/chat/completions",
+              "model": "bailian/qwen3.5-plus",
+              "startedAt": "2026-03-15T00:00:00.200Z",
+              "completedAt": "2026-03-15T00:00:00.450Z",
+              "durationMs": 250,
+              "responseId": "resp_cand_0_abc",
+              "finishReason": "stop",
+              "usage": {
+                "prompt_tokens": 490,
+                "completion_tokens": 227,
+                "total_tokens": 717
+              }
+            },
+            "candidateIndex": 0,
+            "candidateName": "Alice Johnson",
+            "preview": "# Candidate Assessment: Alice Johnson..."
+          }
+        },
+        {
+          "id": "candidate-assessment-result-1",
+          "name": "Candidate Assessment Result 1",
+          "kind": "markdown",
+          "mimeType": "text/markdown",
+          "stageId": "candidate-assessment",
+          "producedBy": "execute-candidate-assessment",
+          "boundary": "local-only",
+          "metadata": {
+            "templateId": "candidate_assessment_cn",
+            "sourceArtifactId": "sourcing-strategy-result",
+            "renderer": "openai-compatible-chat-completions",
+            "remoteInfo": {
+              "attempted": true,
+              "succeeded": true,
+              "baseUrl": "http://127.0.0.1:8999/v1",
+              "path": "/chat/completions",
+              "model": "bailian/qwen3.5-plus",
+              "startedAt": "2026-03-15T00:00:00.300Z",
+              "completedAt": "2026-03-15T00:00:00.650Z",
+              "durationMs": 350,
+              "responseId": "resp_cand_1_def",
+              "finishReason": "stop",
+              "usage": {
+                "prompt_tokens": 510,
+                "completionTokens": 233,
+                "totalTokens": 743
+              }
+            },
+            "candidateIndex": 1,
+            "candidateName": "Bob Chen",
+            "preview": "# Candidate Assessment: Bob Chen..."
+          }
+        },
+        {
+          "id": "candidate-assessment-result-2",
+          "name": "Candidate Assessment Result 2",
+          "kind": "markdown",
+          "mimeType": "text/markdown",
+          "stageId": "candidate-assessment",
+          "producedBy": "execute-candidate-assessment",
+          "boundary": "local-only",
+          "metadata": {
+            "templateId": "candidate_assessment_cn",
+            "sourceArtifactId": "sourcing-strategy-result",
+            "renderer": "openai-compatible-chat-completions",
+            "remoteInfo": {
+              "attempted": true,
+              "succeeded": true,
+              "baseUrl": "http://127.0.0.1:8999/v1",
+              "path": "/chat/completions",
+              "model": "bailian/qwen3.5-plus",
+              "startedAt": "2026-03-15T00:00:00.400Z",
+              "completedAt": "2026-03-15T00:00:00.800Z",
+              "durationMs": 400,
+              "responseId": "resp_cand_2_ghi",
+              "finishReason": "stop",
+              "usage": {
+                "prompt_tokens": 480,
+                "completionTokens": 220,
+                "totalTokens": 700
+              }
+            },
+            "candidateIndex": 2,
+            "candidateName": "Carol Davis",
+            "preview": "# Candidate Assessment: Carol Davis..."
+          }
+        },
+        {
+          "id": "report-markdown",
+          "name": "Compiled Report",
+          "kind": "markdown",
+          "mimeType": "text/markdown",
+          "stageId": "compile-report",
+          "producedBy": "compile-results",
+          "boundary": "local-only",
+          "metadata": {
+            "templateId": "candidate_assessment_cn",
+            "renderer": "multi-stage-combination",
+            "stageCount": 4,
+            "sourceArtifacts": [
+              "jd-diagnosis-result",
+              "search-plan-result",
+              "sourcing-strategy-result",
+              "candidate-assessment-result"
+            ],
+            "preview": "# Senior Software Engineer - Talent Intelligence Report..."
+          }
+        },
+        {
+          "id": "run-summary",
+          "name": "Run Summary",
+          "kind": "json",
+          "mimeType": "application/json",
+          "stageId": "finalize-run",
+          "producedBy": "finalize-response",
+          "boundary": "local-only",
+          "metadata": {
+            "preview": "{\\"runId\\":\\"run_xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx\\",\\"requestId\\":\\"req_xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx\\",\\"templateId\\":\\"candidate_assessment_cn\\",\\"resolvedRunnerId\\":\\"openai-chat\\",\\"finalArtifactId\\":\\"report-markdown\\",\\"remoteAttempted\\":true,\\"remoteSucceeded\\":true,\\"multiStage\\":true}"
+          }
+        },
+        {
+          "id": "candidate-assessment-result",
+          "name": "Candidate Assessment Summary",
+          "kind": "json",
+          "mimeType": "application/json",
+          "stageId": "candidate-assessment",
+          "producedBy": "execute-candidate-assessment",
+          "boundary": "local-only",
+          "metadata": {
+            "templateId": "candidate_assessment_cn",
+            "sourceArtifactId": "sourcing-strategy-result",
+            "renderer": "openai-compatible-chat-completions",
+            "totalCandidates": 3,
+            "successfulCount": 3,
+            "failedCount": 0
+          }
+        }
+      ],
+      "finalArtifactId": "report-markdown",
+      "result": {
+        "renderer": "multi-stage-combination",
+        "templateId": "candidate_assessment_cn",
+        "artifactId": "report-markdown",
+        "finalArtifactId": "report-markdown",
+        "finalizationArtifactId": "run-summary",
+        "multiStage": true,
+        "stageResults": {
+          "jdDiagnosis": "[JD Diagnosis Content]",
+          "searchPlan": "[Search Plan Content]",
+          "sourcingStrategy": "[Sourcing Strategy Content]",
+          "candidateAssessment": {
+            "totalCandidates": 3,
+            "successfulAssessments": 3,
+            "failedAssessments": 0,
+            "allAssessmentIds": [
+              "candidate-assessment-result-0",
+              "candidate-assessment-result-1",
+              "candidate-assessment-result-2"
+            ]
+          }
+        }
+      },
+      "remote": {
+        "attempted": true,
+        "succeeded": true,
+        "multiStage": true,
+        "stageCount": 4
+      }
+    },
+    "selection": {
+      "requestedMode": "openai",
+      "requestedRunner": "openai-chat",
+      "preferredRunnerId": "openai-chat",
+      "resolvedRunnerId": "openai-chat",
+      "resolvedMode": "llm",
+      "resolutionSource": "runner",
+      "strategy": "requested-runner",
+      "fallbackApplied": false,
+      "fallbackKind": "none",
+      "fallbackReason": "OpenAI-compatible chat-completions adapter is available when explicitly enabled and configured."
+    }
+  },
+  "artifacts": {
+    "rootDir": "/absolute/path/to/state/runs/YYYY/MM/DD/run_xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+    "files": {
+      "request": "/absolute/path/to/state/runs/YYYY/MM/DD/run_xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/request.json",
+      "response": "/absolute/path/to/state/runs/YYYY/MM/DD/run_xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/response.json",
+      "reportMarkdown": "/absolute/path/to/state/runs/YYYY/MM/DD/run_xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/report.md",
+      "events": "/absolute/path/to/state/runs/YYYY/MM/DD/run_xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/events.log"
+    }
+  }
+}

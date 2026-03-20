@@ -1,0 +1,44 @@
+{
+  "templateId": "candidate_assessment_cn",
+  "searchContext": {
+    "projectName": "Confidential Client - Trusted Assessment Demo",
+    "roleTitle": "Senior Engineering Manager",
+    "clientName": "Confidential Client",
+    "companyContext": "Growth-stage AI software company building enterprise products",
+    "objective": "Produce a trusted candidate assessment with rubric, evidence, and confidence",
+    "location": "Shanghai",
+    "salaryRange": "Base 80-110k RMB/month",
+    "mustHaveSkills": [
+      "Engineering leadership",
+      "Cross-functional execution",
+      "B2B product delivery"
+    ],
+    "candidates": [
+      {
+        "name": "Alex Chen",
+        "summary": "Engineering leader with platform and enterprise delivery background.",
+        "highlights": [
+          "Led a 20-engineer team through platform modernization",
+          "Worked closely with product and sales on enterprise customer launches",
+          "Built execution cadence across engineering, QA, and solution teams"
+        ],
+        "concerns": [
+          "Ownership scope may be overstated",
+          "Has mostly operated in relatively mature organizations"
+        ]
+      }
+    ]
+  },
+  "runtime": {
+    "mode": "openai",
+    "runner": "openai-chat",
+    "allowRemote": true,
+    "baseUrl": "http://127.0.0.1:18999/v1",
+    "apiKey": "test-key",
+    "model": "mock-qwen",
+    "jsonMode": true,
+    "temperature": 0.2,
+    "maxTokens": 1600,
+    "timeoutMs": 15000
+  }
+}

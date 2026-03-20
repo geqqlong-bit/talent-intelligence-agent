@@ -1,7 +1,7 @@
 {
   "ok": true,
   "service": "talent-intelligence-service",
-  "version": "v0.6",
+  "version": "v0.8",
   "status": "healthy",
   "execution": {
     "mode": "local-template",
@@ -74,7 +74,7 @@
   "requestId": "req_xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
   "metadata": {
     "requestId": "req_xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
-    "apiVersion": "v0.6",
+    "apiVersion": "v0.8",
     "timestamp": "2026-03-15T00:00:00.000Z"
   }
 }

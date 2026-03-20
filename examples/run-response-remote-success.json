@@ -1,0 +1,305 @@
+{
+  "ok": true,
+  "requestId": "req_remote_success_12345",
+  "mode": "llm",
+  "templateId": "sourcing_strategy_cn",
+  "run": {
+    "id": "run_remote_success_12345",
+    "status": "completed",
+    "templateId": "sourcing_strategy_cn",
+    "mode": "llm",
+    "runnerId": "openai-chat",
+    "stageCount": 4,
+    "stepCount": 4,
+    "artifactCount": 4,
+    "finalArtifactId": "report-markdown"
+  },
+  "engine": {
+    "kind": "remote-llm-runner",
+    "version": "v0.8",
+    "provider": "openai-compatible",
+    "adapter": "chat-completions",
+    "runnerId": "openai-chat",
+    "executionMode": "remote-llm",
+    "requestedMode": "openai",
+    "requestedRunner": "openai-chat",
+    "preferredRunnerId": "openai-chat",
+    "requestedModel": "bailian/qwen3.5-plus",
+    "resolvedMode": "llm",
+    "implementationStatus": "active",
+    "resolutionSource": "runner",
+    "fallbackApplied": false,
+    "fallbackKind": "none",
+    "fallbackReason": "Requested runner openai-chat is callable for this request and was executed successfully.",
+    "boundary": "local-only",
+    "remote": {
+      "readiness": "callable",
+      "enabled": true,
+      "configured": true,
+      "callable": true,
+      "required": false,
+      "explicitRemoteRequest": true,
+      "baseUrl": "http://127.0.0.1:8999/v1",
+      "path": "/chat/completions",
+      "model": "bailian/qwen3.5-plus"
+    }
+  },
+  "summary": {
+    "projectName": "Confidential Client - VP Product Search",
+    "roleTitle": "VP Product",
+    "templateId": "sourcing_strategy_cn"
+  },
+  "reportMarkdown": "# 人才寻访策略报告｜VP Product\n\n## 概要\n\n本报告旨在为贵公司寻找合适的VP Product候选人提供全面的寻访策略和目标公司地图。\n\n## 寻访策略\n\n1. **优先级目标公司**：华为云、阿里云、火山引擎、腾讯云\n2. **关键技能要求**：企业产品领导力、大客户协作、人员管理\n3. **地理覆盖**：上海及周边地区\n4. **薪酬范围**：月薪150-220万人民币\n\n## 结论\n\n建议重点关注上述四家云计算巨头中的高级产品管理人才，特别是有企业级产品经验的候选人。",
+  "metadata": {
+    "requestId": "req_remote_success_12345",
+    "runId": "run_remote_success_12345",
+    "apiVersion": "v0.8",
+    "startedAt": "2026-03-15T14:30:00.000Z",
+    "completedAt": "2026-03-15T14:30:02.150Z",
+    "durationMs": 2150,
+    "workflowId": "talent-intelligence.remote-llm-run",
+    "workflowVersion": "v0.8",
+    "runnerId": "openai-chat",
+    "executionMode": "remote-llm",
+    "executionStatus": "completed",
+    "requestedMode": "openai",
+    "requestedRunner": "openai-chat",
+    "preferredRunnerId": "openai-chat",
+    "resolvedMode": "llm",
+    "fallbackApplied": false,
+    "fallbackKind": "none",
+    "stageCount": 4,
+    "stepCount": 4,
+    "artifactCount": 4,
+    "finalArtifactId": "report-markdown",
+    "llmMetrics": {
+      "promptTokens": 1242,
+      "completionTokens": 386,
+      "totalTokens": 1628,
+      "latencyMs": 2150,
+      "model": "bailian/qwen3.5-plus",
+      "finishReason": "stop"
+    }
+  },
+  "orchestration": {
+    "requestId": "req_remote_success_12345",
+    "runId": "run_remote_success_12345",
+    "workflow": {
+      "id": "talent-intelligence.remote-llm-run",
+      "version": "v0.8",
+      "executionMode": "remote-llm",
+      "runnerId": "openai-chat",
+      "futureHook": "workflowRunner.execute"
+    },
+    "execution": {
+      "status": "completed",
+      "runnerId": "openai-chat",
+      "boundary": "local-only",
+      "stageCount": 4,
+      "stepCount": 4,
+      "stages": [
+        {
+          "id": "ingest-request",
+          "label": "Ingest Request",
+          "order": 1,
+          "status": "completed",
+          "stepCount": 1,
+          "stepIds": [
+            "capture-request"
+          ],
+          "startedAt": "2026-03-15T14:30:00.000Z",
+          "completedAt": "2026-03-15T14:30:00.001Z",
+          "durationMs": 1,
+          "consumes": [],
+          "produces": [
+            "normalized-request"
+          ]
+        },
+        {
+          "id": "build-brief",
+          "label": "Build Search Brief",
+          "order": 2,
+          "status": "completed",
+          "stepCount": 1,
+          "stepIds": [
+            "prepare-context"
+          ],
+          "startedAt": "2026-03-15T14:30:00.001Z",
+          "completedAt": "2026-03-15T14:30:00.003Z",
+          "durationMs": 2,
+          "consumes": [
+            "normalized-request"
+          ],
+          "produces": [
+            "workflow-brief"
+          ]
+        },
+        {
+          "id": "llm-generation",
+          "label": "LLM Content Generation",
+          "order": 3,
+          "status": "completed",
+          "stepCount": 1,
+          "stepIds": [
+            "generate-content"
+          ],
+          "startedAt": "2026-03-15T14:30:00.003Z",
+          "completedAt": "2026-03-15T14:30:02.148Z",
+          "durationMs": 2145,
+          "consumes": [
+            "workflow-brief"
+          ],
+          "produces": [
+            "generated-content"
+          ],
+          "metrics": {
+            "promptTokens": 1242,
+            "completionTokens": 386,
+            "totalTokens": 1628,
+            "latencyMs": 2145,
+            "model": "bailian/qwen3.5-plus",
+            "finishReason": "stop"
+          }
+        },
+        {
+          "id": "finalize-response",
+          "label": "Finalize Response",
+          "order": 4,
+          "status": "completed",
+          "stepCount": 1,
+          "stepIds": [
+            "package-result"
+          ],
+          "startedAt": "2026-03-15T14:30:02.148Z",
+          "completedAt": "2026-03-15T14:30:02.150Z",
+          "durationMs": 2,
+          "consumes": [
+            "generated-content"
+          ],
+          "produces": [
+            "final-result"
+          ]
+        }
+      ],
+      "steps": [
+        {
+          "id": "generate-content",
+          "stageId": "llm-generation",
+          "kind": "llm-generation",
+          "runnerId": "openai-chat",
+          "status": "completed",
+          "startedAt": "2026-03-15T14:30:00.003Z",
+          "completedAt": "2026-03-15T14:30:02.148Z",
+          "durationMs": 2145,
+          "consumes": [
+            "workflow-brief"
+          ],
+          "produces": [
+            "generated-content"
+          ],
+          "output": {
+            "artifactId": "generated-content",
+            "generator": "openai-compatible-chat-completions",
+            "templateId": "sourcing_strategy_cn",
+            "sourceArtifactId": "workflow-brief",
+            "metrics": {
+              "promptTokens": 1242,
+              "completionTokens": 386,
+              "totalTokens": 1628,
+              "latencyMs": 2145,
+              "model": "bailian/qwen3.5-plus",
+              "finishReason": "stop",
+              "responseId": "cmpl-xyz123"
+            }
+          }
+        }
+      ],
+      "artifacts": [
+        {
+          "id": "generated-content",
+          "name": "Generated Report Content",
+          "kind": "markdown",
+          "mimeType": "text/markdown",
+          "stageId": "llm-generation",
+          "producedBy": "generate-content",
+          "boundary": "local-only",
+          "metadata": {
+            "templateId": "sourcing_strategy_cn",
+            "sourceArtifactId": "workflow-brief",
+            "lineCount": 24,
+            "generator": "openai-compatible-chat-completions",
+            "tokenUsage": {
+              "promptTokens": 1242,
+              "completionTokens": 386,
+              "totalTokens": 1628
+            },
+            "preview": "# 人才寻访策略报告｜VP Product..."
+          }
+        }
+      ],
+      "finalArtifactId": "generated-content",
+      "result": {
+        "generator": "openai-compatible-chat-completions",
+        "templateId": "sourcing_strategy_cn",
+        "artifactId": "generated-content",
+        "finalArtifactId": "generated-content",
+        "finalizationArtifactId": "run-summary",
+        "remoteInfo": {
+          "attempted": true,
+          "succeeded": true,
+          "baseUrl": "http://127.0.0.1:8999/v1",
+          "path": "/chat/completions",
+          "model": "bailian/qwen3.5-plus",
+          "startedAt": "2026-03-15T14:30:00.005Z",
+          "completedAt": "2026-03-15T14:30:02.145Z",
+          "durationMs": 2140,
+          "responseId": "cmpl-xyz123",
+          "finishReason": "stop",
+          "usage": {
+            "prompt_tokens": 1242,
+            "completion_tokens": 386,
+            "total_tokens": 1628
+          }
+        }
+      },
+      "remote": {
+        "attempted": true,
+        "succeeded": true,
+        "baseUrl": "http://127.0.0.1:8999/v1",
+        "path": "/chat/completions",
+        "model": "bailian/qwen3.5-plus",
+        "startedAt": "2026-03-15T14:30:00.005Z",
+        "completedAt": "2026-03-15T14:30:02.145Z",
+        "durationMs": 2140,
+        "responseId": "cmpl-xyz123",
+        "finishReason": "stop",
+        "usage": {
+          "prompt_tokens": 1242,
+          "completion_tokens": 386,
+          "total_tokens": 1628
+        }
+      }
+    },
+    "selection": {
+      "requestedMode": "openai",
+      "requestedRunner": "openai-chat",
+      "preferredRunnerId": "openai-chat",
+      "resolvedRunnerId": "openai-chat",
+      "resolvedMode": "llm",
+      "resolutionSource": "runner",
+      "strategy": "requested-runner",
+      "fallbackApplied": false,
+      "fallbackKind": "none",
+      "fallbackReason": "Requested runner openai-chat is callable for this request and was executed successfully."
+    }
+  },
+  "artifacts": {
+    "rootDir": "/absolute/path/to/state/runs/2026/03/15/run_remote_success_12345",
+    "files": {
+      "request": "/absolute/path/to/state/runs/2026/03/15/run_remote_success_12345/request.json",
+      "response": "/absolute/path/to/state/runs/2026/03/15/run_remote_success_12345/response.json",
+      "reportMarkdown": "/absolute/path/to/state/runs/2026/03/15/run_remote_success_12345/report.md",
+      "events": "/absolute/path/to/state/runs/2026/03/15/run_remote_success_12345/events.log"
+    }
+  }
+}

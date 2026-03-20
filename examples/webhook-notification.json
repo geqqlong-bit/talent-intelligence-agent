@@ -1,0 +1,41 @@
+{
+  "jobId": "job_abcdef12-3456-7890-abcd-ef1234567890",
+  "status": "completed",
+  "result": {
+    "ok": true,
+    "requestId": "req_12345678-1234-1234-1234-123456789abc",
+    "mode": "template-renderer",
+    "templateId": "sourcing_strategy_cn",
+    "run": {
+      "id": "run_12345678-1234-1234-1234-123456789def",
+      "status": "completed",
+      "templateId": "sourcing_strategy_cn",
+      "mode": "template-renderer",
+      "runnerId": "local-template",
+      "stageCount": 4,
+      "stepCount": 4,
+      "artifactCount": 4,
+      "finalArtifactId": "report-markdown"
+    },
+    "reportMarkdown": "# 人才寻访策略报告｜VP Product\n...",
+    "metadata": {
+      "requestId": "req_12345678-1234-1234-1234-123456789abc",
+      "runId": "run_12345678-1234-1234-1234-123456789def",
+      "apiVersion": "v0.10",
+      "startedAt": "2026-03-15T00:00:00.000Z",
+      "completedAt": "2026-03-15T00:05:00.000Z",
+      "durationMs": 300000,
+      "workflowId": "talent-intelligence.local-template-render",
+      "workflowVersion": "v0.10",
+      "runnerId": "local-template",
+      "executionMode": "local-template",
+      "executionStatus": "completed",
+      "stageCount": 4,
+      "stepCount": 4,
+      "artifactCount": 4,
+      "finalArtifactId": "report-markdown"
+    }
+  },
+  "error": null,
+  "completedAt": "2026-03-15T00:05:00.000Z"
+}

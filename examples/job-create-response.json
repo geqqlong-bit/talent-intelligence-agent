@@ -1,0 +1,9 @@
+{
+  "ok": true,
+  "requestId": "req_12345678-1234-1234-1234-123456789abc",
+  "jobId": "job_abcdef12-3456-7890-abcd-ef1234567890",
+  "status": "accepted",
+  "message": "Job accepted for processing with webhook notification",
+  "webhookUrl": "https://your-app.com/webhooks/talent-intel-completed",
+  "createdAt": "2026-03-15T00:00:00.000Z"
+}

@@ -1,0 +1,101 @@
+{
+  "templateId": "candidate_assessment_cn",
+  "searchContext": {
+    "projectName": "Tech Company - Senior Engineering Manager Search",
+    "roleTitle": "Senior Engineering Manager",
+    "clientName": "Tech Company",
+    "searchType": "executive_search",
+    "mandateType": "retained",
+    "companyContext": "Series B fintech startup focused on payment solutions",
+    "companyStage": "Series B",
+    "businessModel": "B2B payment processing and financial services",
+    "teamStage": "Scaling engineering team from 15 to 35 people",
+    "hiringBrief": "Find an engineering manager who can scale the team and build robust payment infrastructure",
+    "objective": "Assess candidate for technical leadership and team scaling ability",
+    "targetIndustry": "Fintech, payments, banking technology",
+    "targetCompanies": [
+      "Ant Financial",
+      "Tencent Financial",
+      "Ping An Technology"
+    ],
+    "location": "Shanghai",
+    "targetGeographies": [
+      "Shanghai",
+      "Beijing",
+      "Shenzhen"
+    ],
+    "salaryRange": "Base 200-300k RMB/year",
+    "compensationMix": "Base + annual bonus + equity",
+    "equity": "Significant early-stage option package",
+    "reportingLine": "CTO",
+    "level": "Senior Management",
+    "headcount": "1",
+    "urgency": "Medium",
+    "searchReason": "Need to scale engineering team for Series C growth",
+    "successProfile": "Can build scalable systems, lead diverse teams, and work with compliance requirements",
+    "successMetrics": "Team productivity improvement, system reliability, compliance standards",
+    "marketSignals": "Competitors are expanding engineering teams rapidly",
+    "stakeholderBrief": "CTO wants technical depth; CEO wants business alignment",
+    "mustHaveSkills": [
+      "Payment system architecture",
+      "Team leadership (10+ people)",
+      "Regulatory compliance experience"
+    ],
+    "niceToHaveSkills": [
+      "Fintech domain expertise",
+      "Security-first mindset"
+    ],
+    "dealBreakers": [
+      "No management experience",
+      "Lack of fintech/payment background"
+    ],
+    "targetFunctions": [
+      "Engineering management",
+      "Technical architecture",
+      "Team scaling"
+    ],
+    "targetBackgrounds": [
+      "Scale-ups to enterprise",
+      "15+ person eng org",
+      "Financial services compliance"
+    ],
+    "offLimits": [
+      "Competitor A",
+      "Competitor B"
+    ],
+    "sourceChannels": [
+      "Direct search",
+      "Investor network",
+      "Technical conferences"
+    ],
+    "interviewProcess": "CTO screen -> peer panel -> culture fit -> reference checks",
+    "interviewPanel": [
+      "CTO",
+      "Head of Engineering",
+      "VP Product"
+    ],
+    "processConstraints": "Need decision in 4 weeks",
+    "candidateName": "Alice Johnson",
+    "candidateSummary": "Former Engineering Director at Ant Financial with 8 years of fintech experience",
+    "candidateHighlights": [
+      "Led team of 25 engineers at Ant Financial",
+      "Built core payment infrastructure handling 1M+ transactions/day",
+      "Experience with regulatory compliance in payments"
+    ],
+    "candidateConcerns": [
+      "May be overqualified for current team size",
+      "Salary expectations may be high"
+    ],
+    "interviewerNotes": "Single candidate assessment workflow (backward compatibility)"
+  },
+  "runtime": {
+    "mode": "openai",
+    "runner": "openai-chat",
+    "baseUrl": "http://127.0.0.1:8999/v1",
+    "apiKey": "test-key",
+    "model": "bailian/qwen3.5-plus",
+    "temperature": 0.4,
+    "maxTokens": 5000,
+    "timeoutMs": 120000
+  }
+}

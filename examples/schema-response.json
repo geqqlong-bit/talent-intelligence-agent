@@ -1,7 +1,7 @@
 {
   "ok": true,
   "service": "talent-intelligence-service",
-  "version": "v0.6",
+  "version": "v0.8",
   "templates": [
     "jd_diagnosis_cn",
     "sourcing_strategy_cn",
@@ -97,7 +97,7 @@
     },
     "engine": {
       "kind": "local-template-engine",
-      "version": "v0.6",
+      "version": "v0.8",
       "provider": "local",
       "adapter": "template-renderer",
       "runnerId": "local-template",
@@ -132,12 +132,12 @@
     "metadata": {
       "requestId": "req_xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
       "runId": "run_xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
-      "apiVersion": "v0.6",
+      "apiVersion": "v0.8",
       "startedAt": "ISO date",
       "completedAt": "ISO date",
       "durationMs": 12,
       "workflowId": "talent-intelligence.local-template-render",
-      "workflowVersion": "v0.6",
+      "workflowVersion": "v0.8",
       "runnerId": "local-template",
       "executionMode": "local-template",
       "executionStatus": "completed",
@@ -158,7 +158,7 @@
       "runId": "run_xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
       "workflow": {
         "id": "talent-intelligence.local-template-render",
-        "version": "v0.6",
+        "version": "v0.8",
         "executionMode": "local-template",
         "runnerId": "local-template",
         "futureHook": "workflowRunner.execute"
@@ -257,7 +257,7 @@
     },
     "metadata": {
       "requestId": "req_xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
-      "apiVersion": "v0.6",
+      "apiVersion": "v0.8",
       "status": 400,
       "timestamp": "ISO date"
     }
@@ -265,7 +265,7 @@
   "requestId": "req_xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
   "metadata": {
     "requestId": "req_xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
-    "apiVersion": "v0.6",
+    "apiVersion": "v0.8",
     "timestamp": "2026-03-15T00:00:00.000Z"
   }
 }

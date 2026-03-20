@@ -105,33 +105,105 @@ function remoteConfigErrorFor(remote) {
   });
 }
 
-function buildMessages(payload) {
+// Define the multi-stage pipeline stages
+const MULTI_STAGE_STAGES = [
+  {
+    id: 'jd-diagnosis',
+    label: 'JD Diagnosis',
+    prompt: 'Analyze the job description and provide a diagnosis of the role requirements, market positioning, and potential challenges in finding suitable candidates. Focus on identifying if the role is well-defined and realistic in the current market.'
+  },
+  {
+    id: 'search-plan',
+    label: 'Search Plan',
+    prompt: 'Create a comprehensive search plan based on the role requirements. Include timeline, target companies, search channels, and success metrics for the search process.'
+  },
+  {
+    id: 'sourcing-strategy',
+    label: 'Sourcing Strategy',
+    prompt: 'Develop a detailed sourcing strategy focusing on target companies, candidate profiles, outreach methods, and competitive landscape analysis.'
+  },
+  {
+    id: 'candidate-assessment',
+    label: 'Candidate Assessment Framework',
+    prompt: 'Assess the candidate using only resume evidence from the provided payload. Return transparent structured reasoning for each dimension, including direct evidence quotes, a confidence label, and explicit 信息不足 when evidence is missing. Do not use black-box numeric scoring.'
+  }
+];
+
+function buildMessages(payload, stage = null) {
   const ctx = payload.searchContext || {};
-  const system = [
-    'You are a talent intelligence analyst.',
-    'Return only markdown.',
-    'Use concise Chinese headings and bullets.',
-    'Ground the answer strictly in the provided JSON payload.',
-    'Do not claim external research or fabricated facts.'
-  ].join(' ');
+  
+  if (stage) {
+    // Multi-stage approach - each stage gets specific instructions
+    const stageInfo = MULTI_STAGE_STAGES.find(s => s.id === stage.id) || MULTI_STAGE_STAGES[0];
+    const isCandidateAssessment = stage.id === 'candidate-assessment';
+    
+    const system = [
+      'You are a talent intelligence analyst specializing in executive search.',
+      isCandidateAssessment ? 'Return only valid JSON.' : 'Return only markdown for this specific stage.',
+      'Ground the answer strictly in the provided JSON payload.',
+      'Do not claim external research or fabricated facts.'
+    ].join(' ');
 
-  const user = [
-    'Generate a talent intelligence deliverable in markdown.',
-    `templateId: ${payload.templateId}`,
-    'requestJson:',
-    JSON.stringify(payload, null, 2),
-    '',
-    'Required output rules:',
-    `- Title must mention role: ${ctx.roleTitle || 'Unknown Role'}`,
-    '- Include a short conclusion section first.',
-    '- Use practical recruiter language.',
-    '- If information is missing, say TBD instead of inventing details.'
-  ].join('\n');
+    const user = [
+      `Generate talent intelligence deliverable for stage: ${stageInfo.label}`,
+      stageInfo.prompt,
+      `Role: ${ctx.roleTitle || 'Unknown Role'}`,
+      `Company: ${ctx.company || 'Unknown Company'}`,
+      `Industry: ${ctx.industry || 'Unknown Industry'}`,
+      `Location: ${ctx.location || 'Unknown Location'}`,
+      `Budget Range: ${ctx.salaryRange || 'Not specified'}`,
+      'requestJson:',
+      JSON.stringify(payload, null, 2),
+      '',
+      'Required output rules:',
+      `- Focus specifically on: ${stageInfo.label}`,
+      '- Use practical recruiter language.',
+      isCandidateAssessment
+        ? `- Return a JSON object with this shape: {"candidateName":"string","recommendation":"建议推进|谨慎推进|暂不推进","summary":"string","dimensions":[{"key":"relevant_experience|achievement_ownership|domain_alignment|risk_flags","label":"string","judgement":"string","confidence":"高|中|低","evidenceQuotes":["string"],"evidenceStatus":"证据充分|证据有限|信息不足","missingInformation":["string"]}],"overallRisks":[{"label":"string","detail":"string","confidence":"高|中|低","evidenceQuotes":["string"],"evidenceStatus":"证据充分|证据有限|信息不足"}],"followUpQuestions":["string"]}`
+        : `- Title must mention role: ${ctx.roleTitle || 'Unknown Role'}`,
+      isCandidateAssessment
+        ? '- Every dimension must include direct evidenceQuotes copied or tightly quoted from the candidate resume fields in the payload.'
+        : '- Use concise Chinese headings and bullets.',
+      isCandidateAssessment
+        ? '- If resume evidence is missing, set evidenceStatus to 信息不足 and explain what is missing in missingInformation. Never invent evidence.'
+        : '- If information is missing, say TBD instead of inventing details.',
+      isCandidateAssessment
+        ? '- Do not output numeric scores, percentages, stars, or black-box ratings.'
+        : ''
+    ].filter(Boolean).join('\n');
 
-  return [
-    { role: 'system', content: system },
-    { role: 'user', content: user }
-  ];
+    return [
+      { role: 'system', content: system },
+      { role: 'user', content: user }
+    ];
+  } else {
+    // Fallback to monolithic approach for backward compatibility
+    const system = [
+      'You are a talent intelligence analyst.',
+      'Return only markdown.',
+      'Use concise Chinese headings and bullets.',
+      'Ground the answer strictly in the provided JSON payload.',
+      'Do not claim external research or fabricated facts.'
+    ].join(' ');
+
+    const user = [
+      'Generate a comprehensive talent intelligence deliverable in markdown.',
+      `templateId: ${payload.templateId}`,
+      'requestJson:',
+      JSON.stringify(payload, null, 2),
+      '',
+      'Required output rules:',
+      `- Title must mention role: ${ctx.roleTitle || 'Unknown Role'}`,
+      '- Include a short conclusion section first.',
+      '- Use practical recruiter language.',
+      '- If information is missing, say TBD instead of inventing details.'
+    ].join('\n');
+
+    return [
+      { role: 'system', content: system },
+      { role: 'user', content: user }
+    ];
+  }
 }
 
 export function resolveRemoteOpenAIConfig(runtime = {}) {
@@ -195,7 +267,7 @@ export function resolveRemoteOpenAIConfig(runtime = {}) {
   };
 }
 
-export async function callRemoteOpenAICompatible({ payload, runtime = {}, requestContext = {} }) {
+export async function callRemoteOpenAICompatible({ payload, runtime = {}, requestContext = {}, stage = null }) {
   const remote = resolveRemoteOpenAIConfig(runtime);
 
   if (!remote.callable) {
@@ -208,6 +280,9 @@ export async function callRemoteOpenAICompatible({ payload, runtime = {}, reques
   const controller = new AbortController();
   const startedAtMs = Date.now();
   const timer = setTimeout(() => controller.abort(), remote.request.timeoutMs);
+
+  // Check if streaming is requested
+  const stream = runtime.stream === true;
 
   try {
     const headers = {
@@ -222,8 +297,27 @@ export async function callRemoteOpenAICompatible({ payload, runtime = {}, reques
       model: remote.request.model,
       temperature: remote.request.temperature,
       max_tokens: remote.request.maxTokens,
-      messages: buildMessages(payload)
+      messages: buildMessages(payload, stage) // Pass stage to buildMessages
     };
+
+    // Add response format if specified in runtime
+    if (runtime.responseFormat) {
+      body.response_format = runtime.responseFormat;
+    } else if (runtime.jsonMode === true) {
+      body.response_format = { type: "json_object" };
+    }
+
+    // Add streaming flag if requested
+    if (stream) {
+      body.stream = true;
+      // For some providers like Bailian/Qwen, we might need different streaming options
+      if (remote.request.model.includes('bailian') || remote.request.model.includes('qwen')) {
+        // Some models may require specific streaming settings
+        body.stream_options = { include_usage: true };
+      } else {
+        body.stream_options = { include_usage: true };
+      }
+    }
 
     const response = await fetch(url, {
       method: 'POST',
@@ -232,15 +326,15 @@ export async function callRemoteOpenAICompatible({ payload, runtime = {}, reques
       signal: controller.signal
     });
 
-    const rawText = await response.text();
-    let parsed;
-    try {
-      parsed = rawText ? JSON.parse(rawText) : {};
-    } catch {
-      parsed = undefined;
-    }
-
     if (!response.ok) {
+      const rawText = await response.text();
+      let parsed;
+      try {
+        parsed = rawText ? JSON.parse(rawText) : {};
+      } catch {
+        parsed = undefined;
+      }
+
       const error = new Error(`Remote OpenAI-compatible request failed with HTTP ${response.status}`);
       error.code = 'REMOTE_RUNNER_HTTP_ERROR';
       error.status = response.status;
@@ -249,19 +343,129 @@ export async function callRemoteOpenAICompatible({ payload, runtime = {}, reques
       throw error;
     }
 
-    const content = parsed?.choices?.[0]?.message?.content;
+    let content = '';
+    let parsedResponse = {}; // Store the final parsed response
+    
+    if (stream) {
+      // Handle streaming response
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = '';
+
+      try {
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+
+          buffer += decoder.decode(value, { stream: true });
+          
+          // Process each complete line
+          let newlineIndex;
+          while ((newlineIndex = buffer.indexOf('\n')) !== -1) {
+            const line = buffer.substring(0, newlineIndex);
+            buffer = buffer.substring(newlineIndex + 1);
+
+            const trimmedLine = line.trim();
+            
+            // Skip empty lines and comments (data: [DONE])
+            if (!trimmedLine || trimmedLine === 'data: [DONE]') {
+              continue;
+            }
+
+            // Handle SSE format (data: ...)
+            if (trimmedLine.startsWith('data: ')) {
+              const dataStr = trimmedLine.slice(6); // Remove 'data: ' prefix
+              
+              if (dataStr === '[DONE]') {
+                break;
+              }
+
+              try {
+                const chunk = JSON.parse(dataStr);
+                
+                if (chunk.choices && chunk.choices.length > 0) {
+                  const delta = chunk.choices[0].delta;
+                  if (delta && delta.content) {
+                    content += delta.content;
+                  }
+                  
+                  // Check if we've reached the end
+                  if (chunk.choices[0].finish_reason) {
+                    break;
+                  }
+                }
+                
+                // Capture usage if present (usually in the final chunk)
+                if (chunk.usage) {
+                  parsedResponse.usage = chunk.usage;
+                }
+                
+                // Capture response ID if present
+                if (chunk.id) {
+                  parsedResponse.id = chunk.id;
+                }
+              } catch (parseErr) {
+                console.warn('Failed to parse SSE data:', dataStr);
+                continue;
+              }
+            }
+          }
+        }
+      } finally {
+        reader.releaseLock();
+      }
+    } else {
+      // Handle non-streaming response
+      const rawText = await response.text();
+      try {
+        parsedResponse = rawText ? JSON.parse(rawText) : {};
+      } catch {
+        parsedResponse = undefined;
+      }
+
+      content = parsedResponse?.choices?.[0]?.message?.content || '';
+    }
+
     if (!normalizeText(content)) {
-      const error = new Error('Remote OpenAI-compatible response did not include choices[0].message.content');
+      const error = new Error('Remote OpenAI-compatible response did not include content');
       error.code = 'REMOTE_RUNNER_BAD_RESPONSE';
       error.status = 502;
-      error.responseBody = summarize(parsed || rawText);
+      error.responseBody = summarize(parsedResponse);
       error.remote = remote;
       throw error;
     }
 
+    let parsedContent;
+    const expectsJson = runtime.responseFormat?.type === 'json_object'
+      || runtime.responseFormat === 'json_object'
+      || runtime.jsonMode === true;
+    if (expectsJson) {
+      try {
+        parsedContent = JSON.parse(content);
+      } catch {
+        const error = new Error('Remote OpenAI-compatible response returned invalid JSON content');
+        error.code = 'REMOTE_RUNNER_BAD_RESPONSE';
+        error.status = 502;
+        error.responseBody = summarize(content);
+        error.remote = remote;
+        throw error;
+      }
+    }
+
     const completedAtMs = Date.now();
+    const usage = parsedResponse?.usage || {};
+    
+    // Extract token usage metrics
+    const tokenUsage = {
+      promptTokens: usage.prompt_tokens,
+      completionTokens: usage.completion_tokens,
+      totalTokens: usage.total_tokens,
+      model: remote.request.model
+    };
+    
     return {
       reportMarkdown: String(content),
+      structuredOutput: parsedContent,
       remoteInfo: {
         attempted: true,
         succeeded: true,
@@ -271,9 +475,12 @@ export async function callRemoteOpenAICompatible({ payload, runtime = {}, reques
         startedAt: toIso(startedAtMs),
         completedAt: toIso(completedAtMs),
         durationMs: completedAtMs - startedAtMs,
-        responseId: parsed?.id,
-        finishReason: parsed?.choices?.[0]?.finish_reason,
-        usage: parsed?.usage
+        responseId: parsedResponse?.id,
+        finishReason: parsedResponse?.choices?.[0]?.finish_reason || 'stop',
+        usage: parsedResponse?.usage,
+        tokenUsage,
+        stream: !!stream,
+        stage: stage ? stage.id : null // Include stage info in remote info
       }
     };
   } catch (error) {

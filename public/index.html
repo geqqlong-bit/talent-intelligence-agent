@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Talent Intelligence | 智能猎头工作台</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: { 50: '#eff6ff', 100: '#dbeafe', 500: '#3b82f6', 600: '#2563eb', 700: '#1d4ed8', 900: '#1e3a8a' }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    [v-cloak] { display: none; }
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    .markdown-body h2, .markdown-body h3 { font-weight: 600; color: #1e293b; margin-top: 1em; margin-bottom: 0.5em; }
+    .markdown-body p { margin-bottom: 0.75em; color: #475569; line-height: 1.6; }
+    .markdown-body ul { list-style-type: disc; padding-left: 1.5em; margin-bottom: 1em; color: #475569; }
+    .markdown-body strong { color: #0f172a; }
+    .fade-enter-active, .fade-leave-active { transition: opacity 0.3s ease; }
+    .fade-enter-from, .fade-leave-to { opacity: 0; }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 h-screen overflow-hidden flex">
+  <div id="app" class="flex w-full h-full" v-cloak>
+    <aside class="w-64 bg-slate-900 text-slate-300 flex flex-col shadow-xl z-20 shrink-0">
+      <div class="h-16 flex items-center px-6 border-b border-slate-800">
+        <i class="fa-solid fa-brain text-brand-500 text-xl mr-3"></i>
+        <span class="text-white font-bold text-lg tracking-wide">Talent Intel</span>
+      </div>
+      <div class="p-4">
+        <div class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-4 mt-2">工作台</div>
+        <nav class="space-y-1">
+          <a href="#" class="flex items-center px-3 py-2.5 bg-brand-600 text-white rounded-lg group">
+            <i class="fa-solid fa-briefcase w-6 text-center"></i>
+            <span class="ml-2 font-medium">智能寻猎任务</span>
+          </a>
+          <a href="#" class="flex items-center px-3 py-2.5 hover:bg-slate-800 hover:text-white rounded-lg transition-colors group">
+            <i class="fa-solid fa-users w-6 text-center text-slate-400 group-hover:text-white"></i>
+            <span class="ml-2 font-medium">候选人库 (Mock)</span>
+          </a>
+          <a href="#" class="flex items-center px-3 py-2.5 hover:bg-slate-800 hover:text-white rounded-lg transition-colors group">
+            <i class="fa-solid fa-chart-pie w-6 text-center text-slate-400 group-hover:text-white"></i>
+            <span class="ml-2 font-medium">市场洞察 (Mock)</span>
+          </a>
+        </nav>
+      </div>
+      <div class="mt-auto p-4 border-t border-slate-800">
+        <div class="flex items-center">
+          <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-brand-500 to-purple-500 flex items-center justify-center text-white font-bold">M</div>
+          <div class="ml-3">
+            <p class="text-sm font-medium text-white">Master</p>
+            <p class="text-xs text-slate-500 flex items-center">
+              <span class="w-2 h-2 rounded-full bg-emerald-500 mr-1.5"></span> Engine v0.11
+            </p>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <main class="flex-1 flex flex-col h-full overflow-hidden bg-slate-50 relative">
+      <header class="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-8 shrink-0">
+        <h1 class="text-xl font-semibold text-slate-800">
+          <span v-if="currentView === 'list'">任务看板</span>
+          <span v-else-if="currentView === 'create'">创建新任务</span>
+          <span v-else-if="currentView === 'detail'">任务详情: {{ activeJob?.searchContext?.roleTitle || '评估中' }}</span>
+        </h1>
+        <div class="flex items-center space-x-4">
+          <button v-if="currentView !== 'list'" @click="currentView = 'list'" class="text-sm text-slate-500 hover:text-slate-800 transition">
+            <i class="fa-solid fa-arrow-left mr-1"></i> 返回看板
+          </button>
+          <button v-if="currentView === 'list'" @click="currentView = 'create'" class="bg-brand-600 hover:bg-brand-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition shadow-sm">
+            <i class="fa-solid fa-plus mr-1.5"></i> 新建寻猎
+          </button>
+        </div>
+      </header>
+
+      <div class="flex-1 overflow-auto p-8">
+        <div v-if="currentView === 'list'" class="max-w-5xl mx-auto">
+          <div v-if="jobs.length === 0" class="text-center py-20 bg-white rounded-xl border border-slate-200 border-dashed">
+            <div class="w-16 h-16 bg-brand-50 text-brand-500 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl">
+              <i class="fa-solid fa-inbox"></i>
+            </div>
+            <h3 class="text-lg font-medium text-slate-900 mb-1">暂无寻猎任务</h3>
+            <p class="text-slate-500 mb-6">创建一个 JD，导入候选人，让 AI 引擎为你并发评估。</p>
+            <button @click="currentView = 'create'" class="bg-brand-600 hover:bg-brand-700 text-white px-5 py-2.5 rounded-lg font-medium transition shadow-sm">
+              开始创建任务
+            </button>
+          </div>
+
+          <div v-else class="grid gap-4">
+            <div v-for="job in jobs" :key="job.id" @click="viewJob(job)" class="bg-white border border-slate-200 rounded-xl p-5 hover:shadow-md transition cursor-pointer flex items-center justify-between group">
+              <div class="flex items-start">
+                <div class="w-10 h-10 rounded-lg flex items-center justify-center shrink-0 mt-0.5"
+                     :class="{'bg-amber-100 text-amber-600': job.status !== 'completed' && job.status !== 'failed', 'bg-emerald-100 text-emerald-600': job.status === 'completed', 'bg-red-100 text-red-600': job.status === 'failed'}">
+                  <i class="fa-solid" :class="{'fa-circle-notch fa-spin': job.status !== 'completed' && job.status !== 'failed', 'fa-check': job.status === 'completed', 'fa-xmark': job.status === 'failed'}"></i>
+                </div>
+                <div class="ml-4">
+                  <h3 class="font-semibold text-slate-800 text-lg group-hover:text-brand-600 transition">{{ job.searchContext.roleTitle }}</h3>
+                  <div class="text-sm text-slate-500 flex items-center mt-1 space-x-3">
+                    <span><i class="fa-regular fa-clock mr-1"></i> {{ formatTime(job.createdAt) }}</span>
+                    <span><i class="fa-regular fa-file-lines mr-1"></i> {{ job.searchContext.candidates.length }} 位候选人</span>
+                    <span class="px-2 py-0.5 rounded-full text-xs font-medium"
+                          :class="{'bg-amber-100 text-amber-700': job.status !== 'completed' && job.status !== 'failed', 'bg-emerald-100 text-emerald-700': job.status === 'completed', 'bg-red-100 text-red-700': job.status === 'failed'}">
+                      {{ statusText(job.status) }}
+                    </span>
+                  </div>
+                </div>
+              </div>
+              <div class="text-slate-400 group-hover:text-brand-500 transition">
+                <i class="fa-solid fa-chevron-right"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div v-else-if="currentView === 'create'" class="max-w-4xl mx-auto">
+          <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+            <div class="p-6 border-b border-slate-100 bg-slate-50/50">
+              <h2 class="text-lg font-semibold text-slate-800"><i class="fa-solid fa-crosshairs text-brand-500 mr-2"></i>岗位要求 (JD)</h2>
+            </div>
+            <div class="p-6 space-y-5">
+              <div>
+                <label class="block text-sm font-medium text-slate-700 mb-1">寻访职位名称</label>
+                <input v-model="form.roleTitle" type="text" class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition" placeholder="例如：资深前端架构师">
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-slate-700 mb-1">职位描述 (JD 详情)</label>
+                <textarea v-model="form.jobDescription" rows="4" class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition" placeholder="粘贴完整的职位描述、要求、汇报线等信息..."></textarea>
+              </div>
+            </div>
+
+            <div class="p-6 border-y border-slate-100 bg-slate-50/50 flex items-center justify-between gap-4 flex-wrap">
+              <div>
+                <h2 class="text-lg font-semibold text-slate-800"><i class="fa-solid fa-scale-balanced text-brand-500 mr-2"></i>评估 Rubric</h2>
+                <p class="text-sm text-slate-500 mt-1">先把"怎么判断"写清楚，结果卡片才更可信。</p>
+              </div>
+              <div class="flex items-center gap-3">
+                <div class="text-sm px-3 py-1.5 rounded-lg border" :class="rubricWeightTotal === 100 ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-amber-50 text-amber-700 border-amber-200'">
+                  权重合计 {{ rubricWeightTotal }}%
+                </div>
+                <button @click="addRubricDimension" class="text-sm text-brand-600 hover:text-brand-700 font-medium"><i class="fa-solid fa-plus mr-1"></i>添加维度</button>
+              </div>
+            </div>
+            <div class="p-6 bg-slate-50 space-y-4">
+              <div class="grid grid-cols-12 gap-3 text-xs font-semibold uppercase tracking-wide text-slate-400 px-1">
+                <div class="col-span-3">维度名称</div>
+                <div class="col-span-2">权重</div>
+                <div class="col-span-4">评估关注点</div>
+                <div class="col-span-2">评分标准</div>
+                <div class="col-span-1 text-right">操作</div>
+              </div>
+              <div v-for="(dim, index) in form.rubric" :key="`rubric-${index}`" class="grid grid-cols-12 gap-3 items-start bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+                <div class="col-span-12 md:col-span-3">
+                  <input v-model="dim.name" type="text" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500 outline-none text-sm" placeholder="例如：核心技术深度">
+                </div>
+                <div class="col-span-6 md:col-span-2">
+                  <div class="relative">
+                    <input v-model.number="dim.weight" @change="sanitizeRubricWeight(dim)" type="number" min="0" max="100" class="w-full px-3 py-2 pr-8 border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500 outline-none text-sm" placeholder="25">
+                    <span class="absolute right-3 top-2 text-slate-400 text-sm">%</span>
+                  </div>
+                </div>
+                <div class="col-span-12 md:col-span-4">
+                  <input v-model="dim.focus" type="text" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500 outline-none text-sm" placeholder="例如：是否真正主导过训练/推理架构">
+                </div>
+                <div class="col-span-12 md:col-span-2">
+                  <input v-model="dim.scoringGuide" type="text" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500 outline-none text-sm" placeholder="例如：优秀(90-100) 良好(70-89) 一般(50-69)">
+                </div>
+                <div class="col-span-6 md:col-span-1 flex md:justify-end">
+                  <button @click="removeRubricDimension(index)" :disabled="form.rubric.length === 1" class="w-9 h-9 rounded-lg border border-slate-200 text-slate-400 hover:text-red-500 hover:border-red-200 disabled:opacity-40 disabled:cursor-not-allowed transition">
+                    <i class="fa-solid fa-trash-can"></i>
+                  </button>
+                </div>
+              </div>
+              <div class="rounded-xl border border-dashed border-slate-300 bg-white/60 px-4 py-3 text-sm text-slate-500 flex items-start gap-2">
+                <i class="fa-solid fa-shield-heart text-brand-500 mt-0.5"></i>
+                <span>建议把维度控制在 3-6 个；权重不必完美，但最好接近 100%，这样候选人分卡更容易解释。</span>
+              </div>
+            </div>
+
+            <div class="p-6 border-y border-slate-100 bg-slate-50/50 flex justify-between items-center">
+              <h2 class="text-lg font-semibold text-slate-800"><i class="fa-solid fa-users text-brand-500 mr-2"></i>待评估候选人 (并发处理)</h2>
+              <button @click="addCandidate" class="text-sm text-brand-600 hover:text-brand-700 font-medium"><i class="fa-solid fa-plus mr-1"></i>添加简历</button>
+            </div>
+            <div class="p-6 bg-slate-50">
+              <div class="space-y-4">
+                <div v-for="(cand, index) in form.candidates" :key="index" class="bg-white p-4 rounded-lg border border-slate-200 relative group shadow-sm">
+                  <button v-if="form.candidates.length > 1" @click="removeCandidate(index)" class="absolute top-4 right-4 text-slate-400 hover:text-red-500 transition opacity-0 group-hover:opacity-100">
+                    <i class="fa-solid fa-trash-can"></i>
+                  </button>
+                  <div class="mb-3">
+                    <input v-model="cand.name" type="text" class="w-full md:w-1/3 px-3 py-1.5 border border-slate-300 rounded-md focus:ring-2 focus:ring-brand-500 outline-none text-sm font-medium" placeholder="候选人姓名">
+                  </div>
+                  <div>
+                    <textarea v-model="cand.resume" rows="2" class="w-full px-3 py-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-brand-500 outline-none text-sm text-slate-600" placeholder="粘贴候选人履历/简历摘要..."></textarea>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="p-6 border-t border-slate-200 bg-white flex justify-between items-center">
+              <div class="text-sm text-slate-500">
+                <i class="fa-solid fa-bolt text-amber-400 mr-1"></i> 引擎将开启 <strong class="text-slate-700">{{ form.candidates.length }}</strong> 个并行 Worker 进行打分
+              </div>
+              <div class="flex space-x-3">
+                <button @click="currentView = 'list'" class="px-5 py-2.5 rounded-lg font-medium text-slate-600 hover:bg-slate-100 transition">取消</button>
+                <button @click="submitJob" :disabled="isSubmitting" class="bg-brand-600 hover:bg-brand-700 text-white px-6 py-2.5 rounded-lg font-medium transition shadow-sm flex items-center disabled:opacity-70 disabled:cursor-not-allowed">
+                  <i v-if="isSubmitting" class="fa-solid fa-circle-notch fa-spin mr-2"></i>
+                  {{ isSubmitting ? '提交中...' : '开始智能评估 (异步并发)' }}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div v-else-if="currentView === 'detail'" class="max-w-6xl mx-auto">
+          <div v-if="activeJob.status !== 'completed' && activeJob.status !== 'failed'" class="bg-white rounded-xl shadow-sm border border-slate-200 p-10 text-center mb-6">
+            <div class="w-20 h-20 bg-brand-50 rounded-full flex items-center justify-center mx-auto mb-6 relative">
+              <i class="fa-solid fa-circle-notch fa-spin text-3xl text-brand-500 absolute"></i>
+              <i class="fa-solid fa-brain text-brand-300 text-xl absolute"></i>
+            </div>
+            <h2 class="text-xl font-semibold text-slate-800 mb-2">AI 引擎正在深度分析中...</h2>
+            <p class="text-slate-500 max-w-md mx-auto mb-6">
+              已将任务发送至后端异步队列。引擎正在同时处理 {{ activeJob.searchContext?.candidates?.length || 0 }} 份简历与市场策略，这可能需要 15-40 秒。
+            </p>
+            <div class="w-64 h-2 bg-slate-100 rounded-full mx-auto overflow-hidden">
+              <div class="h-full bg-brand-500 rounded-full animate-pulse" style="width: 60%"></div>
+            </div>
+          </div>
+
+          <div v-else-if="activeJob.status === 'failed'" class="bg-white rounded-xl shadow-sm border border-red-200 p-8 text-center mb-6">
+             <div class="w-16 h-16 bg-red-50 text-red-500 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl">
+              <i class="fa-solid fa-triangle-exclamation"></i>
+            </div>
+            <h2 class="text-xl font-semibold text-slate-800 mb-2">任务执行失败</h2>
+            <p class="text-red-600 font-mono text-sm bg-red-50 p-4 rounded-lg inline-block text-left">{{ activeJob.error?.message || '未知错误' }}</p>
+          </div>
+
+          <div v-else-if="activeJob.status === 'completed'" class="space-y-6">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm col-span-1 md:col-span-2 flex items-center">
+                <div class="w-12 h-12 bg-emerald-50 text-emerald-500 rounded-full flex items-center justify-center text-xl shrink-0 mr-4">
+                  <i class="fa-solid fa-check-double"></i>
+                </div>
+                <div>
+                  <h3 class="text-slate-500 text-sm font-medium mb-1">任务状态</h3>
+                  <p class="text-slate-900 font-semibold text-lg">评估完成</p>
+                </div>
+              </div>
+              <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex items-center">
+                <div class="w-12 h-12 bg-indigo-50 text-indigo-500 rounded-full flex items-center justify-center text-xl shrink-0 mr-4">
+                  <i class="fa-solid fa-stopwatch"></i>
+                </div>
+                <div>
+                  <h3 class="text-slate-500 text-sm font-medium mb-1">并发总耗时</h3>
+                  <p class="text-slate-900 font-semibold text-lg">{{ formatDuration(activeJob.result?.metadata?.totalDurationMs) }}</p>
+                </div>
+              </div>
+              <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex items-center">
+                <div class="w-12 h-12 bg-amber-50 text-amber-500 rounded-full flex items-center justify-center text-xl shrink-0 mr-4">
+                  <i class="fa-solid fa-coins"></i>
+                </div>
+                <div>
+                  <h3 class="text-slate-500 text-sm font-medium mb-1">Token 消耗</h3>
+                  <p class="text-slate-900 font-semibold text-lg">{{ activeJob.result?.orchestration?.execution?.metrics?.tokenUsage?.totalTokens || 0 }}</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
+              <div class="xl:col-span-2 space-y-6">
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+                  <div class="p-5 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+                    <div>
+                      <h2 class="font-semibold text-slate-800"><i class="fa-solid fa-users-viewfinder text-brand-500 mr-2"></i>候选人可信评估卡</h2>
+                      <p class="text-xs text-slate-500 mt-1">显示总分、分维度评分、证据引用与判断信心。</p>
+                    </div>
+                  </div>
+                  <div class="p-0">
+                    <div v-if="parsedCandidates.length === 0" class="p-8 text-center text-slate-500">
+                      未能解析出结构化候选人数据 (可能模型未按照 JSON 要求返回)
+                    </div>
+                    <ul class="divide-y divide-slate-100">
+                      <li v-for="cand in parsedCandidates" :key="cand.name" class="p-6 hover:bg-slate-50 transition">
+                        <div class="flex flex-col md:flex-row gap-6 items-start">
+                          <div class="shrink-0 flex flex-col items-center justify-center w-24">
+                            <div class="relative w-20 h-20 flex items-center justify-center rounded-full border-4" :class="getScoreColor(cand.score)">
+                              <span class="text-2xl font-bold" :class="getTextColor(cand.score)">{{ cand.score }}</span>
+                            </div>
+                            <span class="mt-2 font-semibold text-slate-800 text-center">{{ cand.name }}</span>
+                            <span v-if="cand.confidenceLabel" class="mt-2 inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border" :class="getConfidenceBadgeClass(cand.confidenceLabel)">
+                              <i class="fa-solid fa-shield-halved mr-1"></i>{{ cand.confidenceLabel }}
+                            </span>
+                          </div>
+
+                          <div class="flex-1 space-y-4 min-w-0">
+                            <div class="grid grid-cols-1 lg:grid-cols-2 gap-3" v-if="cand.dimensions.length">
+                              <div v-for="(dimension, idx) in cand.dimensions" :key="`${cand.name}-${idx}`" class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+                                <div class="flex items-start justify-between gap-3 mb-3">
+                                  <div>
+                                    <p class="font-semibold text-slate-800">{{ dimension.name }}</p>
+                                    <p class="text-xs text-slate-500" v-if="dimension.weight">权重 {{ dimension.weight }}%</p>
+                                  </div>
+                                  <div class="text-right shrink-0">
+                                    <p class="text-lg font-bold" :class="getTextColor(dimension.score)">{{ dimension.score }}</p>
+                                    <span v-if="dimension.confidenceLabel" class="inline-flex items-center mt-1 px-2 py-0.5 rounded-full text-[11px] font-medium border" :class="getConfidenceBadgeClass(dimension.confidenceLabel)">
+                                      <i class="fa-solid fa-circle-dot mr-1"></i>{{ dimension.confidenceLabel }}
+                                    </span>
+                                  </div>
+                                </div>
+                                <div v-if="dimension.evidence" class="bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-600 leading-relaxed mb-2">
+                                  <span class="text-slate-400 mr-1">“</span>{{ dimension.evidence }}<span class="text-slate-400 ml-1">”</span>
+                                </div>
+                                <div v-else class="text-sm text-slate-400 mb-2">暂无直接证据引用</div>
+                                <div v-if="dimension.scoringGuide" class="text-xs text-slate-500 bg-slate-100 rounded px-2 py-1">
+                                  <i class="fa-solid fa-ruler-horizontal mr-1"></i>{{ dimension.scoringGuide }}
+                                </div>
+                              </div>
+                            </div>
+
+                            <div v-if="cand.evidenceQuote" class="rounded-xl bg-brand-50 border border-brand-100 p-4">
+                              <p class="text-sm font-medium text-brand-700 mb-1.5"><i class="fa-solid fa-quote-left mr-1.5"></i>核心证据</p>
+                              <p class="text-sm text-slate-700 leading-relaxed">{{ cand.evidenceQuote }}</p>
+                            </div>
+
+                            <div>
+                              <p class="text-sm font-medium text-slate-500 mb-1.5"><i class="fa-regular fa-thumbs-up text-emerald-500 mr-1.5"></i>优势亮点</p>
+                              <div class="flex flex-wrap gap-2">
+                                <span v-for="pro in cand.pros" :key="pro" class="bg-emerald-50 text-emerald-700 text-xs px-2.5 py-1 rounded border border-emerald-100">{{ pro }}</span>
+                              </div>
+                            </div>
+                            <div>
+                              <p class="text-sm font-medium text-slate-500 mb-1.5"><i class="fa-regular fa-thumbs-down text-red-500 mr-1.5"></i>风险顾虑</p>
+                              <div class="flex flex-wrap gap-2">
+                                <span v-for="con in cand.cons" :key="con" class="bg-red-50 text-red-700 text-xs px-2.5 py-1 rounded border border-red-100">{{ con }}</span>
+                              </div>
+                            </div>
+                            <div v-if="cand.summary">
+                              <p class="text-sm font-medium text-slate-500 mb-1.5"><i class="fa-solid fa-comment-dots text-brand-500 mr-1.5"></i>AI 综合点评</p>
+                              <p class="text-sm text-slate-700 bg-slate-100 p-3 rounded-lg">{{ cand.summary }}</p>
+                            </div>
+                          </div>
+                        </div>
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+                  <div class="p-5 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+                    <h2 class="font-semibold text-slate-800"><i class="fa-solid fa-map text-brand-500 mr-2"></i>寻访策略洞察报告</h2>
+                  </div>
+                  <div class="p-6 markdown-body text-sm" v-html="renderMarkdown(activeJob.result?.reportMarkdown || '无报告内容')"></div>
+                </div>
+              </div>
+
+              <div class="xl:col-span-1 space-y-6">
+                <div class="bg-slate-900 rounded-xl shadow-sm border border-slate-800 overflow-hidden flex flex-col h-[600px] sticky top-6">
+                  <div class="p-4 border-b border-slate-800 flex justify-between items-center bg-slate-900 shrink-0">
+                    <h2 class="font-semibold text-slate-200 text-sm"><i class="fa-solid fa-code text-slate-500 mr-2"></i>原始返回日志 (Raw Result)</h2>
+                  </div>
+                  <div class="p-4 overflow-auto flex-1">
+                    <pre class="text-xs text-emerald-400 font-mono whitespace-pre-wrap word-break">{{ JSON.stringify(activeJob.result, null, 2) }}</pre>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    const { createApp } = Vue;
+    const API_BASE = window.location.origin;
+
+    createApp({
+      data() {
+        return {
+          currentView: 'create',
+          jobs: [],
+          activeJobId: null,
+          pollInterval: null,
+          isSubmitting: false,
+          form: {
+            roleTitle: '资深 AI 架构师 (大模型方向)',
+            jobDescription: '薪资：80K-120K / 月\n要求：\n1. 深刻理解 Transformer 架构，有自研模型训练或大规模推理优化经验；\n2. 熟悉 vLLM, DeepSpeed 等框架；\n3. 能够主导亿级用户的 AI 对话产品底层架构设计。',
+            rubric: [
+              { name: '核心技术深度', weight: 35, focus: '是否真正主导过模型训练、推理优化或底层架构设计', scoringGuide: '优秀(90-100) 良好(70-89) 一般(50-69)' },
+              { name: '规模化落地经验', weight: 25, focus: '是否在高并发/大规模业务环境交付过稳定结果', scoringGuide: '优秀(90-100) 良好(70-89) 一般(50-69)' },
+              { name: 'Ownership 与影响力', weight: 20, focus: '是参与者还是 owner，能否跨团队推动复杂项目', scoringGuide: '优秀(90-100) 良好(70-89) 一般(50-69)' },
+              { name: '动机与岗位适配', weight: 20, focus: '转岗动机、稳定性、薪资预期与组织阶段适配度', scoringGuide: '优秀(90-100) 良好(70-89) 一般(50-69)' }
+            ],
+            candidates: [
+              { name: '候选人张大牛', resume: '前 BAT 资深算法工程师，T9级别。主导过千亿参数大模型从0到1的预训练，在ACL发过多篇Paper，熟悉Megatron-LM。薪资预期150w+' },
+              { name: '候选人李云龙', resume: '5年后端开发经验，近1年转AI方向。主要做过基于 LangChain 的业务应用层开发，用 OpenAI API 做过内部知识库问答系统，懂一点微调，但不熟悉底层框架优化。沟通表达极好。' },
+              { name: '候选人王码农', resume: '博士毕业，一直做NLP。在某独角兽负责推理加速，将 vLLM 集成进公司生产环境，吞吐量提升了3倍。性格比较内向。' }
+            ]
+          }
+        }
+      },
+      computed: {
+        activeJob() {
+          return this.jobs.find(j => j.id === this.activeJobId) || {};
+        },
+        rubricWeightTotal() {
+          return this.form.rubric.reduce((sum, dim) => sum + (Number(dim.weight) || 0), 0);
+        },
+        parsedCandidates() {
+          const artifacts = this.activeJob.result?.artifacts || [];
+          return artifacts
+            .filter(art => art.id && (art.id.startsWith('candidate-assessment-result-') || art.id.startsWith('candidate-assessment-')))
+            .map(art => this.normalizeCandidateArtifact(art))
+            .filter(Boolean)
+            .sort((a, b) => Number(b.score || 0) - Number(a.score || 0));
+        }
+      },
+      methods: {
+        addCandidate() {
+          this.form.candidates.push({ name: '', resume: '' });
+        },
+        removeCandidate(index) {
+          this.form.candidates.splice(index, 1);
+        },
+        addRubricDimension() {
+          this.form.rubric.push({ name: '', weight: 10, focus: '', scoringGuide: '' });
+        },
+        removeRubricDimension(index) {
+          if (this.form.rubric.length === 1) return;
+          this.form.rubric.splice(index, 1);
+        },
+        sanitizeRubricWeight(dim) {
+          const value = Number(dim.weight);
+          dim.weight = Number.isFinite(value) ? Math.max(0, Math.min(100, value)) : 0;
+        },
+        formatTime(isoString) {
+          if (!isoString) return '';
+          const d = new Date(isoString);
+          return `${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}:${d.getSeconds().toString().padStart(2, '0')}`;
+        },
+        formatDuration(ms) {
+          if (!ms) return '0s';
+          return (ms / 1000).toFixed(1) + 's';
+        },
+        statusText(status) {
+          const map = {
+            pending: '排队中',
+            processing: 'AI 执行中',
+            completed: '已完成',
+            failed: '失败'
+          };
+          return map[status] || status;
+        },
+        getScoreColor(score) {
+          if (score === 'N/A') return 'border-slate-300';
+          const s = Number(score);
+          if (s >= 85) return 'border-emerald-500';
+          if (s >= 70) return 'border-amber-400';
+          return 'border-red-400';
+        },
+        getTextColor(score) {
+          if (score === 'N/A') return 'text-slate-400';
+          const s = Number(score);
+          if (s >= 85) return 'text-emerald-600';
+          if (s >= 70) return 'text-amber-500';
+          return 'text-red-500';
+        },
+        getConfidenceBadgeClass(level) {
+          const normalized = String(level || '').toLowerCase();
+          if (normalized.includes('high') || normalized.includes('高')) return 'bg-emerald-50 text-emerald-700 border-emerald-200';
+          if (normalized.includes('medium') || normalized.includes('中')) return 'bg-amber-50 text-amber-700 border-amber-200';
+          if (normalized.includes('low') || normalized.includes('低')) return 'bg-rose-50 text-rose-700 border-rose-200';
+          return 'bg-slate-50 text-slate-600 border-slate-200';
+        },
+        renderMarkdown(text) {
+          return marked.parse(text);
+        },
+        normalizeCandidateArtifact(art) {
+          try {
+            const data = this.extractStructuredContent(art);
+            const candidateName = data.name || data.candidateName || art.metadata?.candidateName || art.id.replace(/^candidate-assessment(?:-result)?-/, '');
+            const dimensionsRaw = data.dimensionScores || data.dimensions || data.rubricScores || data.scoreBreakdown || data.breakdown || [];
+            const dimensions = this.normalizeDimensions(dimensionsRaw);
+            const overallScore = this.pickFirstNumber([
+              data.score,
+              data.matchScore,
+              data.overallScore,
+              data.totalScore,
+              data.综合评分,
+              data.finalScore,
+              dimensions.length ? Math.round(dimensions.reduce((sum, dim) => sum + (Number(dim.score) || 0), 0) / dimensions.length) : null
+            ]);
+            const evidenceQuote = this.pickFirstString([
+              data.evidenceQuote,
+              data.keyEvidence,
+              data.evidence,
+              data.quote,
+              data.证据引用,
+              data.核心证据,
+              dimensions.find(dim => dim.evidence)?.evidence
+            ]);
+            const confidenceLabel = this.normalizeConfidenceLabel(
+              data.confidence || data.confidenceLabel || data.signalConfidence || data.信心等级 || data.confidence_level
+            );
+            return {
+              name: candidateName || '未命名候选人',
+              score: overallScore ?? 'N/A',
+              pros: this.normalizeStringArray(data.pros || data.advantages || data.strengths || data.亮点 || ['待模型输出']),
+              cons: this.normalizeStringArray(data.cons || data.risks || data.concerns || data.风险 || ['待模型输出']),
+              summary: this.pickFirstString([data.summary, data.evaluation, data.overallAssessment, data.总体评价, data.recommendation]),
+              confidenceLabel,
+              evidenceQuote,
+              dimensions
+            };
+          } catch (e) {
+            console.log('Failed to parse candidate JSON:', e);
+            return {
+              name: art.metadata?.candidateName || art.id.replace(/^candidate-assessment(?:-result)?-/, ''),
+              score: 'N/A',
+              pros: ['格式非 JSON'],
+              cons: [],
+              summary: String(art.content || '').substring(0, 160) + '...',
+              confidenceLabel: '',
+              evidenceQuote: '',
+              dimensions: []
+            };
+          }
+        },
+        extractStructuredContent(art) {
+          if (typeof art.content === 'object' && art.content !== null) return art.content;
+          const raw = String(art.content || '').trim();
+          if (!raw) return {};
+          const cleaned = raw.replace(/```json/g, '').replace(/```/g, '').trim();
+          return JSON.parse(cleaned);
+        },
+        normalizeDimensions(rawDimensions) {
+          const items = Array.isArray(rawDimensions)
+            ? rawDimensions
+            : (rawDimensions && typeof rawDimensions === 'object')
+              ? Object.entries(rawDimensions).map(([name, value]) => ({ name, ...(typeof value === 'object' ? value : { score: value }) }))
+              : [];
+          return items.map((item, index) => {
+            const confidenceLabel = this.normalizeConfidenceLabel(item.confidence || item.confidenceLabel || item.signalConfidence || item.信心等级);
+            return {
+              name: item.name || item.dimension || item.label || item.title || `维度 ${index + 1}`,
+              score: this.pickFirstNumber([item.score, item.value, item.rating, item.评分, item.points]) ?? 'N/A',
+              weight: this.pickFirstNumber([item.weight, item.percentage, item.权重, item.weightPct]),
+              evidence: this.pickFirstString([item.evidence, item.quote, item.reasoning, item.rationale, item.证据引用, item.依据]),
+              confidenceLabel,
+              scoringGuide: item.scoringGuide || item.guidance || ''
+            };
+          });
+        },
+        normalizeStringArray(value) {
+          if (Array.isArray(value)) return value.filter(Boolean).map(v => String(v));
+          if (typeof value === 'string' && value.trim()) return [value.trim()];
+          return [];
+        },
+        pickFirstString(values) {
+          return values.find(v => typeof v === 'string' && v.trim()) || '';
+        },
+        pickFirstNumber(values) {
+          for (const value of values) {
+            const num = Number(value);
+            if (Number.isFinite(num)) return Math.round(num);
+          }
+          return null;
+        },
+        normalizeConfidenceLabel(value) {
+          if (value == null || value === '') return '';
+          const text = String(value).trim();
+          const lower = text.toLowerCase();
+          if (lower === '3' || lower.includes('high') || text.includes('高')) return '高信心';
+          if (lower === '2' || lower.includes('medium') || text.includes('中')) return '中信心';
+          if (lower === '1' || lower.includes('low') || text.includes('低')) return '低信心';
+          return text;
+        },
+        async submitJob() {
+          this.isSubmitting = true;
+
+          const rubric = this.form.rubric
+            .filter(dim => dim.name.trim())
+            .map(dim => ({
+              name: dim.name.trim(),
+              weight: Number(dim.weight) || 0,
+              focus: dim.focus.trim(),
+              scoringGuide: dim.scoringGuide.trim()
+            }));
+
+          const payload = {
+            searchContext: {
+              roleTitle: this.form.roleTitle,
+              jobDescription: this.form.jobDescription,
+              hiringBrief: this.form.jobDescription,
+              assessmentRubric: rubric,
+              rubric,
+              candidates: this.form.candidates.filter(c => c.name.trim() && c.resume.trim())
+            },
+            runtime: {
+              maxConcurrency: 5,
+              jsonMode: true
+            }
+          };
+
+          try {
+            const res = await fetch(`${API_BASE}/api/talent-intelligence/jobs`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(payload)
+            });
+            const data = await res.json();
+
+            if (data.jobId) {
+              const newJob = {
+                id: data.jobId,
+                status: 'processing',
+                searchContext: payload.searchContext,
+                createdAt: new Date().toISOString()
+              };
+              this.jobs.unshift(newJob);
+              this.activeJobId = data.jobId;
+              this.currentView = 'detail';
+              this.startPolling(data.jobId);
+            } else {
+              alert('提交失败: ' + (data.error?.message || '未知错误'));
+            }
+          } catch (e) {
+            alert('网络请求失败: ' + e.message);
+          } finally {
+            this.isSubmitting = false;
+          }
+        },
+        viewJob(job) {
+          this.activeJobId = job.id;
+          this.currentView = 'detail';
+          if (job.status === 'processing' || job.status === 'pending') {
+            this.startPolling(job.id);
+          }
+        },
+        startPolling(jobId) {
+          if (this.pollInterval) clearInterval(this.pollInterval);
+
+          this.pollInterval = setInterval(async () => {
+            try {
+              const res = await fetch(`${API_BASE}/api/talent-intelligence/jobs/${jobId}`);
+              const data = await res.json();
+              const jobIndex = this.jobs.findIndex(j => j.id === jobId);
+              if (jobIndex >= 0) {
+                this.jobs[jobIndex].status = data.status;
+                if (data.status === 'completed' || data.status === 'failed') {
+                  this.jobs[jobIndex].result = data.result || data;
+                  this.jobs[jobIndex].error = data.error;
+                  clearInterval(this.pollInterval);
+                }
+              }
+            } catch (e) {
+              console.error('Poll error:', e);
+            }
+          }, 3000);
+        }
+      },
+      unmounted() {
+        if (this.pollInterval) clearInterval(this.pollInterval);
+      }
+    }).mount('#app');
+  </script>
+</body>
+</html>

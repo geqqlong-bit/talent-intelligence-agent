@@ -1,3 +1,4 @@
+import crypto from 'crypto';
 import {
   API_VERSION,
   createError,
@@ -10,7 +11,8 @@ import {
 } from './schema.mjs';
 import { DEFAULT_LOCAL_RUNNER_ID, WORKFLOW_ID, getExecutionCatalog, resolveExecutionTarget } from './execution.mjs';
 import { persistRunArtifacts, persistRunFailure } from './persistence.mjs';
-import { runTalentIntelligence } from './service.mjs';
+import { runTalentIntelligence, runTalentIntelligenceAsJob, getJobStatus } from './service.mjs';
+import { generateJobId, jobManager } from './job-manager.mjs';
 
 function getRequestId(req) {
   return createRequestId(req.headers['x-request-id']);
@@ -74,6 +76,8 @@ export async function routeRequest(req, res) {
       templates: TEMPLATE_IDS,
       endpoints: {
         run: 'POST /api/talent-intelligence/run',
+        jobs: 'POST /api/talent-intelligence/jobs',
+        jobs_get: 'GET /api/talent-intelligence/jobs/:jobId',
         health: 'GET /health',
         schema: 'GET /api/talent-intelligence/schema'
       },
@@ -225,6 +229,17 @@ export async function routeRequest(req, res) {
           }
         }
       },
+      jobResponseShape: {
+        ok: true,
+        jobId: 'job_xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx',
+        status: 'processing',
+        message: 'Job accepted for processing',
+        createdAt: 'ISO date',
+        startedAt: 'ISO date', // Present when processing starts
+        completedAt: 'ISO date', // Present when completed
+        result: {}, // Present when completed successfully
+        error: {} // Present when failed
+      },
       errorShape: {
         ok: false,
         requestId: 'req_xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx',
@@ -245,15 +260,46 @@ export async function routeRequest(req, res) {
     }, requestId, { timestamp: new Date().toISOString() }), requestId);
   }
 
-  if (req.method === 'POST' && req.url === '/api/talent-intelligence/run') {
+  if (req.method === 'POST' && (req.url === '/api/talent-intelligence/run' || req.url === '/api/talent-intelligence/jobs')) {
     let raw;
 
     try {
       raw = await readJsonBody(req);
       const payload = normalizeRequest(raw);
-      const result = await runTalentIntelligence(payload, { requestId });
-      const persisted = await persistRunArtifacts(result, payload);
-      return json(res, 200, persisted, requestId);
+      
+      // If webhookUrl is provided or it's the /jobs endpoint, process as a background job
+      if (payload.webhookUrl || req.url === '/api/talent-intelligence/jobs') {
+        // Generate a unique job ID
+        const jobId = generateJobId();
+        
+        // Create a new job with pending status
+        jobManager.createJob(jobId, payload, 'pending', 0);
+        
+        // Process the job asynchronously in the background
+        (async () => {
+          try {
+            await runTalentIntelligenceAsJob(payload, { requestId, jobId });
+          } catch (error) {
+            console.error(`Job ${jobId} failed:`, error);
+            // The error handling is already taken care of in runTalentIntelligenceAsJob
+          }
+        })();
+        
+        // Return 202 Accepted with job information immediately
+        return json(res, 202, withRequestMeta({
+          ok: true,
+          jobId: jobId,
+          status: 'accepted',
+          message: 'Job accepted for processing with webhook notification',
+          webhookUrl: payload.webhookUrl,
+          createdAt: new Date().toISOString()
+        }, requestId, { timestamp: new Date().toISOString() }), requestId);
+      } else {
+        // Process synchronously as before
+        const result = await runTalentIntelligence(payload, { requestId });
+        const persisted = await persistRunArtifacts(result, payload);
+        return json(res, 200, persisted, requestId);
+      }
     } catch (error) {
       const normalized = normalizeError(error, requestId);
       await persistRunFailure({
@@ -262,6 +308,46 @@ export async function routeRequest(req, res) {
         error: normalized.error,
         timestamp: normalized.metadata.timestamp
       });
+      return json(res, normalized.metadata.status || 500, normalized, requestId);
+    }
+  }
+
+  if (req.method === 'GET' && req.url.startsWith('/api/talent-intelligence/jobs/')) {
+    try {
+      // Extract job ID from URL
+      const jobId = req.url.split('/')[4]; // /api/talent-intelligence/jobs/{jobId}
+      
+      if (!jobId) {
+        const error = createError('INVALID_JOB_ID', 'Job ID is required', undefined, 400);
+        const normalized = normalizeError(error, requestId);
+        return json(res, 400, normalized, requestId);
+      }
+      
+      const job = getJobStatus(jobId);
+      
+      if (!job) {
+        const error = createError('JOB_NOT_FOUND', `Job not found: ${jobId}`, undefined, 404);
+        const normalized = normalizeError(error, requestId);
+        return json(res, 404, normalized, requestId);
+      }
+      
+      return json(res, 200, withRequestMeta({
+        ok: true,
+        jobId: job.id,
+        status: job.status,
+        progress: job.progress,
+        message: job.message,
+        payload: {
+          templateId: job.payload?.templateId,
+          webhookUrl: job.payload?.webhookUrl
+        },
+        createdAt: job.createdAt,
+        updatedAt: job.updatedAt,
+        ...(job.result && { result: job.result }),
+        ...(job.error && { error: job.error })
+      }, requestId, { timestamp: new Date().toISOString() }), requestId);
+    } catch (error) {
+      const normalized = normalizeError(error, requestId);
       return json(res, normalized.metadata.status || 500, normalized, requestId);
     }
   }
