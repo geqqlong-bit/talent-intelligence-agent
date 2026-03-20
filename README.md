@@ -17,9 +17,6 @@ Talent Intelligence Agent is that layer.
 
 ## Core capabilities
 
-**v0.11 trusted assessment:** candidate assessment can now return an evidence-first structured result shape that makes rubric, evidence, and confidence explicit for local validation and downstream consumers.
-
-
 - **v0.11 trusted assessment**: candidate assessment can now return an evidence-first structured result shape that makes rubric, evidence, and confidence explicit for local validation and downstream consumers.
 - **Dedicated recruiting skill** for OpenClaw
 - **Portable CLI wrapper** around a local recruiting workflow backend
@@ -99,6 +96,12 @@ flowchart LR
 - **Recruiting workflow backend** — running and reachable
 - Optional backend remote-runner env vars (`TALENT_INTEL_REMOTE_*`, `TALENT_INTEL_ENABLE_REMOTE_RUNNER`) if you want the server to actually call an OpenAI-compatible endpoint
 - Optional CLI convenience env vars (`TALENT_INTEL_LLM_*`) for the bundled wrapper, which are forwarded into request runtime fields
+
+## Current status
+
+- Latest implemented milestone: **v0.11**
+- Repository state: pushed to GitHub at `geqqlong-bit/talent-intelligence-agent`
+- Recommended next step: clean up task-board status for v0.7-v0.11 and add a formal GitHub release note
 
 ## Quick start
 
