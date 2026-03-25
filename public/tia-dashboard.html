@@ -160,8 +160,13 @@
     .tabs {
       display: flex;
       gap: 8px;
-      flex-wrap: wrap;
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      padding-bottom: 4px;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
     }
+    .tabs::-webkit-scrollbar { display: none; }
 
     .tab {
       border: 1px solid var(--line);
@@ -452,7 +457,9 @@
       grid-template-columns: repeat(7, minmax(190px, 1fr));
       gap: 12px;
       overflow-x: auto;
-      padding-bottom: 4px;
+      padding-bottom: 8px;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: thin;
     }
 
     .kanban-col {
@@ -543,6 +550,74 @@
 
     .hidden { display: none; }
 
+    /* ── Modals ── */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(8, 17, 31, 0.62);
+      backdrop-filter: blur(6px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      padding: 20px;
+    }
+    .modal-backdrop.hidden { display: none; }
+    .modal {
+      background: var(--panel-strong);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-xl);
+      box-shadow: 0 40px 80px rgba(8,17,31,0.28);
+      width: 100%;
+      max-width: 560px;
+      max-height: 90vh;
+      overflow-y: auto;
+      padding: 28px;
+      display: grid;
+      gap: 16px;
+    }
+    .modal h3 {
+      margin: 0;
+      font-size: 20px;
+      letter-spacing: -0.02em;
+    }
+    .modal label {
+      display: grid;
+      gap: 6px;
+      font-size: 13px;
+      color: var(--muted);
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+    .modal input,
+    .modal select,
+    .modal textarea {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 10px 12px;
+      background: rgba(255,255,255,0.78);
+      color: var(--ink);
+      font-size: 14px;
+      width: 100%;
+    }
+    .modal textarea { resize: vertical; min-height: 90px; }
+    .modal-footer {
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+      margin-top: 6px;
+    }
+    .import-result {
+      font-size: 13px;
+      line-height: 1.7;
+      color: var(--muted);
+      background: rgba(255,255,255,0.6);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 12px;
+    }
+
     @media (max-width: 1420px) {
       .layout { grid-template-columns: 1fr; }
       .aside { position: static; }
@@ -577,9 +652,9 @@
     <section class="hero">
       <div class="hero-top">
         <div class="hero-title">
-          <div class="hero-kicker">Talent Intelligence Workbench</div>
-          <h1>把猎头工作台做成可推进的操作系统。</h1>
-          <p>这不是只看数据的 dashboard。它把 BD、职位、候选人看板、Offer 与交付、AI Copilot 连成一条前后端闭环：所有视图都基于真实 API，所有动作都直接写回业务流。</p>
+          <div class="hero-kicker">TIA Workbench</div>
+          <h1>AI 驱动的智能招聘主控台</h1>
+          <p>连接 BD、职位、候选人与 Offer 交付的端到端闭环操作中心。结合 AI Copilot 实时预测风险，辅助决策并推动业务流转。</p>
         </div>
         <div class="hero-meta">
           <div class="hero-card">
@@ -607,7 +682,7 @@
         <select id="position-switcher"></select>
       </div>
       <div class="shell-action">
-        <button class="primary" id="refresh-workbench">刷新工作台</button>
+        <button class="primary" id="refresh-workbench">刷新</button>
       </div>
     </section>
 
@@ -648,6 +723,107 @@
         </section>
       </aside>
     </section>
+  </div>
+
+  <!-- Modal: New Position -->
+  <div id="modal-new-position" class="modal-backdrop hidden">
+    <div class="modal">
+      <h3>新增职位</h3>
+      <label>职位名称 <span style="color:var(--red)">*</span>
+        <input id="np-title" type="text" placeholder="e.g. CFO · 新能源" />
+      </label>
+      <label>客户名称
+        <input id="np-client" type="text" placeholder="e.g. 蔚来汽车" />
+      </label>
+      <label>行业
+        <input id="np-industry" type="text" placeholder="e.g. 新能源、互联网" />
+      </label>
+      <label>薪资范围
+        <input id="np-salary" type="text" placeholder="e.g. 80-120K" />
+      </label>
+      <label>工作地点
+        <input id="np-location" type="text" placeholder="e.g. 上海" />
+      </label>
+      <label>硬性要求（逗号分隔）
+        <input id="np-must" type="text" placeholder="e.g. 新能源行业经验,CPA" />
+      </label>
+      <label>备注
+        <textarea id="np-notes" placeholder="JD 摘要或其他补充说明"></textarea>
+      </label>
+      <div id="np-error" style="color:var(--red);font-size:13px;display:none;"></div>
+      <div class="modal-footer">
+        <button class="action ghost" id="np-cancel">取消</button>
+        <button class="action primary" id="np-submit">创建职位</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: New Candidate -->
+  <div id="modal-new-candidate" class="modal-backdrop hidden">
+    <div class="modal">
+      <h3>新增候选人</h3>
+      <label>姓名 <span style="color:var(--red)">*</span>
+        <input id="nc-name" type="text" placeholder="e.g. 张三" />
+      </label>
+      <label>当前公司
+        <input id="nc-company" type="text" placeholder="e.g. 阿里巴巴" />
+      </label>
+      <label>当前职位
+        <input id="nc-title" type="text" placeholder="e.g. 产品总监" />
+      </label>
+      <label>工作年限
+        <input id="nc-exp" type="number" placeholder="e.g. 8" />
+      </label>
+      <label>期望薪资（K/月）
+        <input id="nc-salary" type="number" placeholder="e.g. 80" />
+      </label>
+      <label>手机号
+        <input id="nc-mobile" type="text" placeholder="e.g. 138XXXXXXXX" />
+      </label>
+      <label>邮箱
+        <input id="nc-email" type="email" placeholder="e.g. zhang@example.com" />
+      </label>
+      <label>简历摘要
+        <textarea id="nc-resume" placeholder="粘贴简历关键信息"></textarea>
+      </label>
+      <label>备注
+        <textarea id="nc-notes" placeholder="来源、渠道、初步印象等"></textarea>
+      </label>
+      <div id="nc-error" style="color:var(--red);font-size:13px;display:none;"></div>
+      <div class="modal-footer">
+        <button class="action ghost" id="nc-cancel">取消</button>
+        <button class="action primary" id="nc-submit">创建候选人</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Bulk Import -->
+  <div id="modal-bulk-import" class="modal-backdrop hidden">
+    <div class="modal">
+      <h3>批量导入</h3>
+      <label>导入类型
+        <select id="bi-type">
+          <option value="candidates">候选人</option>
+          <option value="positions">职位</option>
+        </select>
+      </label>
+      <label>CSV 数据
+        <textarea id="bi-csv" style="min-height:200px;font-family:var(--mono);font-size:12px;" placeholder="候选人格式（第一行为标题）：
+name,company,title,years_experience,salary_expected,mobile,email,notes
+张三,阿里巴巴,产品总监,8,80,138XXXXXXXX,,来自猎聘
+李四,字节跳动,AI架构师,10,120,,li4@example.com,Boss直聘
+
+职位格式：
+job_title,client_name,industry,salary_range,location,must_have,notes
+首席财务官,蔚来汽车,新能源,100-200K,上海,"新能源行业经验,CPA",urgent"></textarea>
+      </label>
+      <div id="bi-result" class="import-result hidden"></div>
+      <div id="bi-error" style="color:var(--red);font-size:13px;display:none;"></div>
+      <div class="modal-footer">
+        <button class="action ghost" id="bi-cancel">关闭</button>
+        <button class="action secondary" id="bi-submit">开始导入</button>
+      </div>
+    </div>
   </div>
 
   <script>
@@ -838,10 +1014,10 @@
     function renderDashboard() {
       const dashboard = state.workbench.dashboard;
       const metrics = [
-        { label: '本月已确认佣金', value: formatCurrency(dashboard.metrics.confirmedFee), desc: '按已入职候选人所在职位汇总。' },
-        { label: '在跑职位', value: dashboard.metrics.activePositions, desc: '当前状态为 active 的职位数量。' },
-        { label: 'Pipeline 候选人', value: dashboard.metrics.pipelineCandidates, desc: '不含已成单，反映当前推进压力。' },
-        { label: '平均交付周期', value: dashboard.metrics.averageCycleDays ? `${dashboard.metrics.averageCycleDays} 天` : 'TBD', desc: '按已入职候选人的创建到入职周期估算。' }
+        { label: '确认佣金', value: formatCurrency(dashboard.metrics.confirmedFee), desc: '已入职累计佣金' },
+        { label: '活跃职位', value: dashboard.metrics.activePositions, desc: 'Active 状态职位数' },
+        { label: '储备候选人', value: dashboard.metrics.pipelineCandidates, desc: '流程中候选人储备' },
+        { label: '交付周期', value: dashboard.metrics.averageCycleDays ? `${dashboard.metrics.averageCycleDays} 天` : 'TBD', desc: '平均从建档到入职时间' }
       ];
 
       els.dash.innerHTML = `
@@ -858,8 +1034,8 @@
           <section class="panel">
             <div class="panel-header">
               <div>
-                <div class="sub">Today Queue</div>
-                <h2>今日优先事项</h2>
+                <div class="sub">Action Items</div>
+                <h2>待办事项</h2>
               </div>
               <span class="pill tone-amber">${dashboard.priorities.length} 项</span>
             </div>
@@ -878,8 +1054,8 @@
           <section class="panel">
             <div class="panel-header">
               <div>
-                <div class="sub">Global Funnel</div>
-                <h2>全局漏斗</h2>
+                <div class="sub">Funnel</div>
+                <h2>转化漏斗</h2>
               </div>
             </div>
             <div class="panel-body funnel-grid">
@@ -897,8 +1073,8 @@
           <section class="panel">
             <div class="panel-header">
               <div>
-                <div class="sub">Risk Radar</div>
-                <h2>风险预警</h2>
+                <div class="sub">Alerts</div>
+                <h2>风险雷达</h2>
               </div>
             </div>
             <div class="panel-body list">
@@ -930,10 +1106,10 @@
     function renderBd() {
       const bd = state.workbench.bd;
       const metrics = [
-        { label: 'BD线索池', value: bd.metrics.leadPool },
-        { label: '合同谈判中', value: bd.metrics.contractsNegotiating },
-        { label: '近 30 天新职位', value: bd.metrics.newSigned },
-        { label: '续签健康度', value: `${bd.metrics.renewalRate}%` }
+        { label: '线索池', value: bd.metrics.leadPool },
+        { label: '谈判中', value: bd.metrics.contractsNegotiating },
+        { label: '新增职位 (30天)', value: bd.metrics.newSigned },
+        { label: '合同健康度', value: `${bd.metrics.renewalRate}%` }
       ];
 
       els.bd.innerHTML = `
@@ -942,7 +1118,6 @@
             <div class="metric">
               <div class="label">${metric.label}</div>
               <div class="value">${escapeHtml(metric.value)}</div>
-              <div class="desc">来自客户、职位和合同时效的聚合视图。</div>
             </div>
           `).join('')}
         </div>
@@ -951,7 +1126,7 @@
             <div class="panel-header">
               <div>
                 <div class="sub">Account Map</div>
-                <h2>客户分级管理</h2>
+                <h2>客户分级</h2>
               </div>
             </div>
             <div class="panel-body list">
@@ -1008,7 +1183,11 @@
             <div class="panel-header">
               <div>
                 <div class="sub">Active Positions</div>
-                <h2>职位全景</h2>
+                <h2>运行中职位</h2>
+              </div>
+              <div style="display:flex;gap:8px;">
+                <button class="mini-action" id="btn-new-position">＋ 新增职位</button>
+                <button class="mini-action" id="btn-bulk-import">批量导入</button>
               </div>
             </div>
             <div class="panel-body list">
@@ -1065,6 +1244,8 @@
       els.positions.querySelectorAll('[data-copilot]').forEach((button) => {
         button.addEventListener('click', () => runCopilot(button.dataset.copilot));
       });
+      els.positions.querySelector('#btn-new-position')?.addEventListener('click', () => openModal('modal-new-position'));
+      els.positions.querySelector('#btn-bulk-import')?.addEventListener('click', () => openModal('modal-bulk-import'));
     }
 
     function renderKanban() {
@@ -1075,10 +1256,13 @@
         <section class="panel">
           <div class="panel-header">
             <div>
-              <div class="sub">Candidate Pipeline</div>
-              <h2>${escapeHtml(kanban.positionTitle || '候选人看板')}</h2>
+              <div class="sub">Pipeline</div>
+              <h2>${escapeHtml(kanban.positionTitle || '候选人漏斗')}</h2>
             </div>
-            <span class="pill tone-blue">${kanban.candidateCount} candidates</span>
+            <div style="display:flex;gap:8px;align-items:center;">
+              <span class="pill tone-blue">${kanban.candidateCount} candidates</span>
+              <button class="mini-action" id="btn-new-candidate">＋ 新增候选人</button>
+            </div>
           </div>
           <div class="panel-body">
             <div class="kanban-board">
@@ -1156,6 +1340,7 @@
           updateStage(select.value);
         });
       }
+      els.kanban.querySelector('#btn-new-candidate')?.addEventListener('click', () => openModal('modal-new-candidate'));
     }
 
     function renderOffer() {
@@ -1166,19 +1351,19 @@
       els.offer.innerHTML = `
         <div class="grid-3">
           <div class="metric">
-            <div class="label">已确认佣金</div>
+            <div class="label">确认佣金</div>
             <div class="value">${formatCurrency(offer.revenue.confirmed)}</div>
-            <div class="desc">按已入职候选人的职位汇总。</div>
+            <div class="desc">已成功入职</div>
           </div>
           <div class="metric">
-            <div class="label">大概率佣金</div>
+            <div class="label">预期佣金</div>
             <div class="value">${formatCurrency(offer.revenue.probable)}</div>
-            <div class="desc">来自 client interview / offer 阶段。</div>
+            <div class="desc">Interview/Offer 阶段</div>
           </div>
           <div class="metric">
-            <div class="label">平均交付周期</div>
+            <div class="label">交付周期</div>
             <div class="value">${offer.revenue.averageCycleDays ? `${offer.revenue.averageCycleDays} 天` : 'TBD'}</div>
-            <div class="desc">反映当前交付效率。</div>
+            <div class="desc">平均建档到入职</div>
           </div>
         </div>
         <div class="grid-2">
@@ -1186,7 +1371,7 @@
             <div class="panel-header">
               <div>
                 <div class="sub">Negotiations</div>
-                <h2>Offer 与谈判</h2>
+                <h2>Offer 谈判</h2>
               </div>
             </div>
             <div class="panel-body list">
@@ -1214,8 +1399,8 @@
           <section class="panel">
             <div class="panel-header">
               <div>
-                <div class="sub">Follow Ups</div>
-                <h2>入职与保证期</h2>
+                <div class="sub">Onboarding</div>
+                <h2>入职追踪</h2>
               </div>
             </div>
             <div class="panel-body list">
@@ -1480,6 +1665,134 @@
       const dashLogContainer = document.querySelector('#dash-logs');
       renderLogsInto(dashLogContainer);
     }
+
+    // ── Modal helpers ──
+    function openModal(id) {
+      document.getElementById(id)?.classList.remove('hidden');
+    }
+    function closeModal(id) {
+      document.getElementById(id)?.classList.add('hidden');
+    }
+    function showModalError(id, msg) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.textContent = msg;
+      el.style.display = msg ? 'block' : 'none';
+    }
+
+    // ── New Position modal ──
+    document.getElementById('np-cancel').addEventListener('click', () => closeModal('modal-new-position'));
+    document.getElementById('np-submit').addEventListener('click', async () => {
+      const title = document.getElementById('np-title').value.trim();
+      if (!title) { showModalError('np-error', '职位名称不能为空'); return; }
+      showModalError('np-error', '');
+      try {
+        const must = document.getElementById('np-must').value.trim();
+        await api('/api/tia/positions', {
+          method: 'POST',
+          body: JSON.stringify({
+            job_title: title,
+            client_name: document.getElementById('np-client').value.trim(),
+            industry: document.getElementById('np-industry').value.trim(),
+            salary_range: document.getElementById('np-salary').value.trim(),
+            work_location: document.getElementById('np-location').value.trim(),
+            must_have_requirements: must ? must.split(',').map(s => s.trim()).filter(Boolean) : [],
+            notes: document.getElementById('np-notes').value.trim()
+          })
+        });
+        closeModal('modal-new-position');
+        // reset form
+        ['np-title','np-client','np-industry','np-salary','np-location','np-must','np-notes'].forEach(id => { document.getElementById(id).value = ''; });
+        setStatus(`职位「${title}」已创建，正在刷新...`);
+        await loadWorkbench();
+      } catch (err) {
+        showModalError('np-error', err.message);
+      }
+    });
+
+    // ── New Candidate modal ──
+    document.getElementById('nc-cancel').addEventListener('click', () => closeModal('modal-new-candidate'));
+    document.getElementById('nc-submit').addEventListener('click', async () => {
+      const name = document.getElementById('nc-name').value.trim();
+      if (!name) { showModalError('nc-error', '姓名不能为空'); return; }
+      showModalError('nc-error', '');
+      try {
+        await api('/api/tia/candidates', {
+          method: 'POST',
+          body: JSON.stringify({
+            name,
+            current_company: document.getElementById('nc-company').value.trim(),
+            current_title: document.getElementById('nc-title').value.trim(),
+            years_experience: document.getElementById('nc-exp').value ? Number(document.getElementById('nc-exp').value) : null,
+            salary_expected: document.getElementById('nc-salary').value ? Number(document.getElementById('nc-salary').value) : null,
+            mobile: document.getElementById('nc-mobile').value.trim() || null,
+            email: document.getElementById('nc-email').value.trim() || null,
+            resume_text: document.getElementById('nc-resume').value.trim(),
+            notes: document.getElementById('nc-notes').value.trim(),
+            position_id: state.selectedPositionId || null
+          })
+        });
+        closeModal('modal-new-candidate');
+        ['nc-name','nc-company','nc-title','nc-exp','nc-salary','nc-mobile','nc-email','nc-resume','nc-notes'].forEach(id => { document.getElementById(id).value = ''; });
+        setStatus(`候选人「${name}」已创建，正在刷新...`);
+        await loadWorkbench();
+      } catch (err) {
+        showModalError('nc-error', err.message);
+      }
+    });
+
+    // ── Bulk Import modal ──
+    document.getElementById('bi-cancel').addEventListener('click', () => closeModal('modal-bulk-import'));
+    document.getElementById('bi-submit').addEventListener('click', async () => {
+      const type = document.getElementById('bi-type').value;
+      const csvText = document.getElementById('bi-csv').value.trim();
+      if (!csvText) { showModalError('bi-error', 'CSV 内容不能为空'); return; }
+      showModalError('bi-error', '');
+
+      // Parse CSV
+      const lines = csvText.split('\n').map(l => l.trim()).filter(Boolean);
+      if (lines.length < 2) { showModalError('bi-error', '至少需要标题行 + 一行数据'); return; }
+      const headers = lines[0].split(',').map(h => h.replace(/^"|"$/g, '').trim());
+      const rows = lines.slice(1).map(line => {
+        // simple CSV split (handles quoted fields with commas)
+        const cols = [];
+        let cur = '', inQ = false;
+        for (const ch of line) {
+          if (ch === '"') { inQ = !inQ; }
+          else if (ch === ',' && !inQ) { cols.push(cur.trim()); cur = ''; }
+          else cur += ch;
+        }
+        cols.push(cur.trim());
+        const obj = {};
+        headers.forEach((h, i) => { obj[h] = cols[i] ?? ''; });
+        return obj;
+      });
+
+      try {
+        const result = await api(`/api/tia/import/${type}`, {
+          method: 'POST',
+          body: JSON.stringify({ rows })
+        });
+        const el = document.getElementById('bi-result');
+        el.classList.remove('hidden');
+        el.innerHTML = `
+          <strong>导入完成</strong>：共 ${result.total} 行 —
+          ✅ 成功 ${result.imported}　⚠️ 跳过 ${result.skipped}　❌ 失败 ${result.errors}<br>
+          ${result.results.filter(r => r.status !== 'imported').map(r => `<span style="color:var(--amber)">${r.name || r.row}：${r.status} ${r.reason || r.error || ''}</span>`).join('<br>') || ''}
+        `;
+        setStatus(`批量导入完成：成功 ${result.imported} 条`);
+        await loadWorkbench();
+      } catch (err) {
+        showModalError('bi-error', err.message);
+      }
+    });
+
+    // Close modal when clicking backdrop
+    document.querySelectorAll('.modal-backdrop').forEach(backdrop => {
+      backdrop.addEventListener('click', (e) => {
+        if (e.target === backdrop) backdrop.classList.add('hidden');
+      });
+    });
 
     function connectLogs() {
       const protocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
