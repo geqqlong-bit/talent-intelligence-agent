@@ -1,0 +1,83 @@
+{
+  "id": "tia",
+  "kind": "provider",
+  "name": "Talent Intelligence Agent",
+  "version": "1.0.0",
+  "description": "PostgreSQL-backed recruiting workflow tools, skills, and dashboard endpoints for OpenClaw.",
+  "skills": [
+    "skills"
+  ],
+  "configSchema": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "pgUrl": {
+        "type": "string"
+      },
+      "llmBaseUrl": {
+        "type": "string"
+      },
+      "llmApiKey": {
+        "type": "string"
+      },
+      "llmModel": {
+        "type": "string"
+      },
+      "embeddingBaseUrl": {
+        "type": "string"
+      },
+      "embeddingApiKey": {
+        "type": "string"
+      },
+      "embeddingModel": {
+        "type": "string"
+      },
+      "defaultWebhookUrls": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      },
+      "reportDir": {
+        "type": "string"
+      }
+    }
+  },
+  "uiHints": {
+    "pgUrl": {
+      "label": "PostgreSQL URL",
+      "placeholder": "postgresql://user:pass@127.0.0.1:5432/tia",
+      "sensitive": true
+    },
+    "llmBaseUrl": {
+      "label": "LLM Base URL",
+      "placeholder": "https://api.openai.com/v1"
+    },
+    "llmApiKey": {
+      "label": "LLM API Key",
+      "sensitive": true
+    },
+    "llmModel": {
+      "label": "LLM Model",
+      "placeholder": "qwen-max"
+    },
+    "embeddingBaseUrl": {
+      "label": "Embedding Base URL"
+    },
+    "embeddingApiKey": {
+      "label": "Embedding API Key",
+      "sensitive": true
+    },
+    "embeddingModel": {
+      "label": "Embedding Model",
+      "placeholder": "text-embedding-3-small"
+    },
+    "defaultWebhookUrls": {
+      "label": "Default Webhook URLs"
+    },
+    "reportDir": {
+      "label": "Report Directory",
+      "placeholder": "./state/reports"
+    }
+  }
+}

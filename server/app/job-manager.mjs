@@ -11,13 +11,17 @@ class JobManager {
   }
 
   createJob(jobId, payload, status = 'pending', progress = 0) {
+    const timestamp = new Date().toISOString();
     const job = {
       id: jobId,
       status,
       progress,
       payload,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
+      message: null,
+      createdAt: timestamp,
+      updatedAt: timestamp,
+      startedAt: status === 'processing' ? timestamp : null,
+      completedAt: ['completed', 'failed'].includes(status) ? timestamp : null,
       result: null,
       error: null
     };
@@ -34,10 +38,17 @@ class JobManager {
     const job = jobStore.get(jobId);
     if (!job) return null;
 
+    const nextStatus = updates.status || job.status;
+    const timestamp = new Date().toISOString();
+
     const updatedJob = {
       ...job,
       ...updates,
-      updatedAt: new Date().toISOString()
+      updatedAt: timestamp,
+      startedAt: job.startedAt || (nextStatus === 'processing' ? timestamp : null),
+      completedAt: ['completed', 'failed'].includes(nextStatus)
+        ? (job.completedAt || timestamp)
+        : job.completedAt
     };
 
     jobStore.set(jobId, updatedJob);

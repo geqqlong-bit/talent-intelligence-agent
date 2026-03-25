@@ -1,0 +1,1543 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TIA Workbench</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg-0: #08111f;
+      --bg-1: #0f1c30;
+      --bg-2: #12253d;
+      --panel: rgba(255, 255, 255, 0.9);
+      --panel-strong: rgba(255, 255, 255, 0.97);
+      --line: rgba(12, 27, 47, 0.1);
+      --ink: #102036;
+      --muted: #60728a;
+      --teal: #0f9d92;
+      --cyan: #1971c2;
+      --amber: #c7841e;
+      --red: #c04d3a;
+      --green: #28845d;
+      --purple: #6052d9;
+      --shadow: 0 22px 50px rgba(10, 26, 49, 0.12);
+      --radius-xl: 28px;
+      --radius-lg: 22px;
+      --radius-md: 16px;
+      --radius-sm: 12px;
+      --mono: "SFMono-Regular", "Menlo", "Consolas", monospace;
+      --sans: "Avenir Next", "PingFang SC", "Helvetica Neue", sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: var(--sans);
+      color: var(--ink);
+      background:
+        radial-gradient(circle at top left, rgba(15, 157, 146, 0.14), transparent 22%),
+        radial-gradient(circle at right center, rgba(25, 113, 194, 0.12), transparent 24%),
+        linear-gradient(160deg, #f3f7fb 0%, #edf2f8 44%, #eef4f7 100%);
+    }
+
+    button, input, select, textarea { font: inherit; }
+    button { cursor: pointer; }
+
+    .app {
+      max-width: 1680px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+
+    .hero {
+      position: relative;
+      overflow: hidden;
+      padding: 26px 28px;
+      border-radius: var(--radius-xl);
+      background:
+        radial-gradient(circle at top right, rgba(15, 157, 146, 0.18), transparent 28%),
+        linear-gradient(135deg, var(--bg-0), var(--bg-1) 42%, var(--bg-2));
+      color: white;
+      box-shadow: 0 24px 60px rgba(8, 17, 31, 0.24);
+      margin-bottom: 18px;
+    }
+
+    .hero::after {
+      content: "";
+      position: absolute;
+      inset: auto -60px -100px auto;
+      width: 280px;
+      height: 280px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(96, 82, 217, 0.22), transparent 65%);
+      pointer-events: none;
+    }
+
+    .hero-top {
+      display: flex;
+      justify-content: space-between;
+      gap: 18px;
+      align-items: flex-start;
+      margin-bottom: 24px;
+    }
+
+    .hero-title {
+      max-width: 780px;
+    }
+
+    .hero-kicker {
+      display: inline-flex;
+      gap: 8px;
+      align-items: center;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      margin-bottom: 14px;
+    }
+
+    .hero h1 {
+      margin: 0 0 10px;
+      font-size: clamp(34px, 5vw, 56px);
+      line-height: 0.96;
+      letter-spacing: -0.04em;
+    }
+
+    .hero p {
+      margin: 0;
+      font-size: 15px;
+      line-height: 1.75;
+      color: rgba(233, 244, 255, 0.78);
+    }
+
+    .hero-meta {
+      display: grid;
+      gap: 10px;
+      min-width: 280px;
+    }
+
+    .hero-card {
+      padding: 14px 16px;
+      border-radius: var(--radius-md);
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+    }
+
+    .hero-card .label {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: rgba(233, 244, 255, 0.62);
+      margin-bottom: 7px;
+    }
+
+    .hero-card .value {
+      font-size: 18px;
+      line-height: 1.3;
+      font-weight: 600;
+    }
+
+    .shell-bar {
+      display: grid;
+      grid-template-columns: 1.2fr auto auto;
+      gap: 14px;
+      align-items: center;
+      padding: 14px 16px;
+      border-radius: var(--radius-lg);
+      background: var(--panel);
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow);
+      margin-bottom: 18px;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .tab {
+      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.78);
+      color: var(--muted);
+      border-radius: 999px;
+      padding: 10px 14px;
+      font-size: 13px;
+      transition: transform 0.16s ease, background 0.16s ease, color 0.16s ease, border-color 0.16s ease;
+    }
+
+    .tab:hover { transform: translateY(-1px); }
+    .tab.active {
+      color: white;
+      background: linear-gradient(135deg, #0b716b, #144f8d);
+      border-color: rgba(11, 113, 107, 0.4);
+    }
+
+    .position-switcher,
+    .shell-action {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .position-switcher select,
+    .shell-action button,
+    .offer-form input,
+    .offer-form textarea,
+    .candidate-actions select,
+    .note-box textarea {
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 10px 12px;
+      background: rgba(255, 255, 255, 0.86);
+      color: var(--ink);
+    }
+
+    .shell-action button,
+    .action,
+    .mini-action {
+      border: 1px solid rgba(13, 58, 96, 0.1);
+      border-radius: 14px;
+      padding: 10px 14px;
+      background: rgba(255, 255, 255, 0.86);
+      color: var(--ink);
+      transition: transform 0.16s ease, opacity 0.16s ease, background 0.16s ease;
+    }
+
+    .action.primary,
+    .shell-action button.primary {
+      background: linear-gradient(135deg, #0b716b, #0f9d92);
+      color: white;
+      border-color: rgba(15, 157, 146, 0.32);
+    }
+
+    .action.secondary {
+      background: linear-gradient(135deg, #163c72, #2460aa);
+      color: white;
+      border-color: rgba(25, 113, 194, 0.32);
+    }
+
+    .action.ghost,
+    .mini-action {
+      background: rgba(255, 255, 255, 0.82);
+    }
+
+    .shell-action button:hover,
+    .action:hover,
+    .mini-action:hover,
+    .pill:hover {
+      transform: translateY(-1px);
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 340px;
+      gap: 18px;
+      align-items: start;
+    }
+
+    .main-column {
+      display: grid;
+      gap: 18px;
+    }
+
+    .aside {
+      position: sticky;
+      top: 20px;
+      display: grid;
+      gap: 18px;
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      padding: 16px 18px;
+      border-bottom: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.7);
+    }
+
+    .panel-header h2 {
+      margin: 0;
+      font-size: 17px;
+      line-height: 1.2;
+    }
+
+    .panel-header .sub {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--muted);
+    }
+
+    .panel-body {
+      padding: 18px;
+    }
+
+    .view {
+      display: none;
+      gap: 18px;
+    }
+
+    .view.active {
+      display: grid;
+    }
+
+    .grid-4,
+    .grid-3,
+    .grid-2 {
+      display: grid;
+      gap: 14px;
+    }
+
+    .grid-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    .grid-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .grid-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+
+    .metric {
+      padding: 18px;
+      border-radius: var(--radius-md);
+      background: var(--panel-strong);
+      border: 1px solid var(--line);
+    }
+
+    .metric .label {
+      font-size: 11px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 12px;
+    }
+
+    .metric .value {
+      font-size: 30px;
+      line-height: 1;
+      font-weight: 700;
+      letter-spacing: -0.04em;
+      margin-bottom: 8px;
+    }
+
+    .metric .desc {
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .timeline,
+    .list,
+    .logs,
+    .kanban-card-stack {
+      display: grid;
+      gap: 10px;
+    }
+
+    .timeline-item,
+    .list-item,
+    .client-card,
+    .position-card,
+    .negotiation-card,
+    .kanban-card,
+    .prompt-card,
+    .alert-card,
+    .context-card,
+    .log-card {
+      padding: 15px 16px;
+      border-radius: var(--radius-md);
+      background: var(--panel-strong);
+      border: 1px solid var(--line);
+    }
+
+    .item-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      align-items: flex-start;
+      margin-bottom: 8px;
+    }
+
+    .item-title {
+      font-weight: 600;
+      font-size: 15px;
+      line-height: 1.35;
+    }
+
+    .item-copy,
+    .micro {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.65;
+    }
+
+    .micro {
+      font-family: var(--mono);
+      letter-spacing: 0.01em;
+    }
+
+    .pill,
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 999px;
+      padding: 6px 10px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      border: 1px solid transparent;
+      white-space: nowrap;
+    }
+
+    .tone-teal { color: var(--teal); background: rgba(15, 157, 146, 0.08); border-color: rgba(15, 157, 146, 0.14); }
+    .tone-amber { color: var(--amber); background: rgba(199, 132, 30, 0.1); border-color: rgba(199, 132, 30, 0.16); }
+    .tone-red { color: var(--red); background: rgba(192, 77, 58, 0.1); border-color: rgba(192, 77, 58, 0.16); }
+    .tone-blue { color: var(--cyan); background: rgba(25, 113, 194, 0.1); border-color: rgba(25, 113, 194, 0.16); }
+    .tone-green { color: var(--green); background: rgba(40, 132, 93, 0.08); border-color: rgba(40, 132, 93, 0.16); }
+    .tone-purple { color: var(--purple); background: rgba(96, 82, 217, 0.1); border-color: rgba(96, 82, 217, 0.16); }
+    .tone-gray { color: var(--muted); background: rgba(96, 114, 138, 0.08); border-color: rgba(96, 114, 138, 0.14); }
+
+    .progress {
+      height: 8px;
+      border-radius: 999px;
+      background: rgba(16, 32, 54, 0.08);
+      overflow: hidden;
+      margin-top: 10px;
+    }
+
+    .progress > span {
+      display: block;
+      height: 100%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, #0b716b, #1971c2);
+    }
+
+    .funnel-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .funnel-card {
+      padding: 14px;
+      border-radius: var(--radius-md);
+      background: var(--panel-strong);
+      border: 1px solid var(--line);
+    }
+
+    .funnel-card .count {
+      font-size: 24px;
+      font-weight: 700;
+      line-height: 1;
+      margin-bottom: 6px;
+    }
+
+    .kanban-board {
+      display: grid;
+      grid-template-columns: repeat(7, minmax(190px, 1fr));
+      gap: 12px;
+      overflow-x: auto;
+      padding-bottom: 4px;
+    }
+
+    .kanban-col {
+      min-width: 190px;
+      border-radius: var(--radius-md);
+      background: rgba(255, 255, 255, 0.58);
+      border: 1px solid var(--line);
+      padding: 12px;
+    }
+
+    .kanban-col h3 {
+      margin: 0 0 10px;
+      font-size: 12px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .kanban-card {
+      cursor: pointer;
+      transition: transform 0.16s ease, border-color 0.16s ease;
+    }
+
+    .kanban-card:hover,
+    .position-card:hover,
+    .client-card:hover,
+    .negotiation-card:hover {
+      transform: translateY(-1px);
+      border-color: rgba(15, 157, 146, 0.24);
+    }
+
+    .candidate-actions,
+    .stack-actions,
+    .quick-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .note-box textarea {
+      width: 100%;
+      min-height: 120px;
+      resize: vertical;
+    }
+
+    .output {
+      min-height: 240px;
+      max-height: 520px;
+      overflow: auto;
+      padding: 18px;
+      border-radius: var(--radius-md);
+      background:
+        radial-gradient(circle at top right, rgba(15, 157, 146, 0.14), transparent 28%),
+        linear-gradient(180deg, #0d1828, #111d2f);
+      color: #d8e6fb;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      font-family: var(--mono);
+      font-size: 12px;
+      line-height: 1.72;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    .status {
+      padding: 14px 16px;
+      border-radius: var(--radius-md);
+      background: rgba(255, 255, 255, 0.76);
+      border: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    .logs {
+      max-height: 380px;
+      overflow: auto;
+    }
+
+    .log-card {
+      font-family: var(--mono);
+      font-size: 12px;
+      line-height: 1.65;
+    }
+
+    .hidden { display: none; }
+
+    @media (max-width: 1420px) {
+      .layout { grid-template-columns: 1fr; }
+      .aside { position: static; }
+    }
+
+    @media (max-width: 1160px) {
+      .grid-4,
+      .grid-3,
+      .grid-2,
+      .funnel-grid,
+      .shell-bar,
+      .hero-top { grid-template-columns: 1fr; }
+      .hero-top,
+      .shell-bar { display: grid; }
+      .kanban-board { grid-template-columns: repeat(7, minmax(240px, 1fr)); }
+    }
+
+    @media (max-width: 760px) {
+      .app { padding: 14px; }
+      .hero,
+      .panel-body,
+      .panel-header { padding-left: 14px; padding-right: 14px; }
+      .grid-4,
+      .grid-3,
+      .grid-2,
+      .funnel-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <section class="hero">
+      <div class="hero-top">
+        <div class="hero-title">
+          <div class="hero-kicker">Talent Intelligence Workbench</div>
+          <h1>把猎头工作台做成可推进的操作系统。</h1>
+          <p>这不是只看数据的 dashboard。它把 BD、职位、候选人看板、Offer 与交付、AI Copilot 连成一条前后端闭环：所有视图都基于真实 API，所有动作都直接写回业务流。</p>
+        </div>
+        <div class="hero-meta">
+          <div class="hero-card">
+            <div class="label">Runtime</div>
+            <div class="value" id="runtime-text">loading</div>
+          </div>
+          <div class="hero-card">
+            <div class="label">Model</div>
+            <div class="value" id="model-text">loading</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="shell-bar">
+      <div class="tabs">
+        <button class="tab active" data-view="dash">主控台</button>
+        <button class="tab" data-view="bd">BD开发</button>
+        <button class="tab" data-view="positions">职位管理</button>
+        <button class="tab" data-view="kanban">候选人看板</button>
+        <button class="tab" data-view="offer">Offer & 交付</button>
+        <button class="tab" data-view="ai">AI 工作台</button>
+      </div>
+      <div class="position-switcher">
+        <select id="position-switcher"></select>
+      </div>
+      <div class="shell-action">
+        <button class="primary" id="refresh-workbench">刷新工作台</button>
+      </div>
+    </section>
+
+    <section class="layout">
+      <main class="main-column">
+        <div class="status" id="status-text">准备载入工作台...</div>
+
+        <section class="view active" id="view-dash"></section>
+        <section class="view" id="view-bd"></section>
+        <section class="view" id="view-positions"></section>
+        <section class="view" id="view-kanban"></section>
+        <section class="view" id="view-offer"></section>
+        <section class="view" id="view-ai"></section>
+      </main>
+
+      <aside class="aside">
+        <section class="panel">
+          <div class="panel-header">
+            <div>
+              <div class="sub">Selected Context</div>
+              <h2 id="context-title">等待载入</h2>
+            </div>
+          </div>
+          <div class="panel-body" id="context-panel"></div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-header">
+            <div>
+              <div class="sub">Action Output</div>
+              <h2 id="output-title">输出面板</h2>
+            </div>
+            <button class="mini-action" id="copy-output">复制</button>
+          </div>
+          <div class="panel-body">
+            <div class="output" id="output-content">等待动作...</div>
+          </div>
+        </section>
+      </aside>
+    </section>
+  </div>
+
+  <script>
+    const state = {
+      view: 'dash',
+      runtime: {},
+      workbench: null,
+      selectedPositionId: '',
+      selectedCandidateId: '',
+      logs: [],
+      outputTitle: '输出面板',
+      outputContent: '等待动作...'
+    };
+
+    const els = {
+      runtimeText: document.getElementById('runtime-text'),
+      modelText: document.getElementById('model-text'),
+      positionSwitcher: document.getElementById('position-switcher'),
+      refreshWorkbench: document.getElementById('refresh-workbench'),
+      statusText: document.getElementById('status-text'),
+      contextTitle: document.getElementById('context-title'),
+      contextPanel: document.getElementById('context-panel'),
+      outputTitle: document.getElementById('output-title'),
+      outputContent: document.getElementById('output-content'),
+      copyOutput: document.getElementById('copy-output'),
+      dash: document.getElementById('view-dash'),
+      bd: document.getElementById('view-bd'),
+      positions: document.getElementById('view-positions'),
+      kanban: document.getElementById('view-kanban'),
+      offer: document.getElementById('view-offer'),
+      ai: document.getElementById('view-ai')
+    };
+
+    function escapeHtml(value) {
+      return String(value ?? '')
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#39;');
+    }
+
+    function formatCurrency(value) {
+      const amount = Number(value || 0);
+      return amount ? `¥${Math.round(amount).toLocaleString('zh-CN')}` : 'TBD';
+    }
+
+    function toneClass(value) {
+      return {
+        HIGH: 'tone-red',
+        MED: 'tone-amber',
+        LOW: 'tone-teal',
+        active: 'tone-teal',
+        paused: 'tone-gray',
+        filled: 'tone-green',
+        closed: 'tone-gray',
+        amber: 'tone-amber',
+        teal: 'tone-teal',
+        red: 'tone-red',
+        blue: 'tone-blue',
+        green: 'tone-green',
+        purple: 'tone-purple',
+        gray: 'tone-gray',
+        star: 'tone-amber',
+        cashcow: 'tone-teal',
+        growth: 'tone-blue',
+        watch: 'tone-gray',
+        counter_offer: 'tone-amber',
+        competing_offer: 'tone-red',
+        none: 'tone-gray'
+      }[value] || 'tone-blue';
+    }
+
+    function setStatus(message) {
+      els.statusText.textContent = message;
+    }
+
+    function setOutput(title, content) {
+      state.outputTitle = title;
+      state.outputContent = typeof content === 'string' ? content : JSON.stringify(content, null, 2);
+      els.outputTitle.textContent = state.outputTitle;
+      els.outputContent.textContent = state.outputContent;
+    }
+
+    async function api(path, options = {}) {
+      const response = await fetch(path, {
+        headers: { 'Content-Type': 'application/json', ...(options.headers || {}) },
+        ...options
+      });
+      const payload = await response.json();
+      if (!response.ok || payload.ok === false) {
+        throw new Error(payload?.error?.message || `Request failed: ${response.status}`);
+      }
+      return payload;
+    }
+
+    function allKanbanCandidates() {
+      return (state.workbench?.kanban?.columns || []).flatMap((column) =>
+        column.candidates.map((candidate) => ({
+          ...candidate,
+          stage: column.id
+        }))
+      );
+    }
+
+    function findSelectedCandidate() {
+      const candidateId = state.selectedCandidateId;
+      if (!candidateId) return null;
+
+      const fromKanban = allKanbanCandidates().find((candidate) => candidate.id === candidateId);
+      if (fromKanban) return fromKanban;
+
+      const fromOffer = state.workbench?.offer?.negotiations?.find((candidate) => candidate.id === candidateId);
+      if (fromOffer) return fromOffer;
+
+      return state.workbench?.offer?.followUps?.find((candidate) => candidate.id === candidateId) || null;
+    }
+
+    function syncSelectedCandidate() {
+      const existing = findSelectedCandidate();
+      if (existing) return;
+
+      const firstOffer = state.workbench?.offer?.negotiations?.[0];
+      if (firstOffer) {
+        state.selectedCandidateId = firstOffer.id;
+        return;
+      }
+
+      const firstKanban = allKanbanCandidates()[0];
+      state.selectedCandidateId = firstKanban?.id || '';
+    }
+
+    function renderRuntime() {
+      const runtime = state.runtime || {};
+      els.runtimeText.textContent = runtime.storageMode || 'unknown';
+      els.modelText.textContent = runtime.llmMode || 'fallback';
+    }
+
+    function renderShell() {
+      const positions = state.workbench?.positions?.items || [];
+      els.positionSwitcher.innerHTML = positions.map((position) => `
+        <option value="${position.id}" ${position.id === state.selectedPositionId ? 'selected' : ''}>
+          ${escapeHtml(position.title)} · ${escapeHtml(position.clientName || 'Unknown')}
+        </option>
+      `).join('');
+    }
+
+    function renderContextPanel() {
+      const selectedContext = state.workbench?.positions?.selectedContext;
+      const selectedCandidate = findSelectedCandidate();
+      els.contextTitle.textContent = selectedCandidate?.name || selectedContext?.position?.title || '等待载入';
+
+      const hardRequirements = JSON.stringify(selectedContext?.clientPreferences?.hardRequirements || {}, null, 2);
+      els.contextPanel.innerHTML = `
+        <div class="context-card">
+          <div class="item-head">
+            <div class="item-title">${escapeHtml(selectedContext?.position?.title || '当前职位')}</div>
+            <span class="pill ${toneClass(selectedContext?.position?.status || 'active')}">${escapeHtml(selectedContext?.position?.status || 'active')}</span>
+          </div>
+          <div class="item-copy">${escapeHtml(selectedContext?.position?.jdRaw || '暂无 JD 摘要')}</div>
+        </div>
+        <div class="context-card">
+          <div class="item-title">客户与限制</div>
+          <div class="item-copy">客户：${escapeHtml(selectedContext?.client?.name || 'TBD')}</div>
+          <div class="item-copy">行业：${escapeHtml(selectedContext?.client?.industry || 'TBD')}</div>
+          <div class="item-copy">预算上限：${formatCurrency(selectedContext?.clientPreferences?.salaryCeiling)}</div>
+          <div class="micro" style="margin-top:10px;">${escapeHtml(hardRequirements)}</div>
+        </div>
+        ${selectedCandidate ? `
+          <div class="context-card">
+            <div class="item-title">当前候选人</div>
+            <div class="item-copy">${escapeHtml(selectedCandidate.company || selectedCandidate.currentCompany || 'Unknown Company')}</div>
+            <div class="item-copy">${escapeHtml(selectedCandidate.title || selectedCandidate.stage || 'Unknown')}</div>
+            <div class="quick-actions">
+              <button class="mini-action" data-quick="assess">评估</button>
+              <button class="mini-action" data-quick="cc">CC</button>
+              <button class="mini-action" data-quick="report">报告</button>
+            </div>
+          </div>
+        ` : ''}
+      `;
+
+      els.contextPanel.querySelectorAll('[data-quick]').forEach((button) => {
+        button.addEventListener('click', () => handleCandidateAction(button.dataset.quick));
+      });
+    }
+
+    function renderDashboard() {
+      const dashboard = state.workbench.dashboard;
+      const metrics = [
+        { label: '本月已确认佣金', value: formatCurrency(dashboard.metrics.confirmedFee), desc: '按已入职候选人所在职位汇总。' },
+        { label: '在跑职位', value: dashboard.metrics.activePositions, desc: '当前状态为 active 的职位数量。' },
+        { label: 'Pipeline 候选人', value: dashboard.metrics.pipelineCandidates, desc: '不含已成单，反映当前推进压力。' },
+        { label: '平均交付周期', value: dashboard.metrics.averageCycleDays ? `${dashboard.metrics.averageCycleDays} 天` : 'TBD', desc: '按已入职候选人的创建到入职周期估算。' }
+      ];
+
+      els.dash.innerHTML = `
+        <div class="grid-4">
+          ${metrics.map((metric) => `
+            <div class="metric">
+              <div class="label">${metric.label}</div>
+              <div class="value">${escapeHtml(metric.value)}</div>
+              <div class="desc">${escapeHtml(metric.desc)}</div>
+            </div>
+          `).join('')}
+        </div>
+        <div class="grid-2">
+          <section class="panel">
+            <div class="panel-header">
+              <div>
+                <div class="sub">Today Queue</div>
+                <h2>今日优先事项</h2>
+              </div>
+              <span class="pill tone-amber">${dashboard.priorities.length} 项</span>
+            </div>
+            <div class="panel-body timeline">
+              ${dashboard.priorities.map((item) => `
+                <div class="timeline-item">
+                  <div class="item-head">
+                    <div class="item-title">${escapeHtml(item.title)}</div>
+                    <span class="pill ${toneClass(item.urgency)}">${escapeHtml(item.urgency)}</span>
+                  </div>
+                  <div class="item-copy">${escapeHtml(item.summary)}</div>
+                </div>
+              `).join('')}
+            </div>
+          </section>
+          <section class="panel">
+            <div class="panel-header">
+              <div>
+                <div class="sub">Global Funnel</div>
+                <h2>全局漏斗</h2>
+              </div>
+            </div>
+            <div class="panel-body funnel-grid">
+              ${dashboard.funnel.map((item) => `
+                <div class="funnel-card">
+                  <div class="count">${item.count}</div>
+                  <div class="item-title">${escapeHtml(item.label)}</div>
+                  <div class="item-copy">${escapeHtml(item.stage)}</div>
+                </div>
+              `).join('')}
+            </div>
+          </section>
+        </div>
+        <div class="grid-2">
+          <section class="panel">
+            <div class="panel-header">
+              <div>
+                <div class="sub">Risk Radar</div>
+                <h2>风险预警</h2>
+              </div>
+            </div>
+            <div class="panel-body list">
+              ${dashboard.alerts.map((alert) => `
+                <div class="alert-card">
+                  <div class="item-head">
+                    <div class="item-title">${escapeHtml(alert.candidateName || alert.positionTitle || alert.type)}</div>
+                    <span class="pill ${toneClass(alert.urgency)}">${escapeHtml(alert.urgency)}</span>
+                  </div>
+                  <div class="item-copy">${escapeHtml(alert.suggestedAction)}</div>
+                </div>
+              `).join('')}
+            </div>
+          </section>
+          <section class="panel">
+            <div class="panel-header">
+              <div>
+                <div class="sub">Log Stream</div>
+                <h2>实时日志</h2>
+              </div>
+            </div>
+            <div class="panel-body logs" id="dash-logs"></div>
+          </section>
+        </div>
+      `;
+      renderLogsInto(els.dash.querySelector('#dash-logs'));
+    }
+
+    function renderBd() {
+      const bd = state.workbench.bd;
+      const metrics = [
+        { label: 'BD线索池', value: bd.metrics.leadPool },
+        { label: '合同谈判中', value: bd.metrics.contractsNegotiating },
+        { label: '近 30 天新职位', value: bd.metrics.newSigned },
+        { label: '续签健康度', value: `${bd.metrics.renewalRate}%` }
+      ];
+
+      els.bd.innerHTML = `
+        <div class="grid-4">
+          ${metrics.map((metric) => `
+            <div class="metric">
+              <div class="label">${metric.label}</div>
+              <div class="value">${escapeHtml(metric.value)}</div>
+              <div class="desc">来自客户、职位和合同时效的聚合视图。</div>
+            </div>
+          `).join('')}
+        </div>
+        <div class="grid-2">
+          <section class="panel">
+            <div class="panel-header">
+              <div>
+                <div class="sub">Account Map</div>
+                <h2>客户分级管理</h2>
+              </div>
+            </div>
+            <div class="panel-body list">
+              ${bd.clients.map((client) => `
+                <div class="client-card">
+                  <div class="item-head">
+                    <div class="item-title">${escapeHtml(client.name)}</div>
+                    <span class="pill ${toneClass(client.tier)}">${escapeHtml(client.tierLabel)}</span>
+                  </div>
+                  <div class="item-copy">${escapeHtml(client.industry || '未知行业')} · 活跃职位 ${client.activePositionCount} · Pipeline ${formatCurrency(client.pipelineFee)}</div>
+                  <div class="item-copy">${escapeHtml(client.summary)}</div>
+                </div>
+              `).join('')}
+            </div>
+          </section>
+          <section class="panel">
+            <div class="panel-header">
+              <div>
+                <div class="sub">Opportunities</div>
+                <h2>BD 机会追踪</h2>
+              </div>
+            </div>
+            <div class="panel-body list">
+              ${bd.opportunities.map((item) => `
+                <div class="list-item">
+                  <div class="item-head">
+                    <div class="item-title">${escapeHtml(item.title)}</div>
+                    <span class="pill ${toneClass(item.tone)}">${escapeHtml(item.tone)}</span>
+                  </div>
+                  <div class="item-copy">${escapeHtml(item.summary)}</div>
+                </div>
+              `).join('')}
+              <div class="stack-actions">
+                <button class="action primary" data-copilot="bd_script">生成 BD 话术</button>
+                <button class="action ghost" data-copilot="invoice_email">生成续签/收款邮件</button>
+              </div>
+            </div>
+          </section>
+        </div>
+      `;
+
+      els.bd.querySelectorAll('[data-copilot]').forEach((button) => {
+        button.addEventListener('click', () => runCopilot(button.dataset.copilot));
+      });
+    }
+
+    function renderPositions() {
+      const positions = state.workbench.positions.items;
+      const selectedContext = state.workbench.positions.selectedContext;
+
+      els.positions.innerHTML = `
+        <div class="grid-2">
+          <section class="panel">
+            <div class="panel-header">
+              <div>
+                <div class="sub">Active Positions</div>
+                <h2>职位全景</h2>
+              </div>
+            </div>
+            <div class="panel-body list">
+              ${positions.map((position) => `
+                <div class="position-card" data-position="${position.id}">
+                  <div class="item-head">
+                    <div class="item-title">${escapeHtml(position.title)}</div>
+                    <span class="pill ${toneClass(position.riskLevel)}">${escapeHtml(position.riskLevel)}</span>
+                  </div>
+                  <div class="item-copy">${escapeHtml(position.clientName || 'Unknown Client')} · ${position.daysOpen} 天在跑 · ${formatCurrency(position.targetFee)}</div>
+                  <div class="item-copy">推荐 ${position.recommendedCount} · 已成单 ${position.placedCount} · 候选人 ${position.candidateCount}</div>
+                  <div class="progress"><span style="width:${Math.round(position.progressRatio * 100)}%"></span></div>
+                </div>
+              `).join('')}
+            </div>
+          </section>
+          <section class="panel">
+            <div class="panel-header">
+              <div>
+                <div class="sub">Position Context</div>
+                <h2>${escapeHtml(selectedContext?.position?.title || '当前职位')}</h2>
+              </div>
+            </div>
+            <div class="panel-body grid-2">
+              <div class="context-card">
+                <div class="item-title">客户偏好</div>
+                <div class="item-copy">客户：${escapeHtml(selectedContext?.client?.name || 'TBD')}</div>
+                <div class="item-copy">预算：${formatCurrency(selectedContext?.clientPreferences?.salaryCeiling)}</div>
+                <div class="item-copy">来源偏好：${escapeHtml((selectedContext?.clientPreferences?.preferredSources || []).join('、') || '暂无')}</div>
+              </div>
+              <div class="context-card">
+                <div class="item-title">最近拒绝模式</div>
+                <div class="item-copy">${escapeHtml((selectedContext?.clientPreferences?.rejectionPatterns || []).map((item) => item.reason || item).join('；') || '暂无')}</div>
+              </div>
+              <div class="context-card">
+                <div class="item-title">JD 摘要</div>
+                <div class="item-copy">${escapeHtml(selectedContext?.position?.jdRaw || '暂无 JD')}</div>
+              </div>
+              <div class="context-card">
+                <div class="item-title">建议动作</div>
+                <div class="stack-actions">
+                  <button class="action primary" data-copilot="jd_diagnosis">职位诊断</button>
+                  <button class="action secondary" data-copilot="market_map">市场测绘</button>
+                </div>
+              </div>
+            </div>
+          </section>
+        </div>
+      `;
+
+      els.positions.querySelectorAll('[data-position]').forEach((card) => {
+        card.addEventListener('click', () => selectPosition(card.dataset.position));
+      });
+      els.positions.querySelectorAll('[data-copilot]').forEach((button) => {
+        button.addEventListener('click', () => runCopilot(button.dataset.copilot));
+      });
+    }
+
+    function renderKanban() {
+      const kanban = state.workbench.kanban;
+      const selectedCandidate = findSelectedCandidate();
+
+      els.kanban.innerHTML = `
+        <section class="panel">
+          <div class="panel-header">
+            <div>
+              <div class="sub">Candidate Pipeline</div>
+              <h2>${escapeHtml(kanban.positionTitle || '候选人看板')}</h2>
+            </div>
+            <span class="pill tone-blue">${kanban.candidateCount} candidates</span>
+          </div>
+          <div class="panel-body">
+            <div class="kanban-board">
+              ${kanban.columns.map((column) => `
+                <div class="kanban-col">
+                  <h3>${escapeHtml(column.label)} <span>${column.count}</span></h3>
+                  <div class="kanban-card-stack">
+                    ${column.candidates.length ? column.candidates.map((candidate) => `
+                      <div class="kanban-card" data-candidate="${candidate.id}">
+                        <div class="item-title">${escapeHtml(candidate.name)}</div>
+                        <div class="item-copy">${escapeHtml(candidate.company || 'Unknown')} · ${escapeHtml(candidate.title || 'Unknown')}</div>
+                        ${candidate.score ? `<div class="micro" style="margin-top:8px;">Score ${candidate.score}</div>` : ''}
+                        ${candidate.offerRisk && candidate.offerRisk !== 'none' ? `<div class="micro">${escapeHtml(candidate.offerRisk)}</div>` : ''}
+                      </div>
+                    `).join('') : '<div class="item-copy">暂无候选人</div>'}
+                  </div>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        </section>
+        <section class="panel">
+          <div class="panel-header">
+            <div>
+              <div class="sub">Focused Candidate</div>
+              <h2>${escapeHtml(selectedCandidate?.name || '等待选择候选人')}</h2>
+            </div>
+          </div>
+          <div class="panel-body">
+            ${selectedCandidate ? `
+              <div class="context-card">
+                <div class="item-copy">${escapeHtml(selectedCandidate.company || selectedCandidate.currentCompany || 'Unknown')}</div>
+                <div class="item-copy">${escapeHtml(selectedCandidate.title || selectedCandidate.stage || 'Unknown')}</div>
+                ${selectedCandidate.score ? `<div class="item-copy">综合评分 ${selectedCandidate.score}</div>` : ''}
+                ${selectedCandidate.salaryExpected ? `<div class="item-copy">期望薪资 ${formatCurrency(selectedCandidate.salaryExpected)}</div>` : ''}
+                <div class="candidate-actions">
+                  <button class="action primary" data-candidate-action="assess">结构化评估</button>
+                  <button class="action secondary" data-candidate-action="cc">生成 CC 话术</button>
+                  <button class="action ghost" data-candidate-action="report">推荐报告</button>
+                  <button class="action ghost" data-copilot="interview_prep">面试辅导</button>
+                  <button class="action ghost" data-copilot="followup_plan">推进计划</button>
+                </div>
+                <div class="candidate-actions" style="margin-top:14px;">
+                  <select id="stage-update-select">
+                    ${state.workbench.kanban.columns.map((column) => `
+                      <option value="${column.id}" ${column.id === selectedCandidate.stage ? 'selected' : ''}>${escapeHtml(column.label)}</option>
+                    `).join('')}
+                  </select>
+                  <button class="action ghost" id="stage-update-button">更新阶段</button>
+                </div>
+              </div>
+            ` : '<div class="item-copy">从左侧看板里选择一个候选人。</div>'}
+          </div>
+        </section>
+      `;
+
+      els.kanban.querySelectorAll('[data-candidate]').forEach((card) => {
+        card.addEventListener('click', () => {
+          state.selectedCandidateId = card.dataset.candidate;
+          renderKanban();
+          renderContextPanel();
+        });
+      });
+      els.kanban.querySelectorAll('[data-candidate-action]').forEach((button) => {
+        button.addEventListener('click', () => handleCandidateAction(button.dataset.candidateAction));
+      });
+      els.kanban.querySelectorAll('[data-copilot]').forEach((button) => {
+        button.addEventListener('click', () => runCopilot(button.dataset.copilot));
+      });
+
+      const stageUpdateButton = els.kanban.querySelector('#stage-update-button');
+      if (stageUpdateButton) {
+        stageUpdateButton.addEventListener('click', () => {
+          const select = els.kanban.querySelector('#stage-update-select');
+          updateStage(select.value);
+        });
+      }
+    }
+
+    function renderOffer() {
+      const offer = state.workbench.offer;
+      const selectedCandidate = findSelectedCandidate();
+      const selectedBudget = state.workbench.positions.selectedContext?.clientPreferences?.salaryCeiling || '';
+
+      els.offer.innerHTML = `
+        <div class="grid-3">
+          <div class="metric">
+            <div class="label">已确认佣金</div>
+            <div class="value">${formatCurrency(offer.revenue.confirmed)}</div>
+            <div class="desc">按已入职候选人的职位汇总。</div>
+          </div>
+          <div class="metric">
+            <div class="label">大概率佣金</div>
+            <div class="value">${formatCurrency(offer.revenue.probable)}</div>
+            <div class="desc">来自 client interview / offer 阶段。</div>
+          </div>
+          <div class="metric">
+            <div class="label">平均交付周期</div>
+            <div class="value">${offer.revenue.averageCycleDays ? `${offer.revenue.averageCycleDays} 天` : 'TBD'}</div>
+            <div class="desc">反映当前交付效率。</div>
+          </div>
+        </div>
+        <div class="grid-2">
+          <section class="panel">
+            <div class="panel-header">
+              <div>
+                <div class="sub">Negotiations</div>
+                <h2>Offer 与谈判</h2>
+              </div>
+            </div>
+            <div class="panel-body list">
+              ${offer.negotiations.map((item) => `
+                <div class="negotiation-card" data-candidate="${item.id}" data-position="${item.positionId}">
+                  <div class="item-head">
+                    <div class="item-title">${escapeHtml(item.candidateName)}</div>
+                    <span class="pill ${toneClass(item.offerRisk)}">${escapeHtml(item.offerRisk || item.stage)}</span>
+                  </div>
+                  <div class="item-copy">${escapeHtml(item.currentCompany || 'Unknown')} · ${formatCurrency(item.salaryCurrent)} -> ${formatCurrency(item.salaryExpected)}</div>
+                </div>
+              `).join('')}
+              <div class="offer-form">
+                <input id="offer-current-input" type="number" placeholder="当前薪资" value="${selectedCandidate?.salaryCurrent || ''}">
+                <input id="offer-expected-input" type="number" placeholder="候选人预期" value="${selectedCandidate?.salaryExpected || ''}">
+                <input id="offer-budget-input" type="number" placeholder="客户预算上限" value="${selectedBudget}">
+                <textarea id="offer-note-input" placeholder="离职动因或补充说明">${selectedCandidate?.offerRisk && selectedCandidate.offerRisk !== 'none' ? selectedCandidate.offerRisk : ''}</textarea>
+                <div class="stack-actions">
+                  <button class="action primary" id="offer-analyze-button">生成 Offer 分析</button>
+                  <button class="action ghost" data-copilot="invoice_email">生成收款/交付邮件</button>
+                </div>
+              </div>
+            </div>
+          </section>
+          <section class="panel">
+            <div class="panel-header">
+              <div>
+                <div class="sub">Follow Ups</div>
+                <h2>入职与保证期</h2>
+              </div>
+            </div>
+            <div class="panel-body list">
+              ${offer.followUps.map((item) => `
+                <div class="list-item" data-candidate="${item.id}" data-position="${item.positionId}">
+                  <div class="item-head">
+                    <div class="item-title">${escapeHtml(item.candidateName)}</div>
+                    <span class="pill ${item.status === '需要回访' ? 'tone-amber' : 'tone-teal'}">${escapeHtml(item.status)}</span>
+                  </div>
+                  <div class="item-copy">入职 ${item.daysSinceOnboard || 0} 天</div>
+                </div>
+              `).join('')}
+              <div class="stack-actions">
+                <button class="action secondary" data-copilot="onboarding_plan">生成回访方案</button>
+              </div>
+            </div>
+          </section>
+        </div>
+      `;
+
+      els.offer.querySelectorAll('[data-candidate]').forEach((card) => {
+        card.addEventListener('click', () => selectCandidate(card.dataset.candidate, card.dataset.position));
+      });
+      els.offer.querySelectorAll('[data-copilot]').forEach((button) => {
+        button.addEventListener('click', () => runCopilot(button.dataset.copilot));
+      });
+      els.offer.querySelector('#offer-analyze-button').addEventListener('click', submitOfferAnalysis);
+    }
+
+    function renderAiWorkbench() {
+      const actions = state.workbench.aiWorkbench.actions;
+      const selectedCandidate = findSelectedCandidate();
+      els.ai.innerHTML = `
+        <div class="grid-2">
+          <section class="panel">
+            <div class="panel-header">
+              <div>
+                <div class="sub">Promptable Skills</div>
+                <h2>AI 工作台</h2>
+              </div>
+            </div>
+            <div class="panel-body grid-2">
+              ${actions.map((action) => `
+                <div class="prompt-card">
+                  <div class="item-head">
+                    <div class="item-title">${escapeHtml(action.title)}</div>
+                    <span class="pill ${toneClass(action.tone)}">${escapeHtml(action.tone)}</span>
+                  </div>
+                  <div class="item-copy">${escapeHtml(action.description)}</div>
+                  <div class="stack-actions">
+                    <button class="action primary" data-copilot="${action.id}">执行</button>
+                  </div>
+                </div>
+              `).join('')}
+            </div>
+          </section>
+          <section class="panel">
+            <div class="panel-header">
+              <div>
+                <div class="sub">Context Notes</div>
+                <h2>补充说明</h2>
+              </div>
+            </div>
+            <div class="panel-body note-box">
+              <textarea id="copilot-notes" placeholder="在这里补充本次任务的说明，例如“客户本周必须看到 shortlist”或“候选人已透露存在竞争 offer”。"></textarea>
+              <div class="context-card">
+                <div class="item-title">当前上下文</div>
+                <div class="item-copy">职位：${escapeHtml(state.workbench.positions.selectedContext?.position?.title || 'TBD')}</div>
+                <div class="item-copy">客户：${escapeHtml(state.workbench.positions.selectedContext?.client?.name || 'TBD')}</div>
+                <div class="item-copy">候选人：${escapeHtml(selectedCandidate?.name || '未选中')}</div>
+              </div>
+              <div class="stack-actions">
+                <button class="action secondary" id="shortlist-button">生成短名单总结</button>
+                <button class="action ghost" id="followup-button">生成推进计划</button>
+              </div>
+            </div>
+          </section>
+        </div>
+      `;
+
+      els.ai.querySelectorAll('[data-copilot]').forEach((button) => {
+        button.addEventListener('click', () => runCopilot(button.dataset.copilot, getNotes()));
+      });
+      els.ai.querySelector('#shortlist-button').addEventListener('click', () => runCopilot('shortlist_summary', getNotes()));
+      els.ai.querySelector('#followup-button').addEventListener('click', () => runCopilot('followup_plan', getNotes()));
+    }
+
+    function renderLogsInto(container) {
+      if (!container) return;
+      container.innerHTML = state.logs.length
+        ? state.logs.slice(-18).reverse().map((item) => `
+          <div class="log-card">
+            <div class="item-head">
+              <div class="item-title">${escapeHtml(item.type || 'tia.event')}</div>
+              <span class="micro">${escapeHtml(item.timestamp || '')}</span>
+            </div>
+            <div class="item-copy">${escapeHtml(item.message || '')}</div>
+          </div>
+        `).join('')
+        : '<div class="item-copy">等待日志流连接...</div>';
+    }
+
+    function renderCurrentView() {
+      renderRuntime();
+      renderShell();
+      renderContextPanel();
+      renderDashboard();
+      renderBd();
+      renderPositions();
+      renderKanban();
+      renderOffer();
+      renderAiWorkbench();
+
+      document.querySelectorAll('.view').forEach((view) => {
+        view.classList.toggle('active', view.id === `view-${state.view}`);
+      });
+      document.querySelectorAll('.tab').forEach((tab) => {
+        tab.classList.toggle('active', tab.dataset.view === state.view);
+      });
+      els.outputTitle.textContent = state.outputTitle;
+      els.outputContent.textContent = state.outputContent;
+    }
+
+    async function loadWorkbench(positionId = state.selectedPositionId) {
+      setStatus('正在加载工作台...');
+      const response = await api(`/api/tia/workbench${positionId ? `?position_id=${encodeURIComponent(positionId)}` : ''}`);
+      state.runtime = response.runtime || {};
+      state.workbench = response.result;
+      state.selectedPositionId = response.result.selectedPositionId || '';
+      syncSelectedCandidate();
+      renderCurrentView();
+      setStatus(`工作台已更新：${new Date(response.result.generatedAt).toLocaleString('zh-CN')}`);
+    }
+
+    function getNotes() {
+      return document.getElementById('copilot-notes')?.value || '';
+    }
+
+    async function selectPosition(positionId) {
+      if (!positionId || positionId === state.selectedPositionId) return;
+      state.selectedPositionId = positionId;
+      await loadWorkbench(positionId);
+    }
+
+    async function selectCandidate(candidateId, positionId = state.selectedPositionId) {
+      if (positionId && positionId !== state.selectedPositionId) {
+        state.selectedCandidateId = candidateId;
+        state.selectedPositionId = positionId;
+        await loadWorkbench(positionId);
+        return;
+      }
+      state.selectedCandidateId = candidateId;
+      renderCurrentView();
+    }
+
+    async function handleCandidateAction(action) {
+      const candidate = findSelectedCandidate();
+      if (!candidate) {
+        setStatus('请先选择一个候选人。');
+        return;
+      }
+
+      const positionId = state.selectedPositionId;
+      setStatus(`正在执行 ${action}：${candidate.name}`);
+
+      if (action === 'assess') {
+        const payload = await api('/api/tia/assess', {
+          method: 'POST',
+          body: JSON.stringify({
+            candidate_id: candidate.id,
+            position_id: positionId
+          })
+        });
+        setOutput('结构化评估', payload.result);
+      }
+
+      if (action === 'cc') {
+        const payload = await api('/api/tia/cc', {
+          method: 'POST',
+          body: JSON.stringify({
+            candidate_id: candidate.id,
+            position_id: positionId,
+            stage: candidate.stage,
+            position_brief: state.workbench.positions.selectedContext?.position?.jdRaw || ''
+          })
+        });
+        setOutput('CC 话术', payload.result);
+      }
+
+      if (action === 'report') {
+        const payload = await api('/api/tia/report', {
+          method: 'POST',
+          body: JSON.stringify({
+            candidate_id: candidate.id
+          })
+        });
+        setOutput('推荐报告', `${payload.result.reportMarkdown}\n\nHTML: ${payload.result.htmlPath || 'N/A'}`);
+      }
+
+      await loadWorkbench(positionId);
+      setStatus(`已完成 ${action}：${candidate.name}`);
+    }
+
+    async function updateStage(newStage) {
+      const candidate = findSelectedCandidate();
+      if (!candidate || !newStage) return;
+
+      setStatus(`正在更新阶段：${candidate.name} -> ${newStage}`);
+      const payload = await api('/api/tia/stage', {
+        method: 'POST',
+        body: JSON.stringify({
+          candidate_id: candidate.id,
+          new_stage: newStage,
+          summary: `Workbench moved ${candidate.name} to ${newStage}`
+        })
+      });
+      setOutput('阶段更新', payload.result);
+      await loadWorkbench(state.selectedPositionId);
+      setStatus(`已更新阶段：${candidate.name}`);
+    }
+
+    async function submitOfferAnalysis() {
+      const current = Number(document.getElementById('offer-current-input')?.value || 0);
+      const expected = Number(document.getElementById('offer-expected-input')?.value || 0);
+      const budget = Number(document.getElementById('offer-budget-input')?.value || 0);
+      const notes = document.getElementById('offer-note-input')?.value || '';
+
+      setStatus('正在生成 Offer 分析...');
+      const payload = await api('/api/tia/offer', {
+        method: 'POST',
+        body: JSON.stringify({
+          salary_current: current,
+          salary_expected: expected,
+          client_budget_min: Math.max(0, budget - 10000),
+          client_budget_max: budget,
+          leave_reason: notes,
+          has_competing_offer: /competing|counter|竞争|反/i.test(notes)
+        })
+      });
+      setOutput('Offer 分析', payload.result);
+      setStatus('Offer 分析已生成。');
+    }
+
+    async function runCopilot(taskType, notes = '') {
+      setStatus(`正在运行 Copilot：${taskType}`);
+      const payload = await api('/api/tia/copilot', {
+        method: 'POST',
+        body: JSON.stringify({
+          task_type: taskType,
+          position_id: state.selectedPositionId,
+          candidate_id: state.selectedCandidateId || undefined,
+          notes
+        })
+      });
+      setOutput(payload.result.title, payload.result.content);
+      setStatus(`Copilot 已完成：${payload.result.title}`);
+    }
+
+    async function loadLogsHistory() {
+      const history = await api('/api/tia/logs/history');
+      state.logs = history.logs || [];
+      const dashLogContainer = document.querySelector('#dash-logs');
+      renderLogsInto(dashLogContainer);
+    }
+
+    function connectLogs() {
+      const protocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+      const socket = new WebSocket(`${protocol}//${location.host}/api/tia/logs/stream`);
+
+      socket.addEventListener('message', (event) => {
+        const payload = JSON.parse(event.data);
+        if (payload.type === 'history') {
+          state.logs = payload.events || [];
+        }
+        if (payload.type === 'log' && payload.event) {
+          state.logs = [...state.logs, payload.event].slice(-120);
+        }
+        renderLogsInto(document.querySelector('#dash-logs'));
+      });
+
+      socket.addEventListener('open', () => setStatus('日志流已连接。'));
+      socket.addEventListener('close', () => {
+        setStatus('日志流已断开，3 秒后重连。');
+        setTimeout(connectLogs, 3000);
+      });
+      socket.addEventListener('error', () => socket.close());
+    }
+
+    document.querySelectorAll('.tab').forEach((tab) => {
+      tab.addEventListener('click', () => {
+        state.view = tab.dataset.view;
+        renderCurrentView();
+      });
+    });
+
+    els.positionSwitcher.addEventListener('change', (event) => {
+      selectPosition(event.target.value);
+    });
+
+    els.refreshWorkbench.addEventListener('click', () => {
+      loadWorkbench(state.selectedPositionId);
+    });
+
+    els.copyOutput.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(state.outputContent);
+        setStatus('输出内容已复制。');
+      } catch {
+        setStatus('复制失败，请手动复制。');
+      }
+    });
+
+    (async function bootstrap() {
+      try {
+        await loadWorkbench();
+        await loadLogsHistory();
+        connectLogs();
+      } catch (error) {
+        setStatus(`初始化失败：${error.message}`);
+        setOutput('初始化失败', error.message);
+      }
+    })();
+  </script>
+</body>
+</html>

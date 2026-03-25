@@ -6,7 +6,8 @@ export const TEMPLATE_IDS = [
   'jd_diagnosis_cn',
   'sourcing_strategy_cn',
   'candidate_assessment_cn',
-  'search_plan_cn'
+  'search_plan_cn',
+  'auto'
 ];
 
 export function createRequestId(seed = undefined) {
@@ -197,6 +198,7 @@ export function normalizeRequest(body = {}) {
 
   const normalized = {
     templateId,
+    webhookUrl: toOptionalString(body.webhookUrl),
     searchContext: {
       projectName: toOptionalString(searchContext.projectName, 'Talent Intelligence Task'),
       roleTitle: toRequiredString(searchContext.roleTitle),
@@ -252,6 +254,7 @@ export function normalizeRequest(body = {}) {
       rubrics: normalizeRubrics(
         searchContext.rubrics
         || searchContext.rubric
+        || searchContext.assessmentRubric
         || searchContext.assessmentRubrics
       ),
       interviewerNotes: toOptionalString(searchContext.interviewerNotes)
@@ -269,6 +272,11 @@ export function normalizeRequest(body = {}) {
       allowRemote: runtime.allowRemote === true,
       remoteEnabled: runtime.remoteEnabled === true,
       remoteRequired: runtime.remoteRequired === true,
+      stream: runtime.stream === true,
+      jsonMode: runtime.jsonMode === true,
+      responseFormat: isPlainObject(runtime.responseFormat)
+        ? { ...runtime.responseFormat }
+        : toOptionalString(runtime.responseFormat),
       model: String(runtime.model || process.env.TALENT_INTEL_DEFAULT_MODEL || 'bailian/qwen3.5-plus'),
       temperature: Number.isFinite(Number(runtime.temperature)) ? Number(runtime.temperature) : 0.4,
       maxTokens: Number.isFinite(Number(runtime.maxTokens)) ? Number(runtime.maxTokens) : 5000,

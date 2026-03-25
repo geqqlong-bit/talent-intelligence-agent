@@ -1,0 +1,28 @@
+{
+  "name": "tia-openclaw-plugin",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Talent Intelligence Agent delivery for OpenClaw with PostgreSQL-backed tools, HTTP APIs, and dashboard.",
+  "main": "index.js",
+  "openclaw": {
+    "extensions": [
+      "./index.js"
+    ],
+    "providers": [
+      "tia"
+    ]
+  },
+  "scripts": {
+    "start": "node server/index.mjs",
+    "test": "node --test tests/tia-services.test.mjs",
+    "test:tia": "node --test tests/tia-services.test.mjs",
+    "test:tia:e2e": "node tests/tia-http-smoke.mjs"
+  },
+  "dependencies": {
+    "pg": "^8.12.0"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

@@ -1,0 +1,461 @@
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+.root{padding:0.5rem 0;font-size:13px;line-height:1.5}
+.tabs{display:flex;gap:3px;margin-bottom:12px;border-bottom:0.5px solid var(--color-border-tertiary);padding-bottom:8px;flex-wrap:wrap}
+.tab{padding:5px 12px;border-radius:var(--border-radius-md);cursor:pointer;font-size:12px;font-weight:500;color:var(--color-text-secondary);background:transparent;border:0.5px solid transparent;font-family:var(--font-sans);transition:background .12s}
+.tab:hover{background:var(--color-background-secondary)}
+.tab.on{background:var(--color-background-warning);color:var(--color-text-warning);border-color:var(--color-border-warning)}
+.panel{display:none}.panel.on{display:block}
+
+/* ARCH DIAGRAM */
+.alayer{display:flex;align-items:stretch;gap:8px;margin-bottom:3px}
+.albl{width:52px;font-size:10px;font-weight:500;color:var(--color-text-tertiary);display:flex;align-items:center;justify-content:flex-end;text-align:right;flex-shrink:0;line-height:1.4;padding-right:2px}
+.acomps{flex:1;display:flex;gap:5px}
+.acomp{flex:1;padding:7px 8px;border-radius:var(--border-radius-md);font-size:11px;font-weight:500;text-align:center;cursor:pointer;border:0.5px solid;line-height:1.45;transition:opacity .15s}
+.acomp:hover{opacity:.75}
+.acomp .s{font-size:10px;font-weight:400;display:block;margin-top:1px}
+.cs{background:var(--color-background-success);color:var(--color-text-success);border-color:var(--color-border-success)}
+.ci{background:var(--color-background-info);color:var(--color-text-info);border-color:var(--color-border-info)}
+.cw{background:var(--color-background-warning);color:var(--color-text-warning);border-color:var(--color-border-warning)}
+.cd{background:var(--color-background-danger);color:var(--color-text-danger);border-color:var(--color-border-danger)}
+.cn{background:var(--color-background-secondary);color:var(--color-text-secondary);border-color:var(--color-border-secondary)}
+.acontainer{flex:1;border:0.5px dashed var(--color-border-secondary);border-radius:var(--border-radius-lg);padding:7px}
+.acl{font-size:10px;color:var(--color-text-tertiary);font-weight:500;margin-bottom:6px}
+.arow{display:flex;gap:5px;margin-bottom:5px}
+.arow:last-child{margin-bottom:0}
+.aconn{text-align:center;font-size:10px;color:var(--color-text-tertiary);font-family:var(--font-mono);padding:2px 0 2px 60px}
+
+/* CODE BLOCKS */
+.code{background:var(--color-background-secondary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);padding:10px 12px;font-family:var(--font-mono);font-size:11px;color:var(--color-text-primary);line-height:1.7;overflow-x:auto;margin-bottom:10px;white-space:pre}
+.cm{color:var(--color-text-tertiary)}
+.ck{color:var(--color-text-warning)}
+.cv{color:var(--color-text-info)}
+.cs2{color:var(--color-text-success)}
+
+/* SCHEMA */
+.tname{font-size:12px;font-weight:500;padding:5px 8px;background:var(--color-background-secondary);border-radius:var(--border-radius-md);margin-bottom:5px;color:var(--color-text-primary)}
+.stbl{width:100%;border-collapse:collapse;font-size:11px;margin-bottom:14px}
+.stbl th{text-align:left;padding:4px 8px;background:var(--color-background-secondary);font-weight:500;color:var(--color-text-secondary);border-bottom:0.5px solid var(--color-border-tertiary)}
+.stbl td{padding:4px 8px;border-bottom:0.5px solid var(--color-border-tertiary);vertical-align:top;color:var(--color-text-primary)}
+.stbl tr:last-child td{border-bottom:none}
+.field{font-family:var(--font-mono);color:var(--color-text-info)}
+.ftype{font-family:var(--font-mono);color:var(--color-text-secondary)}
+.fdesc{color:var(--color-text-tertiary)}
+
+/* SKILLS */
+.skcard{border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:9px 12px;margin-bottom:7px;cursor:pointer;transition:background .12s}
+.skcard:hover{background:var(--color-background-secondary)}
+.skname{font-family:var(--font-mono);font-size:12px;color:var(--color-text-info);font-weight:500;margin-bottom:3px}
+.skbadge{display:inline-block;padding:1px 6px;border-radius:3px;font-size:10px;margin-left:6px;vertical-align:middle}
+.bp0{background:var(--color-background-warning);color:var(--color-text-warning)}
+.bp1{background:var(--color-background-info);color:var(--color-text-info)}
+.bp2{background:var(--color-background-secondary);color:var(--color-text-secondary)}
+.skdesc{font-size:11px;color:var(--color-text-secondary);margin-bottom:5px;line-height:1.6}
+.skio{display:flex;gap:16px;font-size:10px;font-family:var(--font-mono);color:var(--color-text-tertiary)}
+
+/* ROADMAP */
+.phases{border-left:2px solid var(--color-border-secondary)}
+.phase{padding:0 0 16px 16px;position:relative}
+.phase:last-child{padding-bottom:0}
+.pdot{width:10px;height:10px;border-radius:50%;position:absolute;left:-6px;top:3px;border:2px solid}
+.pdot.p0{background:var(--color-background-warning);border-color:var(--color-border-warning)}
+.pdot.p1{background:var(--color-background-info);border-color:var(--color-border-info)}
+.pdot.p2{background:var(--color-background-secondary);border-color:var(--color-border-primary)}
+.pdot.p3{background:var(--color-background-success);border-color:var(--color-border-success)}
+.phdr{font-size:12px;font-weight:500;color:var(--color-text-primary);margin-bottom:2px}
+.ptime{font-size:10px;font-family:var(--font-mono);color:var(--color-text-tertiary);margin-bottom:7px}
+.plist{list-style:none;padding:0;margin-bottom:8px}
+.plist li{font-size:11px;color:var(--color-text-secondary);padding:2px 0;display:flex;gap:5px;line-height:1.5}
+.plist li::before{content:"→";color:var(--color-text-tertiary);flex-shrink:0}
+
+.sec{font-size:10px;font-weight:500;color:var(--color-text-tertiary);text-transform:uppercase;letter-spacing:.04em;margin:14px 0 7px}
+.aibtn{padding:5px 12px;border-radius:var(--border-radius-md);font-size:11px;font-weight:500;cursor:pointer;background:var(--color-background-warning);color:var(--color-text-warning);border:0.5px solid var(--color-border-warning);font-family:var(--font-sans);margin-top:6px;transition:opacity .12s;display:inline-block}
+.aibtn:hover{opacity:.8}
+.hint{font-size:11px;color:var(--color-text-tertiary);padding:7px 10px;background:var(--color-background-secondary);border-radius:var(--border-radius-md);margin-top:10px;line-height:1.6}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+@media(max-width:500px){.g2{grid-template-columns:1fr}}
+.constraint{font-size:11px;padding:6px 10px;border-left:2px solid var(--color-border-warning);color:var(--color-text-secondary);margin-bottom:6px;line-height:1.6}
+.constraint strong{color:var(--color-text-warning);font-weight:500}
+</style>
+
+<div class="root">
+<div class="tabs">
+  <button class="tab on" onclick="showTab('arch')">系统架构</button>
+  <button class="tab" onclick="showTab('files')">关键配置文件</button>
+  <button class="tab" onclick="showTab('schema')">数据模型</button>
+  <button class="tab" onclick="showTab('skills')">Skills 规格</button>
+  <button class="tab" onclick="showTab('road')">实施路线</button>
+</div>
+
+<!-- TAB 1: ARCHITECTURE -->
+<div class="panel on" id="tab-arch">
+  <div class="sec">核心设计原则 · 基于 OpenClaw 真实约束</div>
+  <div class="constraint"><strong>约束1：每次会话是全新实例</strong> → 业务状态不能存在 agent 记忆里，必须落 PostgreSQL，每次会话通过 tia-db Skill 重建上下文</div>
+  <div class="constraint"><strong>约束2：Skills 是唯一能力扩展机制</strong> → 所有业务逻辑（评估/CC/报告/风险扫描）都写成 Skills，注册进 openclaw.json</div>
+  <div class="constraint"><strong>约束3：Heartbeat 是唯一主动调度接口</strong> → HEARTBEAT.md 驱动每日待办、入职回访、风险预警，不需要外部 Cron</div>
+
+  <div class="sec">完整系统分层</div>
+
+  <!-- Presentation -->
+  <div class="alayer">
+    <div class="albl">展示层</div>
+    <div class="acomps">
+      <div class="acomp cs" onclick="sendPrompt('说明WebUI如何通过v0.10现有的REST API（/run和/jobs）获取实时数据，以及如何用WebSocket推送agent工作日志到前端看板。')">WebUI Dashboard · 猎头全流程工作台 · 基于 v0.10 /run /jobs API<span class="s">已设计完成，复用现有接口即可</span></div>
+    </div>
+  </div>
+  <div class="aconn">↕ HTTP REST / WebSocket</div>
+
+  <!-- Communication -->
+  <div class="alayer">
+    <div class="albl">通信层</div>
+    <div class="acomps">
+      <div class="acomp ci" onclick="sendPrompt('设计TIA的Discord Bot指令体系：哪些操作用Discord发起（新建职位、查候选人状态、触发评估），指令格式，以及如何在SOUL.md里声明Bot的权限边界。')">Discord Bot<span class="s">指令入口</span></div>
+      <div class="acomp ci" onclick="sendPrompt('说明v0.10现有的/api/talent-intelligence/run和/jobs这两个端点如何直接服务WebUI，需要增加哪些新端点（候选人列表/漏斗数据/风险预警），以及如何在server/index.mjs中扩展。')">v0.10 REST API<span class="s">WebUI对接·已有基础</span></div>
+      <div class="acomp ci" onclick="sendPrompt('设计飞书/企微的通知推送方案：哪3类事件触发通知（今日待办/风险预警/任务完成），消息卡片格式，以及如何在HEARTBEAT.md里配置触发条件。')">飞书 / 企微<span class="s">主动推送</span></div>
+      <div class="acomp ci" onclick="sendPrompt('设计Webhook回调机制：候选人阶段变更、任务完成、风险预警这三类事件的payload格式，以及如何在tia-db Skill的stage_update函数里触发Webhook。')">Webhook<span class="s">异步事件回调</span></div>
+    </div>
+  </div>
+  <div class="aconn">↕ Skills API · Tool Calls · SOUL.md / AGENTS.md / HEARTBEAT.md</div>
+
+  <!-- OpenClaw -->
+  <div class="alayer">
+    <div class="albl">Agent层</div>
+    <div class="acontainer">
+      <div class="acl">OpenClaw Engine · GCP VM openclaw-11 · geqqlong</div>
+      <!-- Agents row -->
+      <div class="arow">
+        <div class="acomp cw" style="flex:1.2" onclick="sendPrompt('写出TIA Orchestrator的完整SOUL.md：它是系统的调度中枢，负责解析用户意图→选择调用Luna还是Swan→组装上下文→协调多步任务。包含：角色声明、路由规则（什么请求走哪个子agent）、失败回退策略、输出格式规范。')">Orchestrator<span class="s">任务路由 · 上下文组装</span></div>
+        <div class="acomp cw" onclick="sendPrompt('写出Luna Agent（BD端）的完整SOUL.md：专注客户开发、合同管理、客户关系维护。包含：角色声明、专属Skills列表（tia-db读客户数据、tia-bd生成BD话术）、输出格式（邮件/话术/分析报告）、边界（不处理候选人相关任务）。')">Luna · BD 端<span class="s">客户 · 合同 · BD话术</span></div>
+        <div class="acomp cw" onclick="sendPrompt('写出Swan Agent（候选人端）的完整SOUL.md：专注候选人全生命周期管理。包含：角色声明、专属Skills（tia-assess/tia-cc/tia-report/tia-offer）、输出格式规范（推荐报告Markdown模板）、边界（不处理BD和合同任务）。')">Swan · 候选人端<span class="s">CC · 评估 · 报告 · Offer</span></div>
+      </div>
+      <!-- Skills row -->
+      <div class="arow">
+        <div class="acomp cn" style="font-size:10px;padding:5px 7px" onclick="sendPrompt('写出tia-db Skill的完整SKILL.md和Node.js实现：提供db_query(sql,params)、db_write(table,op,data)、get_position_context(position_id)、stage_update(candidate_id,new_stage)四个函数，连接PostgreSQL，包含连接池和错误处理。')">tia-db<span class="s">读写PostgreSQL</span></div>
+        <div class="acomp cn" style="font-size:10px;padding:5px 7px" onclick="sendPrompt('写出tia-assess Skill的完整实现：输入resume_text + rubric配置 + client_preferences，调用qwen-max（jsonMode），返回每维度score/evidence/confidence/flag的结构化JSON，存入ai_assessment字段。')">tia-assess<span class="s">结构化评估</span></div>
+        <div class="acomp cn" style="font-size:10px;padding:5px 7px" onclick="sendPrompt('写出tia-cc Skill的完整实现：输入candidate_background + position_brief + stage，生成15秒开场白/3个处理拒绝话术/收尾/微信消息，不暴露客户名，控制字数，调用LLM生成后存入touch_records。')">tia-cc<span class="s">CC寻访话术</span></div>
+        <div class="acomp cn" style="font-size:10px;padding:5px 7px" onclick="sendPrompt('写出tia-report Skill：输入candidate_id，自动从DB读取候选人数据+ai_assessment+client_preferences，生成标准化推荐报告Markdown（含评分维度、证据引用、风险点、薪资匹配、面试方向），可直接发给客户HR。')">tia-report<span class="s">推荐报告生成</span></div>
+        <div class="acomp cn" style="font-size:10px;padding:5px 7px" onclick="sendPrompt('写出tia-risk Skill：全量扫描candidates和positions表，识别风险：超期未推进（按阶段设阈值）/客户超N天未回复/offer_risk标记/保证期临近。输出结构化alerts[]，每条含urgency/type/suggested_action，供HEARTBEAT.md触发推送。')">tia-risk<span class="s">风险扫描器</span></div>
+        <div class="acomp cn" style="font-size:10px;padding:5px 7px" onclick="sendPrompt('写出tia-offer Skill：输入salary_current/expected/client_budget/has_competing_offer/leave_reason，调用LLM输出结构化谈判分析：客户端话术/候选人端话术/时间节点/风险级别/建议决策。')">tia-offer<span class="s">Offer谈判分析</span></div>
+      </div>
+      <!-- Heartbeat -->
+      <div style="margin-top:6px;padding:6px 8px;background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);font-size:10px;color:var(--color-text-secondary);cursor:pointer" onclick="sendPrompt('写出TIA系统的完整HEARTBEAT.md配置：每30分钟触发检查：1)tia-risk扫描是否有新预警→推送飞书，2)今日待办是否已发送→每天8:30生成并推送，3)入职候选人的30/60/90天回访提醒，4)合同到期检查。每项包含触发条件、执行动作、输出格式。')">
+        ⏱ HEARTBEAT.md · 每30min · tia-risk扫描 + 今日待办 + 入职回访提醒 + 合同到期 · 点击生成配置 ↗
+      </div>
+    </div>
+  </div>
+  <div class="aconn">↕ SQL · pgvector</div>
+
+  <!-- Data -->
+  <div class="alayer">
+    <div class="albl">数据层</div>
+    <div class="acomps">
+      <div class="acomp cn" onclick="sendPrompt('给出在GCP VM openclaw-11上安装PostgreSQL + pgvector的完整命令，以及TIA系统的完整建表SQL：positions、candidates、clients、touch_records、client_preferences五张表，包含所有字段、enum类型、索引、外键。')">PostgreSQL · 业务主库<span class="s">同一GCP VM · 5张核心表</span></div>
+      <div class="acomp cn" onclick="sendPrompt('说明pgvector在TIA中的具体使用：candidates表的embedding列如何生成（用什么模型向量化哪些字段），以及如何在tia-assess里查询「与当前候选人最相似的历史成功案例」来增强评估准确性。')">pgvector · 语义记忆<span class="s">候选人画像 · 历史案例检索</span></div>
+      <div class="acomp cn" onclick="sendPrompt('设计TIA的文件存储规范：简历PDF、推荐报告HTML、合同文档的目录结构，文件命名规范，与PostgreSQL的关联方式（resume_path字段），以及如何让tia-report Skill自动保存生成的报告。')">文件存储 · 本地磁盘<span class="s">简历 · 报告 · 合同</span></div>
+    </div>
+  </div>
+
+  <div class="hint">💡 点击任意组件获取对应模块的完整实现方案。整个系统的核心逻辑是：<strong>PostgreSQL 承载所有业务状态 → Skills 作为 agent 访问数据的唯一接口 → HEARTBEAT.md 驱动主动行为 → SOUL.md 定义每个 agent 的角色边界。</strong> OpenClaw 本身不需要改，只需要加 Skills 和改配置文件。</div>
+</div>
+
+<!-- TAB 2: KEY FILES -->
+<div class="panel" id="tab-files">
+  <div class="sec">HEARTBEAT.md · 主动行为的发动机</div>
+  <div class="code"><span class="cm"># TIA HEARTBEAT — 每30分钟执行</span>
+
+<span class="ck">## 每次心跳必做</span>
+<span class="cv">1. 调用 tia-risk Skill，获取当前所有风险预警</span>
+<span class="cv">2. 如果有 urgency=HIGH 的预警，立即通过飞书推送，附带建议动作</span>
+<span class="cv">3. 检查今天是否已发送「今日待办」(查 memory/today.md)</span>
+   如未发送且当前时间在 08:25–08:35：
+   - 调用 tia-risk 获取今日优先事项
+   - 格式化成「今日猎头工作清单」推送飞书/Discord
+   - 在 memory/today.md 写入 sent=true
+
+<span class="ck">## 入职回访检查</span>
+<span class="cv">调用：SELECT * FROM candidates</span>
+<span class="cv">      WHERE stage='placed' AND</span>
+<span class="cv">      onboard_date IN (CURRENT_DATE-30, -60, -90)</span>
+<span class="cv">如有结果，生成回访提醒推送给顾问</span>
+
+<span class="ck">## 合同到期检查</span>
+<span class="cv">调用：SELECT * FROM clients</span>
+<span class="cv">      WHERE contract_expires BETWEEN NOW() AND NOW()+7days</span>
+<span class="cv">如有结果，提醒顾问续签并生成续签邮件草稿</span>
+
+<span class="ck">## 沉默检测</span>
+<span class="cv">推荐报告发出超过3天客户无回复 → 生成跟进话术</span>
+<span class="cv">候选人CC后超过48小时无回应 → 生成微信跟进消息</span></div>
+
+  <div class="sec">SOUL.md · Orchestrator（主调度 agent）</div>
+  <div class="code"><span class="ck"># TIA Orchestrator · Talent Intelligence Agent</span>
+
+<span class="cm">## 身份</span>
+你是一个专业猎头业务调度中枢，代号 TIA。
+你不直接生成业务内容，你的职责是：
+理解意图 → 组装上下文 → 路由任务 → 汇总结果
+
+<span class="cm">## 每次响应前必须</span>
+1. 识别任务类型（BD类 / 候选人类 / 数据查询类 / 风险预警类）
+2. 调用 tia-db.get_position_context() 获取相关职位上下文
+3. 根据任务类型选择子 agent：
+   - BD开发/客户沟通/合同 → 路由给 Luna
+   - 候选人评估/CC/报告/Offer → 路由给 Swan
+   - 数据查询/漏斗分析 → 直接调用 tia-db 返回
+
+<span class="cm">## 输出规范</span>
+- 所有业务结果必须调用 tia-db.db_write() 落库
+- 推荐报告输出 Markdown，可直接发给客户
+- 风险预警输出结构化 JSON，供 WebUI 渲染
+- 禁止输出未经 DB 上下文支撑的候选人评分
+
+<span class="cm">## 边界</span>
+不存储任何业务数据在记忆文件里，所有状态走 PostgreSQL
+不猜测客户偏好，必须从 client_preferences 表读取</div>
+
+  <div class="sec">openclaw.json · Skills 注册</div>
+  <div class="code"><span class="cm">// ~/.openclaw/workspace/openclaw.json</span>
+{
+  <span class="ck">"skills"</span>: {
+    <span class="ck">"install"</span>: { <span class="ck">"nodeManager"</span>: <span class="cs2">"npm"</span> },
+    <span class="ck">"entries"</span>: {
+      <span class="cs2">"tia-db"</span>: {
+        <span class="ck">"enabled"</span>: true,
+        <span class="ck">"env"</span>: { <span class="ck">"PG_URL"</span>: <span class="cs2">"postgresql://localhost/tia"</span> }
+      },
+      <span class="cs2">"tia-assess"</span>: {
+        <span class="ck">"enabled"</span>: true,
+        <span class="ck">"env"</span>: { <span class="ck">"LLM_API_KEY"</span>: <span class="cs2">"sk-xxx"</span>, <span class="ck">"LLM_MODEL"</span>: <span class="cs2">"qwen-max"</span> }
+      },
+      <span class="cs2">"tia-cc"</span>:     { <span class="ck">"enabled"</span>: true },
+      <span class="cs2">"tia-report"</span>: { <span class="ck">"enabled"</span>: true },
+      <span class="cs2">"tia-risk"</span>:   { <span class="ck">"enabled"</span>: true },
+      <span class="cs2">"tia-offer"</span>:  { <span class="ck">"enabled"</span>: true }
+    }
+  },
+  <span class="ck">"agents"</span>: {
+    <span class="ck">"luna"</span>: { <span class="ck">"soul"</span>: <span class="cs2">"agents/luna/SOUL.md"</span>, <span class="ck">"skills"</span>: [<span class="cs2">"tia-db"</span>] },
+    <span class="ck">"swan"</span>: { <span class="ck">"soul"</span>: <span class="cs2">"agents/swan/SOUL.md"</span>,
+              <span class="ck">"skills"</span>: [<span class="cs2">"tia-db"</span>,<span class="cs2">"tia-assess"</span>,<span class="cs2">"tia-cc"</span>,<span class="cs2">"tia-report"</span>,<span class="cs2">"tia-offer"</span>] }
+  }
+}</div>
+
+  <div class="sec">tia-db / SKILL.md · 最关键的 Skill</div>
+  <div class="code"><span class="cm">---</span>
+<span class="ck">name</span>: tia-db
+<span class="ck">description</span>: TIA业务数据库操作。提供候选人/职位/客户数据的读写，
+  以及职位上下文的完整组装（含客户偏好和历史拒绝模式）。
+  每次候选人评估前必须先调用 get_position_context。
+<span class="ck">version</span>: 1.0.0
+<span class="cm">---</span>
+
+<span class="cm">## 可用函数</span>
+
+<span class="ck">### db_query(sql, params[])</span>
+执行 SELECT 查询，返回 JSON 数组。
+例: db_query("SELECT * FROM candidates WHERE position_id=$1", [pos_id])
+
+<span class="ck">### db_write(table, operation, data{})</span>
+operation: insert | update | delete
+自动处理 updated_at 时间戳，返回生成的 id。
+
+<span class="ck">### get_position_context(position_id)</span>
+组装完整职位上下文供评估使用，包含：
+- 职位信息 + rubric 配置
+- 客户硬性要求 + off_limits 公司名单
+- 历史拒绝原因归类（最近5次）
+- 当前漏斗状态（各阶段候选人数）
+返回结构化 JSON，直接注入评估 prompt。
+
+<span class="ck">### stage_update(candidate_id, new_stage)</span>
+更新候选人阶段，同时：
+1. 写 touch_records（类型: stage_change）
+2. 触发对应 Webhook 事件
+3. 如进入 placed 阶段，写入 onboard_date=TODAY</div>
+
+  <button class="aibtn" onclick="sendPrompt('基于以上SKILL.md规格，写出tia-db的完整Node.js实现代码：index.js入口、pg连接池配置、四个函数的完整实现（含错误处理和日志），以及package.json。')">🤖 生成 tia-db 完整代码 ↗</button>
+</div>
+
+<!-- TAB 3: SCHEMA -->
+<div class="panel" id="tab-schema">
+  <div class="sec">5张核心表 · 最小可运行数据模型</div>
+
+  <div class="tname">📋 positions</div>
+  <table class="stbl">
+    <tr><th>字段</th><th>类型</th><th>说明</th></tr>
+    <tr><td class="field">id</td><td class="ftype">uuid PK</td><td class="fdesc">自动生成</td></tr>
+    <tr><td class="field">client_id</td><td class="ftype">uuid FK</td><td class="fdesc">关联 clients 表</td></tr>
+    <tr><td class="field">title</td><td class="ftype">text</td><td class="fdesc">职位名称</td></tr>
+    <tr><td class="field">jd_raw</td><td class="ftype">text</td><td class="fdesc">原始 JD 文本</td></tr>
+    <tr><td class="field">jd_diagnosis</td><td class="ftype">jsonb</td><td class="fdesc">AI诊断结果（难度/薪资benchmark/人才画像）</td></tr>
+    <tr><td class="field">rubric</td><td class="ftype">jsonb</td><td class="fdesc">评分维度权重，默认值可被客户化覆盖</td></tr>
+    <tr><td class="field">status</td><td class="ftype">enum</td><td class="fdesc">active / paused / closed / filled</td></tr>
+    <tr><td class="field">target_fee</td><td class="ftype">numeric</td><td class="fdesc">预计佣金（元）</td></tr>
+    <tr><td class="field">created_at</td><td class="ftype">timestamptz</td><td class="fdesc">开单时间，days_open = NOW() - created_at</td></tr>
+  </table>
+
+  <div class="tname">👤 candidates · 状态机核心</div>
+  <table class="stbl">
+    <tr><th>字段</th><th>类型</th><th>说明</th></tr>
+    <tr><td class="field">id</td><td class="ftype">uuid PK</td><td class="fdesc"></td></tr>
+    <tr><td class="field">position_id</td><td class="ftype">uuid FK</td><td class="fdesc">当前关联职位</td></tr>
+    <tr><td class="field">name / mobile</td><td class="ftype">text</td><td class="fdesc">基本信息</td></tr>
+    <tr><td class="field">current_company</td><td class="ftype">text</td><td class="fdesc">现任职公司</td></tr>
+    <tr><td class="field">stage</td><td class="ftype">enum</td><td class="fdesc">sourcing → interview → eval → recommended → client_interview → offer → placed</td></tr>
+    <tr><td class="field">stage_updated_at</td><td class="ftype">timestamptz</td><td class="fdesc">超期检测基准时间</td></tr>
+    <tr><td class="field">ai_assessment</td><td class="ftype">jsonb</td><td class="fdesc">{dim: {score, evidence, confidence, flag}}</td></tr>
+    <tr><td class="field">salary_current / expected</td><td class="ftype">numeric</td><td class="fdesc">薪资信息，供 offer_analysis 使用</td></tr>
+    <tr><td class="field">offer_risk</td><td class="ftype">enum</td><td class="fdesc">none / counter_offer / competing_offer</td></tr>
+    <tr><td class="field">onboard_date</td><td class="ftype">date</td><td class="fdesc">入职日期，驱动 30/60/90 天回访</td></tr>
+    <tr><td class="field">embedding</td><td class="ftype">vector(1536)</td><td class="fdesc">pgvector，候选人画像向量，供相似案例检索</td></tr>
+  </table>
+
+  <div class="tname">🧠 client_preferences · 护城河核心</div>
+  <table class="stbl">
+    <tr><th>字段</th><th>类型</th><th>说明</th></tr>
+    <tr><td class="field">client_id</td><td class="ftype">uuid FK</td><td class="fdesc"></td></tr>
+    <tr><td class="field">hard_requirements</td><td class="ftype">jsonb</td><td class="fdesc">硬性要求（学历/年限/语言/行业等）</td></tr>
+    <tr><td class="field">rejection_patterns</td><td class="ftype">jsonb[]</td><td class="fdesc">历史拒绝原因，每次客户反馈后 append</td></tr>
+    <tr><td class="field">off_limits</td><td class="ftype">text[]</td><td class="fdesc">禁止挖角的公司名单</td></tr>
+    <tr><td class="field">preferred_sources</td><td class="ftype">text[]</td><td class="fdesc">历史成功来源公司（数据飞轮积累）</td></tr>
+    <tr><td class="field">salary_ceiling</td><td class="ftype">numeric</td><td class="fdesc">薪资上限（实际可谈）</td></tr>
+  </table>
+
+  <div class="tname">📞 touch_records · 沟通时间轴</div>
+  <table class="stbl">
+    <tr><th>字段</th><th>类型</th><th>说明</th></tr>
+    <tr><td class="field">candidate_id</td><td class="ftype">uuid FK</td><td class="fdesc"></td></tr>
+    <tr><td class="field">touch_type</td><td class="ftype">enum</td><td class="fdesc">cc_call / wechat / interview / client_feedback / stage_change / onboarding_checkin</td></tr>
+    <tr><td class="field">summary</td><td class="ftype">text</td><td class="fdesc">沟通摘要，每次 CC 后由 agent 写入</td></tr>
+    <tr><td class="field">sentiment</td><td class="ftype">enum</td><td class="fdesc">positive / neutral / negative · 趋势分析用</td></tr>
+    <tr><td class="field">next_action</td><td class="ftype">text</td><td class="fdesc">AI 建议的下一步，驱动 HEARTBEAT 提醒</td></tr>
+  </table>
+
+  <button class="aibtn" onclick="sendPrompt('生成TIA系统的完整PostgreSQL建表SQL：包含CREATE TYPE（enum）、CREATE TABLE（5张表）、CREATE INDEX（stage/position_id/stage_updated_at上的索引）、CREATE EXTENSION pgvector，以及在GCP VM ubuntu上安装pg和pgvector的完整命令。')">🤖 生成完整建表 SQL ↗</button>
+</div>
+
+<!-- TAB 4: SKILLS -->
+<div class="panel" id="tab-skills">
+  <div class="sec">P0 · 没有这两个 Skills，系统跑不起来</div>
+
+  <div class="skcard" onclick="sendPrompt('写出tia-db Skill的完整代码实现：Node.js，使用pg库，连接池配置，实现db_query/db_write/get_position_context/stage_update四个函数。get_position_context要JOIN clients/client_preferences/touch_records三张表组装完整上下文JSON。')">
+    <div class="skname">tia-db <span class="skbadge bp0">P0 · 先建</span></div>
+    <div class="skdesc">PostgreSQL 读写接口。解决 OpenClaw 无状态的根本问题——把所有业务状态从 Markdown 记忆文件迁移到关系型数据库，让 agent 每次会话都能精确读取"张三现在在哪个阶段、上次客户拒了什么类型候选人"。</div>
+    <div class="skio"><span>输入: sql/table/operation/data</span><span>输出: rows[] / id / position_context{}</span></div>
+  </div>
+
+  <div class="skcard" onclick="sendPrompt('写出tia-risk Skill：SELECT所有active candidates和positions，计算每个候选人在当前阶段的停留天数（用stage_updated_at），与以下阈值比对：sourcing>7天/eval>3天/recommended>5天/client_interview>14天/offer>3天，输出alerts[]，每条含candidate_name/stage/days_stuck/urgency(HIGH/MED/LOW)/suggested_action。')">
+    <div class="skname">tia-risk <span class="skbadge bp0">P0 · 先建</span></div>
+    <div class="skdesc">每30分钟由 HEARTBEAT 触发的风险扫描器。这是让系统从"被动工具"变成"主动助手"的关键——顾问不用手动查，系统会在问题变成危机之前主动告警。</div>
+    <div class="skio"><span>输入: 无（全量扫描）</span><span>输出: alerts[{candidate, stage, urgency, action}]</span></div>
+  </div>
+
+  <div class="sec">P1 · 核心业务价值，建完立刻产生差异化</div>
+
+  <div class="skcard" onclick="sendPrompt('写出tia-assess Skill的完整实现：1)先调用tia-db.get_position_context(position_id)获取rubric和client_preferences，2)构建包含client偏好和历史拒绝模式的评估prompt，3)调用qwen-max（jsonMode），4)解析结果，确保每个维度有evidence字段引用简历原文，5)调用tia-db.db_write写入ai_assessment字段，6)生成候选人embedding向量存入pgvector。')">
+    <div class="skname">tia-assess <span class="skbadge bp1">P1</span></div>
+    <div class="skdesc">v0.10 黑盒评分的升级版。关键改进：每次评估前先读 client_preferences（历史拒绝模式、硬性要求、off_limits），让分数变成"针对这个客户的这个职位的分数"而不是通用打分。每个维度必须引用简历原文作为证据。</div>
+    <div class="skio"><span>输入: resume_text, position_id</span><span>输出: assessment{dims, overall, recommendation}</span></div>
+  </div>
+
+  <div class="skcard" onclick="sendPrompt('写出tia-cc Skill：输入candidate_background(current_company/title/years)+position_brief(不含客户名)+stage，调用LLM生成：15秒开场白（自然，不像sales pitch）、3个处理拒绝话术（按「我不看机会」/「现在很忙」/「你们有什么好机会」三类）、约下一次沟通的收尾、一条脉脉/微信跟进消息（80字内）。结果存touch_records。')">
+    <div class="skname">tia-cc <span class="skbadge bp1">P1</span></div>
+    <div class="skdesc">猎头最高频操作，每天 10–30 次。每次 CC 前30秒生成专属话术，覆盖开场/处理拒绝/收尾三段，结果自动记录到 touch_records，积累候选人反应数据。</div>
+    <div class="skio"><span>输入: candidate_background, position_brief, stage</span><span>输出: opening, objection_handlers[], closing, social_msg</span></div>
+  </div>
+
+  <div class="skcard" onclick="sendPrompt('写出tia-report Skill：输入candidate_id，自动从DB JOIN查询候选人信息+ai_assessment+position信息+client_preferences，调用LLM生成标准推荐报告，格式：## 候选人摘要 / ## 核心优势（每条含简历原文引用）/ ## 风险点（客观呈现）/ ## 匹配度分析 / ## 薪资情况 / ## 建议面试方向 / ## 顾问推荐意见。Markdown格式，可直接邮件发送。')">
+    <div class="skname">tia-report <span class="skbadge bp1">P1</span></div>
+    <div class="skdesc">标准化推荐报告生成，输出可直接发给客户 HR。每条优势都引用简历原文，风险点客观呈现（不美化），薪资匹配分析基于 client_preferences 的实际预算范围。</div>
+    <div class="skio"><span>输入: candidate_id</span><span>输出: report_markdown (可直接发送)</span></div>
+  </div>
+
+  <div class="skcard" onclick="sendPrompt('写出tia-offer Skill：输入{salary_current, salary_expected, client_budget_min, client_budget_max, has_competing_offer, leave_reason, guarantee_months}，调用LLM输出结构化JSON：{risk_level(HIGH/MED/LOW), client_script(向客户争取薪资的话术), candidate_script(向候选人呈现非薪资优势), timeline(时间节点建议), counter_offer_response(如有竞争offer的应对), recommendation(建议决策)}。')">
+    <div class="skname">tia-offer <span class="skbadge bp1">P1</span></div>
+    <div class="skdesc">Offer 谈判决策支持。不只是输出一段文字，而是结构化的情景分析：同时给顾问"说给客户的话"和"说给候选人的话"，以及时间节点建议。输入变量越完整，分析越精准。</div>
+    <div class="skio"><span>输入: offer_params{}</span><span>输出: {risk_level, client_script, candidate_script, timeline}</span></div>
+  </div>
+
+  <button class="aibtn" onclick="sendPrompt('给出所有6个Skills的目录结构和package.json模板，以及如何在GCP VM openclaw-11上部署这些Skills：npm install步骤、权限配置、如何验证Skill是否被OpenClaw成功加载（查看Dashboard的Skills标签页）。')">🤖 生成 Skills 部署方案 ↗</button>
+</div>
+
+<!-- TAB 5: ROADMAP -->
+<div class="panel" id="tab-road">
+  <div class="sec">4阶段 · 从 v0.10 出发到真正跑起来</div>
+  <div class="phases">
+    <div class="phase">
+      <div class="pdot p0"></div>
+      <div class="phdr">Phase 1 · 数据地基</div>
+      <div class="ptime">第1–2周 · 完成后：agent 有了长期记忆</div>
+      <ul class="plist">
+        <li>在 openclaw-11 上安装 PostgreSQL + pgvector</li>
+        <li>执行建表 SQL（5张表 + enum类型 + 索引）</li>
+        <li>开发 tia-db Skill（P0），注册进 openclaw.json</li>
+        <li>开发 tia-risk Skill（P0），在 Dashboard 手动测试</li>
+        <li>把 v0.10 已有的评估结果回填到 ai_assessment 字段</li>
+        <li>写 HEARTBEAT.md 的风险扫描 + 今日待办逻辑</li>
+      </ul>
+      <div style="font-size:11px;color:var(--color-text-success);margin-bottom:6px">验收：Discord 发「今天有什么风险」→ agent 读 DB 返回结构化预警</div>
+      <button class="aibtn" onclick="sendPrompt('给出Phase 1的完整实施步骤：在GCP VM openclaw-11（用户geqqlong）上安装PostgreSQL的命令，pgvector安装，建库建表SQL，tia-db Skill的完整代码，以及如何在OpenClaw Dashboard验证Skill加载成功。')">🤖 Phase 1 完整实施方案 ↗</button>
+    </div>
+
+    <div class="phase">
+      <div class="pdot p1"></div>
+      <div class="phdr">Phase 2 · 核心业务 Skills</div>
+      <div class="ptime">第3–5周 · 完成后：agent 能执行猎头80%的日常操作</div>
+      <ul class="plist">
+        <li>开发 tia-assess（注入 client_preferences，替换 v0.10 黑盒评分）</li>
+        <li>开发 tia-cc（CC话术生成，结果落 touch_records）</li>
+        <li>开发 tia-report（标准化推荐报告，可直接发送）</li>
+        <li>开发 tia-offer（Offer 谈判结构化分析）</li>
+        <li>重写 Orchestrator SOUL.md（路由规则 + 上下文组装）</li>
+        <li>写 Luna / Swan 的 SOUL.md 和 Skill 权限范围</li>
+      </ul>
+      <div style="font-size:11px;color:var(--color-text-success);margin-bottom:6px">验收：Discord 发「帮我准备CC张三」→ 30秒内输出三段话术 + 记录到 DB</div>
+      <button class="aibtn" onclick="sendPrompt('给出Phase 2的Luna和Swan两个子agent的完整SOUL.md文件内容，以及AGENTS.md中多agent路由规则的写法。')">🤖 Phase 2 多 Agent 配置 ↗</button>
+    </div>
+
+    <div class="phase">
+      <div class="pdot p2"></div>
+      <div class="phdr">Phase 3 · WebUI 接入</div>
+      <div class="ptime">第6–8周 · 完成后：有了可用的操作界面</div>
+      <ul class="plist">
+        <li>在 v0.10 server/index.mjs 中扩展新端点：/candidates /positions /funnel /alerts</li>
+        <li>WebUI Dashboard 接 REST API，实时展示漏斗数据</li>
+        <li>WebSocket 接 agent 工作日志，实现实时推送</li>
+        <li>飞书 Bot 接入：今日待办卡片 + 风险预警消息格式</li>
+        <li>推荐报告 HTML 模板标准化，支持一键复制发送</li>
+      </ul>
+      <div style="font-size:11px;color:var(--color-text-success);margin-bottom:6px">验收：打开 WebUI → 看到今日3条预警 → 点击"生成CC话术" → 30秒出结果</div>
+      <button class="aibtn" onclick="sendPrompt('给出在v0.10 server/index.mjs中新增以下端点的代码：GET /api/tia/candidates?position_id=xxx（返回该职位所有候选人及阶段）、GET /api/tia/funnel（返回全局漏斗数据）、GET /api/tia/alerts（返回tia-risk的最新扫描结果）。')">🤖 Phase 3 API 扩展代码 ↗</button>
+    </div>
+
+    <div class="phase">
+      <div class="pdot p3"></div>
+      <div class="phdr">Phase 4 · 数据飞轮</div>
+      <div class="ptime">第9周起 · 持续运营 · 护城河开始建立</div>
+      <ul class="plist">
+        <li>每次客户反馈后自动 append 到 client_preferences.rejection_patterns</li>
+        <li>成单数据积累后，用 preferred_sources 优化下次寻源优先级</li>
+        <li>pgvector 开始发挥作用：评估时自动检索相似历史成功案例</li>
+        <li>薪资 benchmark 表从成单数据中自动提取，形成内部参考值</li>
+        <li>用历史数据回归分析：哪些维度真正预测成单，调整 rubric 默认权重</li>
+      </ul>
+      <div style="font-size:11px;color:var(--color-text-success);margin-bottom:6px">验收：新职位诊断时，AI 自动引用「上次这个客户拒了薪资预期超预算10%的候选人」</div>
+      <button class="aibtn" onclick="sendPrompt('设计TIA的数据飞轮机制：1)客户反馈「拒绝李四，原因是缺乏千万DAU系统经验」后，如何自动更新client_preferences，2)如何用pgvector实现「查找与当前候选人最相似的历史成功案例」，给出SQL和向量化逻辑，3)如何每月自动生成「哪类候选人成单率最高」的分析报告。')">🤖 数据飞轮设计方案 ↗</button>
+    </div>
+  </div>
+
+  <div class="hint" style="margin-top:12px">⚡ <strong>最关键的一步</strong>：先把 tia-db 和 tia-risk 两个 P0 Skills 跑起来，接上 HEARTBEAT.md。其他所有功能都建立在这个基础上。没有数据层，所有 agent 的"记忆"都是会话结束就消失的幻觉。</div>
+</div>
+</div>
+
+<script>
+function showTab(id){
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('on'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));
+  document.getElementById('tab-'+id).classList.add('on');
+  event.target.classList.add('on');
+}
+</script>

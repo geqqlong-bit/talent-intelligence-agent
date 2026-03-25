@@ -1,0 +1,116 @@
+{
+  "benchmarks": {
+    "cto": {
+      "salary_range": "200k-400k RMB/month (plus equity)",
+      "competitors": ["ByteDance", "Alibaba", "Tencent", "Meituan", "Baidu", "PDD"],
+      "key_traits": ["tech vision and architecture depth", "org building from 0 to 1 or scaling", "board-level communication"]
+    },
+    "vp engineering": {
+      "salary_range": "150k-300k RMB/month (plus equity)",
+      "competitors": ["ByteDance", "Alibaba Cloud", "Meituan", "Kuaishou", "Xiaomi"],
+      "key_traits": ["engineering excellence at scale", "cross-team delivery ownership", "talent density management"]
+    },
+    "vp product": {
+      "salary_range": "150k-250k RMB/month (plus equity)",
+      "competitors": ["Huawei Cloud", "Aliyun", "Volcano Engine", "Tencent Cloud"],
+      "key_traits": ["0-1 enterprise software experience", "strong commercial acumen and sales collaboration"]
+    },
+    "ai architect": {
+      "salary_range": "100k-200k RMB/month",
+      "competitors": ["ByteDance", "Alibaba DAMO", "Baidu", "SenseTime", "Moonshot AI", "DeepSeek"],
+      "key_traits": ["large model training and inference optimization", "MLOps and production deployment", "cross-team system design"]
+    },
+    "ai product director": {
+      "salary_range": "80k-150k RMB/month",
+      "competitors": ["ByteDance", "Kuaishou", "Meituan", "Alibaba", "Xiaohongshu"],
+      "key_traits": ["AI product strategy and roadmap", "team management 20+ people", "business-driven AI application"]
+    },
+    "data scientist": {
+      "salary_range": "50k-120k RMB/month",
+      "competitors": ["ByteDance", "Meituan", "JD.com", "Didi", "Alibaba"],
+      "key_traits": ["recommendation/ranking model experience", "experiment platform and A/B testing", "production model deployment"]
+    },
+    "frontend architect": {
+      "salary_range": "70k-130k RMB/month",
+      "competitors": ["ByteDance", "Alibaba", "Tencent", "Meituan", "Kuaishou"],
+      "key_traits": ["complex SPA architecture and performance", "cross-platform standardization", "engineering efficiency systems"]
+    },
+    "backend engineer": {
+      "salary_range": "40k-90k RMB/month",
+      "competitors": ["ByteDance", "Alibaba", "Tencent", "Meituan", "PDD"],
+      "key_traits": ["high concurrency and distributed systems", "microservices architecture", "database and cache optimization"]
+    },
+    "engineer": {
+      "salary_range": "50k-100k RMB/month",
+      "competitors": ["ByteDance", "Tencent", "Alibaba", "Meituan"],
+      "key_traits": ["high concurrency architecture", "distributed systems design"]
+    },
+    "cfo": {
+      "salary_range": "200k-400k RMB/month (plus equity)",
+      "competitors": ["NIO", "XPeng", "Li Auto", "CATL", "BYD"],
+      "key_traits": ["IPO or fundraising experience", "financial system building", "board communication and investor relations"]
+    },
+    "hr director": {
+      "salary_range": "60k-120k RMB/month",
+      "competitors": ["ByteDance", "Alibaba", "Tencent", "Meituan", "JD.com"],
+      "key_traits": ["HRBP or COE depth", "org design and talent density", "employer branding and retention"]
+    },
+    "product manager": {
+      "salary_range": "30k-70k RMB/month",
+      "competitors": ["ByteDance", "Kuaishou", "Xiaohongshu", "Meituan", "Alibaba"],
+      "key_traits": ["user-centric product thinking", "data-driven iteration", "cross-functional collaboration"]
+    },
+    "devops engineer": {
+      "salary_range": "40k-80k RMB/month",
+      "competitors": ["ByteDance", "Alibaba Cloud", "Tencent Cloud", "Huawei Cloud"],
+      "key_traits": ["CI/CD pipeline mastery", "Kubernetes and cloud-native", "monitoring and observability"]
+    },
+    "security engineer": {
+      "salary_range": "40k-90k RMB/month",
+      "competitors": ["Tencent", "Alibaba", "ByteDance", "Qianxin", "Sangfor"],
+      "key_traits": ["penetration testing and vulnerability assessment", "security architecture design", "compliance and risk management"]
+    },
+    "marketing director": {
+      "salary_range": "60k-130k RMB/month",
+      "competitors": ["ByteDance", "Xiaohongshu", "Bilibili", "Kuaishou", "iQIYI"],
+      "key_traits": ["brand strategy and growth marketing", "content marketing and social media", "ROI-driven campaign management"]
+    },
+    "sales director": {
+      "salary_range": "60k-150k RMB/month (plus commission)",
+      "competitors": ["Salesforce", "Feishu", "DingTalk", "WeCom", "Kingdee"],
+      "key_traits": ["enterprise sales methodology", "KA management and pipeline building", "team coaching and quota attainment"]
+    },
+    "supply chain director": {
+      "salary_range": "60k-120k RMB/month",
+      "competitors": ["JD.com", "Alibaba", "PDD", "Meituan", "SF Express"],
+      "key_traits": ["end-to-end supply chain optimization", "demand forecasting and inventory management", "vendor management and cost control"]
+    },
+    "game producer": {
+      "salary_range": "50k-120k RMB/month",
+      "competitors": ["Tencent Games", "NetEase Games", "miHoYo", "Lilith Games", "FunPlus"],
+      "key_traits": ["full lifecycle game production", "player engagement and monetization", "cross-functional creative leadership"]
+    },
+    "nlp engineer": {
+      "salary_range": "50k-120k RMB/month",
+      "competitors": ["ByteDance", "Baidu", "Alibaba DAMO", "Moonshot AI", "Zhipu AI"],
+      "key_traits": ["transformer and LLM fine-tuning", "RAG and knowledge graph systems", "text classification and generation pipelines"]
+    },
+    "autonomous driving engineer": {
+      "salary_range": "60k-150k RMB/month",
+      "competitors": ["Baidu Apollo", "Pony.ai", "WeRide", "NIO", "Huawei"],
+      "key_traits": ["perception or planning algorithms", "sensor fusion and SLAM", "simulation and validation systems"]
+    }
+  },
+  "industries": {
+    "enterprise software": "B2B sales cycles are lengthening; candidates who can unify product features with complex enterprise compliance requirements are highly valued by top HR leaders.",
+    "ai saas": "AI SaaS 领域人才竞争激烈，大模型能力与产品化落地经验是核心差异化因素。头部公司抢夺 AI Infra 和 MLOps 人才，薪资溢价 20-40%。",
+    "电商": "电商行业关注 GMV 增长和用户留存，产品和算法人才需具备强业务 sense。直播电商和内容电商是新增长点，相关人才供不应求。",
+    "互联网": "互联网行业整体降本增效，但 AI 方向持续扩招。有 0-1 经验和规模化交付能力的人才最受欢迎，纯管理型候选人吸引力下降。",
+    "新能源": "新能源行业处于高速发展期，特别是智能驾驶和电池技术方向。跨行业人才（从互联网到新能源）转型意愿强，但行业知识壁垒需要关注。",
+    "本地生活": "本地生活赛道竞争白热化，推荐算法和商业化人才是争抢重点。有高并发数据平台经验的候选人更受青睐。",
+    "金融科技": "金融科技领域受监管影响较大，合规和风控经验是必要条件。AI 在风控、营销、客服场景落地加速，复合型人才稀缺。",
+    "游戏": "游戏行业版号恢复后产能提升，但出海成为主旋律。有全球化运营和跨文化管理经验的制作人和发行负责人需求旺盛。",
+    "医疗健康": "医疗 AI 和数字健康快速发展，但受限于数据合规和临床验证周期。既懂技术又懂医疗场景的人才缺口最大。",
+    "芯片半导体": "芯片行业受国产替代驱动，设计和验证人才需求旺盛。薪资持续上涨但近期趋于理性，有完整 tape-out 经验的候选人最具吸引力。"
+  }
+}

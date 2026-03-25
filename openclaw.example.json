@@ -1,0 +1,24 @@
+{
+  "plugins": {
+    "entries": {
+      "tia": {
+        "enabled": true,
+        "config": {
+          "pgUrl": "postgresql://localhost:5432/tia",
+          "llmBaseUrl": "https://api.openai.com/v1",
+          "llmApiKey": "sk-xxx",
+          "llmModel": "qwen-max",
+          "reportDir": "./state/reports",
+          "defaultWebhookUrls": [
+            "https://example.com/webhooks/tia"
+          ]
+        }
+      }
+    }
+  },
+  "tools": {
+    "allow": [
+      "tia"
+    ]
+  }
+}

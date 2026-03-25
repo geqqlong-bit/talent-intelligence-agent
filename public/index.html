@@ -420,10 +420,8 @@
           return this.form.rubric.reduce((sum, dim) => sum + (Number(dim.weight) || 0), 0);
         },
         parsedCandidates() {
-          const artifacts = this.activeJob.result?.artifacts || [];
-          return artifacts
-            .filter(art => art.id && (art.id.startsWith('candidate-assessment-result-') || art.id.startsWith('candidate-assessment-')))
-            .map(art => this.normalizeCandidateArtifact(art))
+          return this.getCandidateRecords(this.activeJob.result)
+            .map((candidate, index) => this.normalizeCandidateRecord(candidate, index))
             .filter(Boolean)
             .sort((a, b) => Number(b.score || 0) - Number(a.score || 0));
         }
@@ -488,10 +486,26 @@
         renderMarkdown(text) {
           return marked.parse(text);
         },
-        normalizeCandidateArtifact(art) {
+        getCandidateRecords(result) {
+          const candidateAssessment = result?.candidateAssessment || result?.orchestration?.execution?.result?.candidateAssessment;
+          if (candidateAssessment?.mode === 'batch' && Array.isArray(candidateAssessment.assessments)) {
+            return candidateAssessment.assessments;
+          }
+          if (candidateAssessment?.mode === 'single' && candidateAssessment.assessment) {
+            return [candidateAssessment.assessment];
+          }
+          if (Array.isArray(result?.candidateAssessment?.assessments)) {
+            return result.candidateAssessment.assessments;
+          }
+          if (result?.candidateAssessment?.assessment) {
+            return [result.candidateAssessment.assessment];
+          }
+          return [];
+        },
+        normalizeCandidateRecord(candidate, index = 0) {
           try {
-            const data = this.extractStructuredContent(art);
-            const candidateName = data.name || data.candidateName || art.metadata?.candidateName || art.id.replace(/^candidate-assessment(?:-result)?-/, '');
+            const data = this.extractStructuredContent(candidate);
+            const candidateName = data.name || data.candidateName || `候选人 ${index + 1}`;
             const dimensionsRaw = data.dimensionScores || data.dimensions || data.rubricScores || data.scoreBreakdown || data.breakdown || [];
             const dimensions = this.normalizeDimensions(dimensionsRaw);
             const overallScore = this.pickFirstNumber([
@@ -510,16 +524,26 @@
               data.quote,
               data.证据引用,
               data.核心证据,
+              Array.isArray(data.evidenceQuotes) ? data.evidenceQuotes[0] : '',
               dimensions.find(dim => dim.evidence)?.evidence
             ]);
             const confidenceLabel = this.normalizeConfidenceLabel(
-              data.confidence || data.confidenceLabel || data.signalConfidence || data.信心等级 || data.confidence_level
+              data.confidence?.label || data.confidence || data.confidenceLabel || data.signalConfidence || data.信心等级 || data.confidence_level
+            );
+            const risks = this.normalizeStringArray(
+              data.cons
+              || data.risks
+              || data.concerns
+              || data.风险
+              || (Array.isArray(data.overallRisks)
+                ? data.overallRisks.map(item => item.detail || item.label).filter(Boolean)
+                : [])
             );
             return {
               name: candidateName || '未命名候选人',
               score: overallScore ?? 'N/A',
               pros: this.normalizeStringArray(data.pros || data.advantages || data.strengths || data.亮点 || ['待模型输出']),
-              cons: this.normalizeStringArray(data.cons || data.risks || data.concerns || data.风险 || ['待模型输出']),
+              cons: risks.length ? risks : ['待模型输出'],
               summary: this.pickFirstString([data.summary, data.evaluation, data.overallAssessment, data.总体评价, data.recommendation]),
               confidenceLabel,
               evidenceQuote,
@@ -528,11 +552,11 @@
           } catch (e) {
             console.log('Failed to parse candidate JSON:', e);
             return {
-              name: art.metadata?.candidateName || art.id.replace(/^candidate-assessment(?:-result)?-/, ''),
+              name: `候选人 ${index + 1}`,
               score: 'N/A',
               pros: ['格式非 JSON'],
               cons: [],
-              summary: String(art.content || '').substring(0, 160) + '...',
+              summary: String(candidate?.content || candidate || '').substring(0, 160) + '...',
               confidenceLabel: '',
               evidenceQuote: '',
               dimensions: []
@@ -540,6 +564,7 @@
           }
         },
         extractStructuredContent(art) {
+          if (art && typeof art === 'object' && !('content' in art) && !('metadata' in art)) return art;
           if (typeof art.content === 'object' && art.content !== null) return art.content;
           const raw = String(art.content || '').trim();
           if (!raw) return {};
@@ -558,9 +583,18 @@
               name: item.name || item.dimension || item.label || item.title || `维度 ${index + 1}`,
               score: this.pickFirstNumber([item.score, item.value, item.rating, item.评分, item.points]) ?? 'N/A',
               weight: this.pickFirstNumber([item.weight, item.percentage, item.权重, item.weightPct]),
-              evidence: this.pickFirstString([item.evidence, item.quote, item.reasoning, item.rationale, item.证据引用, item.依据]),
+              evidence: this.pickFirstString([
+                item.evidence,
+                item.quote,
+                item.reasoning,
+                item.rationale,
+                item.证据引用,
+                item.依据,
+                Array.isArray(item.evidenceQuotes) ? item.evidenceQuotes[0] : '',
+                item.judgement
+              ]),
               confidenceLabel,
-              scoringGuide: item.scoringGuide || item.guidance || ''
+              scoringGuide: item.scoringGuide || item.guidance || item.evidenceStatus || ''
             };
           });
         },

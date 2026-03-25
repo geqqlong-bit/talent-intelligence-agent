@@ -1,6 +1,10 @@
 import crypto from 'crypto';
 import { createError } from './schema.mjs';
 import { renderTemplate } from './templates.mjs';
+import { classifyRequest } from './classifier.mjs';
+import { getDomainKnowledge } from './rag.mjs';
+import { validateWithExpertRules } from './expert-rules.mjs';
+import { persistRunArtifacts, persistRunFailure } from './persistence.mjs';
 import {
   createEngineDescriptor,
   createWorkflowDescriptor,
@@ -651,14 +655,52 @@ function buildMetadata(requestContext, effectiveExecutionPlan, executionResult) 
   };
 }
 
-// Main function to run talent intelligence - can be called synchronously or as part of a job
-export async function runTalentIntelligence(payload, context = {}) {
-  const requestContext = buildRequestContext(payload, context);
-  const executionPlan = buildExecutionPlan(requestContext);
-  const executionResult = await executeWorkflow(requestContext, executionPlan);
-  const effectiveExecutionPlan = executionResult.executionPlan || executionPlan;
-  const metadata = buildMetadata(requestContext, effectiveExecutionPlan, executionResult);
+async function preparePayloadForExecution(payload = {}) {
+  const activePayload = {
+    ...payload,
+    searchContext: {
+      ...(payload.searchContext || {})
+    },
+    runtime: {
+      ...(payload.runtime || {})
+    }
+  };
 
+  if (activePayload.templateId === 'auto') {
+    const classification = await classifyRequest(activePayload.searchContext);
+    if (classification.needsClarification) {
+      throw createError('CLARIFICATION_REQUIRED', classification.message, undefined, 400);
+    }
+    activePayload.templateId = classification.templateId;
+    if (classification.extractedContext) {
+      activePayload.searchContext.roleTitle = classification.extractedContext.roleTitle;
+    }
+  }
+
+  const ragContext = await getDomainKnowledge(activePayload.searchContext.roleTitle, activePayload.searchContext.targetIndustry);
+  if (ragContext) {
+    activePayload.searchContext.hiringBrief = (activePayload.searchContext.hiringBrief || '') + ragContext;
+  }
+
+  return activePayload;
+}
+
+async function applyExpertReview(markdown, templateId) {
+  if (!markdown) return markdown;
+  const critic = await validateWithExpertRules(markdown, templateId);
+  if (critic.passed) return markdown;
+  return `${markdown}\n\n> [!WARNING]\n> **Expert Rule Validation Failed:**\n> ${critic.feedback}\n`;
+}
+
+function buildRunResponse({
+  activePayload,
+  requestContext,
+  effectiveExecutionPlan,
+  executionResult,
+  metadata,
+  finalMarkdown,
+  jobId = undefined
+}) {
   const fallbackApplied = requestContext.executionTarget.fallbackApplied || Boolean(executionResult.execution?.remote?.fallbackApplied);
   const fallbackKind = executionResult.execution?.remote?.fallbackKind
     || effectiveExecutionPlan.engine?.fallbackKind
@@ -667,15 +709,16 @@ export async function runTalentIntelligence(payload, context = {}) {
     || effectiveExecutionPlan.engine?.fallbackReason
     || requestContext.executionTarget.fallbackReason;
 
-  return {
+  const response = {
     ok: true,
     requestId: requestContext.requestId,
+    ...(jobId ? { jobId } : {}),
     mode: effectiveExecutionPlan.engine.resolvedMode,
-    templateId: payload.templateId,
+    templateId: activePayload.templateId,
     run: {
       id: requestContext.runId,
       status: executionResult.execution.status,
-      templateId: payload.templateId,
+      templateId: activePayload.templateId,
       mode: effectiveExecutionPlan.engine.resolvedMode,
       runnerId: effectiveExecutionPlan.engine.runnerId,
       stageCount: executionResult.execution.stageCount,
@@ -684,20 +727,21 @@ export async function runTalentIntelligence(payload, context = {}) {
       finalArtifactId: executionResult.execution.finalArtifactId
     },
     engine: effectiveExecutionPlan.engine,
-    summary: buildSummary(payload),
-    reportMarkdown: executionResult.reportMarkdown,
+    summary: buildSummary(activePayload),
+    reportMarkdown: finalMarkdown,
     candidateAssessment: executionResult.execution?.result?.candidateAssessment,
     metadata,
     orchestration: {
       requestId: requestContext.requestId,
       runId: requestContext.runId,
+      ...(jobId ? { jobId } : {}),
       workflow: effectiveExecutionPlan.workflow,
       execution: {
         ...executionResult.execution,
         metrics: {
           ...executionResult.execution.metrics,
           requestTotalDurationMs: metadata.durationMs,
-          executionDurationMs: executionResult.execution.metrics?.totalDurationMs || (metadata.completedAtMs - requestContext.startedAtMs)
+          executionDurationMs: executionResult.execution.metrics?.totalDurationMs || metadata.totalDurationMs
         }
       },
       selection: {
@@ -707,19 +751,44 @@ export async function runTalentIntelligence(payload, context = {}) {
         resolvedRunnerId: effectiveExecutionPlan.engine.runnerId,
         resolvedMode: effectiveExecutionPlan.engine.resolvedMode,
         resolutionSource: requestContext.executionTarget.resolutionSource,
-        strategy: requestContext.executionTarget.selectionStrategy,
+        strategy: requestContext.executionTarget.strategy,
         fallbackApplied,
         fallbackKind,
         fallbackReason
       }
     }
   };
+
+  return response;
+}
+
+// Main function to run talent intelligence - can be called synchronously or as part of a job
+export async function runTalentIntelligence(payload, context = {}) {
+  const activePayload = await preparePayloadForExecution(payload);
+  const requestContext = buildRequestContext(activePayload, context);
+  const executionPlan = buildExecutionPlan(requestContext);
+  const executionResult = await executeWorkflow(requestContext, executionPlan);
+  const effectiveExecutionPlan = executionResult.executionPlan || executionPlan;
+  const metadata = buildMetadata(requestContext, effectiveExecutionPlan, executionResult);
+  const finalMarkdown = await applyExpertReview(executionResult.reportMarkdown, activePayload.templateId);
+
+  return buildRunResponse({
+    activePayload,
+    requestContext,
+    effectiveExecutionPlan,
+    executionResult,
+    metadata,
+    finalMarkdown
+  });
 }
 
 // Function to run talent intelligence as a background job with webhook support
 export async function runTalentIntelligenceAsJob(payload, context = {}) {
   const jobId = context.jobId || generateJobId();
   const webhookUrl = payload.webhookUrl;
+  const requestId = context.requestId;
+  let activePayload = payload;
+  let requestContext;
   
   // Create initial job entry if not provided
   if (!jobManager.getJob(jobId)) {
@@ -727,7 +796,8 @@ export async function runTalentIntelligenceAsJob(payload, context = {}) {
   }
 
   try {
-    const requestContext = buildRequestContext(payload, { ...context, jobId });
+    activePayload = await preparePayloadForExecution(payload);
+    requestContext = buildRequestContext(activePayload, { ...context, jobId });
     const executionPlan = buildExecutionPlan(requestContext);
     
     // Update job progress during execution
@@ -740,70 +810,23 @@ export async function runTalentIntelligenceAsJob(payload, context = {}) {
     const executionResult = await executeWorkflow(requestContext, executionPlan);
     const effectiveExecutionPlan = executionResult.executionPlan || executionPlan;
     const metadata = buildMetadata(requestContext, effectiveExecutionPlan, executionResult);
-
-    const fallbackApplied = requestContext.executionTarget.fallbackApplied || Boolean(executionResult.execution?.remote?.fallbackApplied);
-    const fallbackKind = executionResult.execution?.remote?.fallbackKind
-      || effectiveExecutionPlan.engine?.fallbackKind
-      || requestContext.executionTarget.fallbackKind;
-    const fallbackReason = executionResult.execution?.remote?.error?.message
-      || effectiveExecutionPlan.engine?.fallbackReason
-      || requestContext.executionTarget.fallbackReason;
-
-    const result = {
-      ok: true,
-      requestId: requestContext.requestId,
-      jobId: jobId, // Include job ID in response
-      mode: effectiveExecutionPlan.engine.resolvedMode,
-      templateId: payload.templateId,
-      run: {
-        id: requestContext.runId,
-        status: executionResult.execution.status,
-        templateId: payload.templateId,
-        mode: effectiveExecutionPlan.engine.resolvedMode,
-        runnerId: effectiveExecutionPlan.engine.runnerId,
-        stageCount: executionResult.execution.stageCount,
-        stepCount: executionResult.execution.stepCount,
-        artifactCount: executionResult.execution.artifacts?.length || 0,
-        finalArtifactId: executionResult.execution.finalArtifactId
-      },
-      engine: effectiveExecutionPlan.engine,
-      summary: buildSummary(payload),
-      reportMarkdown: executionResult.reportMarkdown,
-      candidateAssessment: executionResult.execution?.result?.candidateAssessment,
+    const finalMarkdown = await applyExpertReview(executionResult.reportMarkdown, activePayload.templateId);
+    const result = buildRunResponse({
+      activePayload,
+      requestContext,
+      effectiveExecutionPlan,
+      executionResult,
       metadata,
-      orchestration: {
-        requestId: requestContext.requestId,
-        runId: requestContext.runId,
-        jobId: jobId, // Include job ID in orchestration
-        workflow: effectiveExecutionPlan.workflow,
-        execution: {
-          ...executionResult.execution,
-          metrics: {
-            ...executionResult.execution.metrics,
-            requestTotalDurationMs: metadata.durationMs,
-            executionDurationMs: executionResult.execution.metrics?.totalDurationMs || (metadata.completedAtMs - requestContext.startedAtMs)
-          }
-        },
-        selection: {
-          requestedMode: requestContext.requestedMode,
-          requestedRunner: requestContext.requestedRunner,
-          preferredRunnerId: requestContext.executionTarget.preferredRunnerId,
-          resolvedRunnerId: effectiveExecutionPlan.engine.runnerId,
-          resolvedMode: effectiveExecutionPlan.engine.resolvedMode,
-          resolutionSource: requestContext.executionTarget.resolutionSource,
-          strategy: requestContext.executionTarget.selectionStrategy,
-          fallbackApplied,
-          fallbackKind,
-          fallbackReason
-        }
-      }
-    };
+      finalMarkdown,
+      jobId
+    });
+    const persistedResult = await persistRunArtifacts(result, activePayload);
 
     // Update job with final result
     jobManager.updateJob(jobId, { 
       status: 'completed', 
       progress: 100,
-      result,
+      result: persistedResult,
       message: 'Execution completed successfully'
     });
 
@@ -811,12 +834,12 @@ export async function runTalentIntelligenceAsJob(payload, context = {}) {
     if (webhookUrl) {
       await jobManager.triggerWebhook(jobId, webhookUrl, {
         status: 'completed',
-        result,
+        result: persistedResult,
         error: null
       });
     }
 
-    return result;
+    return persistedResult;
   } catch (error) {
     // Update job with error
     const errorObj = {
@@ -827,6 +850,14 @@ export async function runTalentIntelligenceAsJob(payload, context = {}) {
         details: error.details || {}
       }
     };
+
+    await persistRunFailure({
+      requestId,
+      runId: requestContext?.runId,
+      requestPayload: activePayload,
+      error: errorObj.error,
+      timestamp: new Date().toISOString()
+    });
 
     jobManager.updateJob(jobId, { 
       status: 'failed', 

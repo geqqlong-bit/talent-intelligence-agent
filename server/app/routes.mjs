@@ -13,6 +13,7 @@ import { DEFAULT_LOCAL_RUNNER_ID, WORKFLOW_ID, getExecutionCatalog, resolveExecu
 import { persistRunArtifacts, persistRunFailure } from './persistence.mjs';
 import { runTalentIntelligence, runTalentIntelligenceAsJob, getJobStatus } from './service.mjs';
 import { generateJobId, jobManager } from './job-manager.mjs';
+import { routeTiaRequest } from './tia-routes.mjs';
 
 function getRequestId(req) {
   return createRequestId(req.headers['x-request-id']);
@@ -49,12 +50,20 @@ function buildExecutionContract() {
   };
 }
 
-export async function routeRequest(req, res) {
+export async function routeRequest(req, res, options = {}) {
   const requestId = getRequestId(req);
+  const pathname = new URL(req.url, 'http://127.0.0.1').pathname;
   const executionCatalog = buildExecutionContract();
   const remoteFallback = resolveExecutionTarget({ mode: 'openai', runner: 'openai-chat' });
 
-  if (req.method === 'GET' && req.url === '/health') {
+  if (pathname === '/api/tia' || pathname.startsWith('/api/tia/')) {
+    return routeTiaRequest(req, res, {
+      requestId,
+      services: options.tiaServices
+    });
+  }
+
+  if (req.method === 'GET' && pathname === '/health') {
     return json(res, 200, withRequestMeta({
       ok: true,
       service: 'talent-intelligence-service',
@@ -68,7 +77,7 @@ export async function routeRequest(req, res) {
     }, requestId, { timestamp: new Date().toISOString() }), requestId);
   }
 
-  if (req.method === 'GET' && req.url === '/api/talent-intelligence/schema') {
+  if (req.method === 'GET' && pathname === '/api/talent-intelligence/schema') {
     return json(res, 200, withRequestMeta({
       ok: true,
       service: 'talent-intelligence-service',
@@ -260,7 +269,7 @@ export async function routeRequest(req, res) {
     }, requestId, { timestamp: new Date().toISOString() }), requestId);
   }
 
-  if (req.method === 'POST' && (req.url === '/api/talent-intelligence/run' || req.url === '/api/talent-intelligence/jobs')) {
+  if (req.method === 'POST' && (pathname === '/api/talent-intelligence/run' || pathname === '/api/talent-intelligence/jobs')) {
     let raw;
 
     try {
@@ -268,7 +277,7 @@ export async function routeRequest(req, res) {
       const payload = normalizeRequest(raw);
       
       // If webhookUrl is provided or it's the /jobs endpoint, process as a background job
-      if (payload.webhookUrl || req.url === '/api/talent-intelligence/jobs') {
+      if (payload.webhookUrl || pathname === '/api/talent-intelligence/jobs') {
         // Generate a unique job ID
         const jobId = generateJobId();
         
@@ -312,10 +321,10 @@ export async function routeRequest(req, res) {
     }
   }
 
-  if (req.method === 'GET' && req.url.startsWith('/api/talent-intelligence/jobs/')) {
+  if (req.method === 'GET' && pathname.startsWith('/api/talent-intelligence/jobs/')) {
     try {
       // Extract job ID from URL
-      const jobId = req.url.split('/')[4]; // /api/talent-intelligence/jobs/{jobId}
+      const jobId = pathname.split('/')[4]; // /api/talent-intelligence/jobs/{jobId}
       
       if (!jobId) {
         const error = createError('INVALID_JOB_ID', 'Job ID is required', undefined, 400);
@@ -342,7 +351,9 @@ export async function routeRequest(req, res) {
           webhookUrl: job.payload?.webhookUrl
         },
         createdAt: job.createdAt,
+        startedAt: job.startedAt,
         updatedAt: job.updatedAt,
+        completedAt: job.completedAt,
         ...(job.result && { result: job.result }),
         ...(job.error && { error: job.error })
       }, requestId, { timestamp: new Date().toISOString() }), requestId);
