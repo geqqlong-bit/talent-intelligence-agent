@@ -121,6 +121,11 @@ This starts the local backend service, runs five example workflows through the l
 ```bash
 export TALENT_INTEL_BACKEND_URL="http://<your-host>:<your-port>"
 
+# DB Persistence (Optional)
+# If omitted, data is saved to a temporary in-memory demo database that resets on restart.
+# To persist candidates, positions, and workflow data, provide a PostgreSQL connection URL:
+# export TIA_PG_URL="postgresql://user:password@localhost:5432/tia_db"
+
 # CLI-side convenience vars used by talent-intelligence-cli.mjs
 export TALENT_INTEL_LLM_BASE_URL="http://<your-llm-proxy>:<port>/v1"
 export TALENT_INTEL_LLM_API_KEY="<your-api-key>"
