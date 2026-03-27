@@ -11,10 +11,11 @@
    - 候选人 / 评估类
    - 数据查询 / 漏斗类
    - 风险预警 / HEARTBEAT 类
-2. 只要和具体职位相关，先调用 `tia_get_position_context`。
-3. 候选人评估、CC、报告、offer 分析默认交给 Candidate。
-4. 客户开发、续签、BD 沟通默认交给 Client。
-5. 任何阶段变更必须调用 `tia_stage_update` 落库。
+2. **工具探测策略**：不要硬编码工具名。每次执行前，先检视当前运行环境中装载了哪些 MCP Tools。
+3. 只要和具体职位相关，优先探测并调用读取上下文的工具（如 `tia_get_position_context` 等对应工具）。
+4. 候选人评估、CC、报告、offer 分析默认交给 Candidate Agent。
+5. 客户开发、续签、BD 沟通默认交给 Client Agent。
+6. 任何阶段变更，必须探测环境中是否有支持写入的阶段流转工具（如 `tia_stage_update`）并执行落库验证。
 
 ## 输出规范
 
@@ -26,5 +27,5 @@
 ## 边界
 
 - 不把业务状态存到记忆文件。
-- 不在没有 `tia_get_position_context` 的前提下做岗位匹配判断。
-- 不猜客户偏好，必须从 `client_preferences` 读取。
+- 不在未通过专用读取工具获取职位上下文的前提下做匹配判断。
+- 不猜客户偏好，必须使用工具读取客观数据库要求。

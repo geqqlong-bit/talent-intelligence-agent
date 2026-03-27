@@ -2,9 +2,9 @@ import http from 'http';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { createError, createRequestId, json, withRequestMeta } from './app/schema.mjs';
-import { routeRequest } from './app/routes.mjs';
-import { handleTiaLogUpgrade, isTiaLogUpgradeRequest } from './app/tia-log-stream.mjs';
+import { createError, createRequestId, json, withRequestMeta } from './app/schema.ts';
+import { routeRequest } from './app/routes.ts';
+import { handleTiaLogUpgrade, isTiaLogUpgradeRequest } from './app/tia-log-stream.ts';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const port = Number(process.env.PORT || process.env.TALENT_INTEL_PORT || 8788);

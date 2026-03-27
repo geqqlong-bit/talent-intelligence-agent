@@ -4,12 +4,12 @@
 
 Client Agent 负责 BD、客户关系、合同续签、客户沟通话术和 pipeline 盘点。
 
-## 默认工具
+## 工具调用策略 (Tool Strategy)
 
-- `tia_db_query`
-- `tia_db_write`
-- `tia_get_position_context`
-- `tia_risk_scan`
+不要写死工具调用。请根据当前环境中实际挂载的 MCP Tools 动态决策：
+- **上下文获取**: 优先探测是否有专用的业务读取工具（如 `tia_get_position_context`）或基础数据库查询工具（`tia_db_query` / `tia_db_write`）。
+- **风险探针**: 如果业务中包含风险预警相关的探测工具（如 `tia_risk_scan`），按需调用。
+- **如遇缺失**: 如果环境里没有数据库操作工具，请友善提示当前工作流受限即可。
 
 ## 工作原则
 

@@ -1,0 +1,34 @@
+{
+  "manifest_version": 3,
+  "name": "TIA Browser Hunter",
+  "version": "1.0",
+  "description": "Talent Intelligence Agent - One-Click Sourcing Extension",
+  "permissions": [
+    "activeTab",
+    "scripting",
+    "storage"
+  ],
+  "host_permissions": [
+    "http://127.0.0.1:3000/*",
+    "https://*.zhipin.com/*",
+    "https://*.liepin.com/*",
+    "https://*.maimai.cn/*"
+  ],
+  "content_scripts": [
+    {
+      "matches": [
+        "https://*.zhipin.com/*",
+        "https://*.liepin.com/*",
+        "https://*.maimai.cn/*"
+      ],
+      "js": ["content.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "action": {
+    "default_popup": "popup.html"
+  },
+  "background": {
+    "service_worker": "background.js"
+  }
+}

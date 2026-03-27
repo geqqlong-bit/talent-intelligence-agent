@@ -645,6 +645,16 @@
       .grid-2,
       .funnel-grid { grid-template-columns: 1fr; }
     }
+    .clickable {
+      cursor: pointer;
+      transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s;
+    }
+
+    .clickable:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(8, 17, 31, 0.08);
+      border-color: rgba(15, 157, 146, 0.2);
+    }
   </style>
 </head>
 <body>
@@ -826,6 +836,40 @@ job_title,client_name,industry,salary_range,location,must_have,notes
     </div>
   </div>
 
+  <!-- Modal: Client Details -->
+  <div id="modal-client-details" class="modal-backdrop hidden">
+    <div class="modal" style="max-width: 600px;">
+      <div style="display:flex; justify-content:space-between; margin-bottom: 20px;">
+        <h3 style="margin:0;" id="cd-title">客户名称</h3>
+        <span class="pill" id="cd-tier">TIER</span>
+      </div>
+      
+      <div class="grid-2">
+        <div class="context-card">
+          <div class="item-title">基本信息</div>
+          <div class="item-copy">行业: <span id="cd-industry"></span></div>
+          <div class="item-copy">负责人: <span id="cd-owner"></span></div>
+          <div class="item-copy" style="margin-top:10px;" id="cd-summary"></div>
+        </div>
+        <div class="context-card">
+          <div class="item-title">合作状态</div>
+          <div class="item-copy">活跃职位: <span id="cd-positions"></span></div>
+          <div class="item-copy">Pipeline: <span id="cd-pipeline"></span></div>
+          <div class="item-copy">到期时间: <span id="cd-expires"></span></div>
+        </div>
+      </div>
+
+      <div class="context-card" style="margin-top:20px;">
+        <div class="item-title">偏好与备注</div>
+        <div class="micro" id="cd-preferences" style="white-space: pre-wrap;"></div>
+      </div>
+
+      <div class="modal-footer" style="margin-top:30px;">
+        <button class="action secondary" onclick="document.getElementById('modal-client-details').classList.add('hidden')">关闭</button>
+      </div>
+    </div>
+  </div>
+
   <script>
     const state = {
       view: 'dash',
@@ -855,6 +899,24 @@ job_title,client_name,industry,salary_range,location,must_have,notes
       kanban: document.getElementById('view-kanban'),
       offer: document.getElementById('view-offer'),
       ai: document.getElementById('view-ai')
+    };
+
+    window.showClientDetails = (index) => {
+      const client = state.workbench.bd.clients[index];
+      if(!client) return;
+      document.getElementById('cd-title').textContent = client.name;
+      document.getElementById('cd-tier').textContent = client.tierLabel;
+      document.getElementById('cd-tier').className = 'pill ' + toneClass(client.tier);
+      document.getElementById('cd-industry').textContent = client.industry || '未知';
+      document.getElementById('cd-owner').textContent = client.account_owner || 'Unknown';
+      document.getElementById('cd-summary').textContent = client.summary || '';
+      document.getElementById('cd-positions').textContent = client.activePositionCount || 0;
+      document.getElementById('cd-pipeline').textContent = formatCurrency(client.pipelineFee);
+      // fallback to something reasonable if missing
+      document.getElementById('cd-expires').textContent = client.contract_expires ? new Date(client.contract_expires).toLocaleDateString() : 'N/A';
+      document.getElementById('cd-preferences').textContent = client.notes || '暂无更多偏好信息';
+
+      document.getElementById('modal-client-details').classList.remove('hidden');
     };
 
     function escapeHtml(value) {
@@ -1014,16 +1076,16 @@ job_title,client_name,industry,salary_range,location,must_have,notes
     function renderDashboard() {
       const dashboard = state.workbench.dashboard;
       const metrics = [
-        { label: '确认佣金', value: formatCurrency(dashboard.metrics.confirmedFee), desc: '已入职累计佣金' },
-        { label: '活跃职位', value: dashboard.metrics.activePositions, desc: 'Active 状态职位数' },
-        { label: '储备候选人', value: dashboard.metrics.pipelineCandidates, desc: '流程中候选人储备' },
-        { label: '交付周期', value: dashboard.metrics.averageCycleDays ? `${dashboard.metrics.averageCycleDays} 天` : 'TBD', desc: '平均从建档到入职时间' }
+        { label: '确认佣金', value: formatCurrency(dashboard.metrics.confirmedFee), desc: '已入职累计佣金', target: 'offer' },
+        { label: '活跃职位', value: dashboard.metrics.activePositions, desc: 'Active 状态职位数', target: 'positions' },
+        { label: '储备候选人', value: dashboard.metrics.pipelineCandidates, desc: '流程中候选人储备', target: 'kanban' },
+        { label: '交付周期', value: dashboard.metrics.averageCycleDays ? `${dashboard.metrics.averageCycleDays} 天` : 'TBD', desc: '平均从建档到入职时间', target: 'kanban' }
       ];
 
       els.dash.innerHTML = `
         <div class="grid-4">
           ${metrics.map((metric) => `
-            <div class="metric">
+            <div class="metric ${metric.target ? 'clickable' : ''}" ${metric.target ? `onclick="window.switchTab('${metric.target}')"` : ''}>
               <div class="label">${metric.label}</div>
               <div class="value">${escapeHtml(metric.value)}</div>
               <div class="desc">${escapeHtml(metric.desc)}</div>
@@ -1041,7 +1103,7 @@ job_title,client_name,industry,salary_range,location,must_have,notes
             </div>
             <div class="panel-body timeline">
               ${dashboard.priorities.map((item) => `
-                <div class="timeline-item">
+                <div class="timeline-item clickable" onclick="window.switchTab('kanban')">
                   <div class="item-head">
                     <div class="item-title">${escapeHtml(item.title)}</div>
                     <span class="pill ${toneClass(item.urgency)}">${escapeHtml(item.urgency)}</span>
@@ -1060,7 +1122,7 @@ job_title,client_name,industry,salary_range,location,must_have,notes
             </div>
             <div class="panel-body funnel-grid">
               ${dashboard.funnel.map((item) => `
-                <div class="funnel-card">
+                <div class="funnel-card clickable" onclick="window.switchTab('kanban')">
                   <div class="count">${item.count}</div>
                   <div class="item-title">${escapeHtml(item.label)}</div>
                   <div class="item-copy">${escapeHtml(item.stage)}</div>
@@ -1106,16 +1168,16 @@ job_title,client_name,industry,salary_range,location,must_have,notes
     function renderBd() {
       const bd = state.workbench.bd;
       const metrics = [
-        { label: '线索池', value: bd.metrics.leadPool },
-        { label: '谈判中', value: bd.metrics.contractsNegotiating },
-        { label: '新增职位 (30天)', value: bd.metrics.newSigned },
-        { label: '合同健康度', value: `${bd.metrics.renewalRate}%` }
+        { label: '线索池', value: bd.metrics.leadPool, target: null },
+        { label: '谈判中', value: bd.metrics.contractsNegotiating, target: null },
+        { label: '新增职位 (30天)', value: bd.metrics.newSigned, target: 'positions' },
+        { label: '合同健康度', value: `${bd.metrics.renewalRate}%`, target: null }
       ];
 
       els.bd.innerHTML = `
         <div class="grid-4">
           ${metrics.map((metric) => `
-            <div class="metric">
+            <div class="metric clickable" onclick="${metric.target ? `window.switchTab('${metric.target}')` : `setStatus('【${metric.label}】详细视图开发中...')`}">
               <div class="label">${metric.label}</div>
               <div class="value">${escapeHtml(metric.value)}</div>
             </div>
@@ -1130,8 +1192,8 @@ job_title,client_name,industry,salary_range,location,must_have,notes
               </div>
             </div>
             <div class="panel-body list">
-              ${bd.clients.map((client) => `
-                <div class="client-card">
+              ${bd.clients.map((client, index) => `
+                <div class="client-card clickable" onclick="window.showClientDetails(${index})">
                   <div class="item-head">
                     <div class="item-title">${escapeHtml(client.name)}</div>
                     <span class="pill ${toneClass(client.tier)}">${escapeHtml(client.tierLabel)}</span>
@@ -1151,7 +1213,7 @@ job_title,client_name,industry,salary_range,location,must_have,notes
             </div>
             <div class="panel-body list">
               ${bd.opportunities.map((item) => `
-                <div class="list-item">
+                <div class="list-item clickable" onclick="setStatus('选中BD机会：${escapeHtml(item.title)}')">
                   <div class="item-head">
                     <div class="item-title">${escapeHtml(item.title)}</div>
                     <span class="pill ${toneClass(item.tone)}">${escapeHtml(item.tone)}</span>
@@ -1192,7 +1254,7 @@ job_title,client_name,industry,salary_range,location,must_have,notes
             </div>
             <div class="panel-body list">
               ${positions.map((position) => `
-                <div class="position-card" data-position="${position.id}">
+                <div class="position-card clickable" data-position="${position.id}">
                   <div class="item-head">
                     <div class="item-title">${escapeHtml(position.title)}</div>
                     <span class="pill ${toneClass(position.riskLevel)}">${escapeHtml(position.riskLevel)}</span>
@@ -1239,7 +1301,11 @@ job_title,client_name,industry,salary_range,location,must_have,notes
       `;
 
       els.positions.querySelectorAll('[data-position]').forEach((card) => {
-        card.addEventListener('click', () => selectPosition(card.dataset.position));
+        card.addEventListener('click', () => {
+          selectPosition(card.dataset.position).then(() => {
+            window.switchTab('kanban');
+          });
+        });
       });
       els.positions.querySelectorAll('[data-copilot]').forEach((button) => {
         button.addEventListener('click', () => runCopilot(button.dataset.copilot));
@@ -1271,7 +1337,7 @@ job_title,client_name,industry,salary_range,location,must_have,notes
                   <h3>${escapeHtml(column.label)} <span>${column.count}</span></h3>
                   <div class="kanban-card-stack">
                     ${column.candidates.length ? column.candidates.map((candidate) => `
-                      <div class="kanban-card" data-candidate="${candidate.id}">
+                      <div class="kanban-card clickable" data-candidate="${candidate.id}">
                         <div class="item-title">${escapeHtml(candidate.name)}</div>
                         <div class="item-copy">${escapeHtml(candidate.company || 'Unknown')} · ${escapeHtml(candidate.title || 'Unknown')}</div>
                         ${candidate.score ? `<div class="micro" style="margin-top:8px;">Score ${candidate.score}</div>` : ''}
@@ -1350,17 +1416,17 @@ job_title,client_name,industry,salary_range,location,must_have,notes
 
       els.offer.innerHTML = `
         <div class="grid-3">
-          <div class="metric">
+          <div class="metric clickable" onclick="setStatus('【确认佣金】详情正在加载...')">
             <div class="label">确认佣金</div>
             <div class="value">${formatCurrency(offer.revenue.confirmed)}</div>
             <div class="desc">已成功入职</div>
           </div>
-          <div class="metric">
+          <div class="metric clickable" onclick="setStatus('【预期佣金】详情正在加载...')">
             <div class="label">预期佣金</div>
             <div class="value">${formatCurrency(offer.revenue.probable)}</div>
             <div class="desc">Interview/Offer 阶段</div>
           </div>
-          <div class="metric">
+          <div class="metric clickable" onclick="window.switchTab('positions')">
             <div class="label">交付周期</div>
             <div class="value">${offer.revenue.averageCycleDays ? `${offer.revenue.averageCycleDays} 天` : 'TBD'}</div>
             <div class="desc">平均建档到入职</div>
@@ -1376,7 +1442,7 @@ job_title,client_name,industry,salary_range,location,must_have,notes
             </div>
             <div class="panel-body list">
               ${offer.negotiations.map((item) => `
-                <div class="negotiation-card" data-candidate="${item.id}" data-position="${item.positionId}">
+                <div class="negotiation-card clickable" data-candidate="${item.id}" data-position="${item.positionId}">
                   <div class="item-head">
                     <div class="item-title">${escapeHtml(item.candidateName)}</div>
                     <span class="pill ${toneClass(item.offerRisk)}">${escapeHtml(item.offerRisk || item.stage)}</span>
@@ -1405,7 +1471,7 @@ job_title,client_name,industry,salary_range,location,must_have,notes
             </div>
             <div class="panel-body list">
               ${offer.followUps.map((item) => `
-                <div class="list-item" data-candidate="${item.id}" data-position="${item.positionId}">
+                <div class="list-item clickable" data-candidate="${item.id}" data-position="${item.positionId}">
                   <div class="item-head">
                     <div class="item-title">${escapeHtml(item.candidateName)}</div>
                     <span class="pill ${item.status === '需要回访' ? 'tone-amber' : 'tone-teal'}">${escapeHtml(item.status)}</span>
@@ -1444,7 +1510,7 @@ job_title,client_name,industry,salary_range,location,must_have,notes
             </div>
             <div class="panel-body grid-2">
               ${actions.map((action) => `
-                <div class="prompt-card">
+                <div class="prompt-card clickable" onclick="runCopilot('${action.id}', getNotes())">
                   <div class="item-head">
                     <div class="item-title">${escapeHtml(action.title)}</div>
                     <span class="pill ${toneClass(action.tone)}">${escapeHtml(action.tone)}</span>
@@ -1817,10 +1883,25 @@ job_title,client_name,industry,salary_range,location,must_have,notes
       socket.addEventListener('error', () => socket.close());
     }
 
+    window.switchTab = (viewName) => {
+      state.view = viewName;
+      renderCurrentView();
+      // Visual tab sync is already handled inside renderCurrentView via conditional active classes, 
+      // but if we need manual class toggling we can do it here. 
+      // Actually, looking at it, the original code did NOT toggle '.active' dynamically on 'click'.
+      // Let's add the visual toggle:
+      document.querySelectorAll('.tab').forEach((t) => {
+        if (t.dataset.view === viewName) {
+          t.classList.add('active');
+        } else {
+          t.classList.remove('active');
+        }
+      });
+    };
+
     document.querySelectorAll('.tab').forEach((tab) => {
       tab.addEventListener('click', () => {
-        state.view = tab.dataset.view;
-        renderCurrentView();
+        window.switchTab(tab.dataset.view);
       });
     });
 

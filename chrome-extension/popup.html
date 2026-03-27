@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TIA Browser Hunter</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="header">
+    <div class="logo">TIA Hunter</div>
+    <div id="status-indicator" class="status loading"></div>
+  </div>
+
+  <div class="content">
+    <div class="form-group">
+      <label for="position-select">目标入库职位</label>
+      <select id="position-select" disabled>
+        <option value="">正在连接 TIA 本地引擎...</option>
+      </select>
+    </div>
+
+    <div id="candidate-preview" class="preview-box hidden">
+      <div class="preview-title" id="preview-name">--</div>
+      <div class="preview-desc" id="preview-desc">--</div>
+    </div>
+
+    <button id="import-btn" class="btn primary" disabled>抓取当前页面简历</button>
+  </div>
+
+  <div id="toast" class="toast hidden">操作成功</div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
